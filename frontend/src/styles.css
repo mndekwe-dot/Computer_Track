@@ -10,17 +10,40 @@
  */
 
 :root {
-  --bg: #0f172a;
-  --bg-soft: #1e293b;
+  /* Neutrals carry a trace of blue so white reads as clean rather than grey.
+     The old palette was Tailwind slate, which is a cold, high-contrast set
+     built for dark interfaces; on an all-light screen it looked severe. */
+  --bg: #f6f8fb;
+  --bg-soft: #eef2f7;
   --surface: #ffffff;
-  --surface-muted: #f1f5f9;
-  --border: #e2e8f0;
-  --text: #0f172a;
-  --text-muted: #64748b;
+  --surface-muted: #f4f6fa;
+  --surface-sunken: #eceff5;
+  --border: #e5e9f0;
+  --border-strong: #d2d9e4;
+  --text: #1b2436;
+  --text-muted: #667186;
+  --text-faint: #96a0b3;
 
+  /* One accent, set per portal by PortalShell. Everything tinted derives
+     from it with color-mix, so a portal only ever declares one colour. */
   --brand: #1d4ed8;
   --brand-dark: #1e40af;
+  --brand-soft: color-mix(in srgb, var(--brand) 9%, #fff);
+  --brand-softer: color-mix(in srgb, var(--brand) 5%, #fff);
+  --brand-line: color-mix(in srgb, var(--brand) 22%, #fff);
 
+  /* The sidebar is now light too. Kept as its own tokens so the whole
+     navigation can be re-themed without hunting through the rules below. */
+  --sidebar-bg: #ffffff;
+  --sidebar-text: #5b6779;
+  --sidebar-text-strong: #1b2436;
+  --sidebar-muted: #96a0b3;
+  --sidebar-hover: #f4f6fa;
+  --sidebar-border: #e9edf3;
+
+  /* Status colours are deliberately unchanged. These exact values were
+     checked for contrast and colour-blind separation, and a HOLD banner at a
+     gate is the last place to trade legibility for a softer look. */
   --pass: #15803d;
   --pass-soft: #dcfce7;
   --hold: #b91c1c;
@@ -29,12 +52,35 @@
   --warn-soft: #fef3c7;
   --info-soft: #dbeafe;
 
+  --radius-lg: 16px;
   --radius: 12px;
-  --radius-sm: 8px;
-  --shadow: 0 1px 3px rgb(15 23 42 / 0.08), 0 8px 24px rgb(15 23 42 / 0.06);
-  --font: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --radius-sm: 9px;
+  --radius-xs: 7px;
 
-  --sidebar-w: 240px;
+  /* Layered and faint. One tight shadow for the edge, one wide and soft for
+     the lift, which reads as depth instead of as a grey smudge. */
+  --shadow-sm: 0 1px 2px rgb(16 24 40 / 0.04);
+  --shadow: 0 1px 2px rgb(16 24 40 / 0.04), 0 1px 3px rgb(16 24 40 / 0.06);
+  --shadow-md: 0 2px 4px -2px rgb(16 24 40 / 0.06), 0 8px 16px -4px rgb(16 24 40 / 0.08);
+  --shadow-lg: 0 4px 8px -4px rgb(16 24 40 / 0.06), 0 20px 40px -12px rgb(16 24 40 / 0.14);
+
+  --font: 'Inter Variable', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  --sidebar-w: 250px;
+}
+
+/* A custom property that references another resolves against the element it
+ * is declared on, and descendants inherit the already-resolved value. Both
+ * portal shells set --brand inline on themselves, so the tints above would
+ * stay locked to the default blue for the teal and purple portals unless they
+ * are re-declared on those same elements. Add any new element that overrides
+ * --brand to this list, or its tints will silently be the wrong colour.
+ */
+.app,
+.login-page {
+  --brand-soft: color-mix(in srgb, var(--brand) 9%, #fff);
+  --brand-softer: color-mix(in srgb, var(--brand) 5%, #fff);
+  --brand-line: color-mix(in srgb, var(--brand) 22%, #fff);
 }
 
 * {
@@ -51,8 +97,13 @@ body {
   margin: 0;
   font-family: var(--font);
   color: var(--text);
-  background: var(--surface-muted);
+  background: var(--bg);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* Inter's own numerals are proportional, which makes a column of reg
+     numbers wobble. Tabular figures line them up so the eye can scan down. */
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.005em;
 }
 
 h1,
@@ -61,6 +112,14 @@ h3,
 h4 {
   margin: 0;
   line-height: 1.25;
+  /* Large type at default tracking looks loose. Tightening as size grows is
+     the single cheapest thing that makes headings look designed. */
+  letter-spacing: -0.02em;
+  font-weight: 650;
+}
+
+h1 {
+  letter-spacing: -0.028em;
 }
 
 /* ---------- App shell ---------- */
@@ -73,20 +132,21 @@ h4 {
 .sidebar {
   width: var(--sidebar-w);
   flex-shrink: 0;
-  background: var(--bg);
-  color: #cbd5e1;
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--sidebar-border);
+  color: var(--sidebar-text);
   display: flex;
   flex-direction: column;
-  padding: 20px 14px;
-  gap: 20px;
+  padding: 18px 12px;
+  gap: 18px;
 }
 
 .brand {
   display: flex;
   align-items: center;
   gap: 11px;
-  padding: 0 6px;
-  color: #fff;
+  padding: 2px 6px;
+  color: var(--sidebar-text-strong);
   min-width: 0;
 }
 
@@ -128,10 +188,11 @@ h4 {
 }
 
 .brand-text span {
-  font-size: 11px;
-  color: #94a3b8;
+  font-size: 10.5px;
+  color: var(--sidebar-muted);
   text-transform: uppercase;
-  letter-spacing: 0.07em;
+  letter-spacing: 0.08em;
+  font-weight: 600;
 }
 
 .brand-stacked .brand-text strong {
@@ -153,42 +214,53 @@ h4 {
 }
 
 .nav-group {
-  margin-top: 10px;
+  margin-top: 14px;
   padding: 0 10px 6px;
   font-size: 10.5px;
   text-transform: uppercase;
   letter-spacing: 0.09em;
-  color: #64748b;
+  font-weight: 600;
+  color: var(--sidebar-muted);
 }
 
 .nav a {
   display: flex;
   align-items: center;
   gap: 11px;
-  padding: 10px;
+  padding: 9px 10px;
   border-radius: var(--radius-sm);
-  color: #cbd5e1;
+  color: var(--sidebar-text);
   text-decoration: none;
   font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.12s ease, color 0.12s ease;
 }
 
 .nav a:hover {
-  background: #1e293b;
-  color: #fff;
+  background: var(--sidebar-hover);
+  color: var(--sidebar-text-strong);
 }
 
+/* Tinted rather than filled. A solid block of accent for every active item
+   was the loudest thing on screen and competed with the status banners,
+   which are the one place colour has to mean something. */
 .nav a.active {
-  background: var(--brand);
-  color: #fff;
+  background: var(--brand-soft);
+  color: var(--brand);
   font-weight: 600;
+}
+
+.nav a.active .nav-icon {
+  color: var(--brand);
 }
 
 .nav-icon {
   flex-shrink: 0;
+  color: var(--text-faint);
 }
 
 .sidebar-footer {
-  border-top: 1px solid #1e293b;
+  border-top: 1px solid var(--sidebar-border);
   padding-top: 14px;
   font-size: 13px;
 }
@@ -205,7 +277,7 @@ h4 {
   padding: 8px 10px;
   border: none;
   background: transparent;
-  color: #94a3b8;
+  color: var(--sidebar-text);
   font-family: inherit;
   font-size: 13px;
   border-radius: var(--radius-sm);
@@ -214,8 +286,8 @@ h4 {
 }
 
 .portal-switch-btn:hover {
-  background: #1e293b;
-  color: #fff;
+  background: var(--sidebar-hover);
+  color: var(--sidebar-text-strong);
 }
 
 .portal-dot {
@@ -231,11 +303,11 @@ h4 {
 
 .sidebar-user strong {
   display: block;
-  color: #fff;
+  color: var(--sidebar-text-strong);
 }
 
 .sidebar-user span {
-  color: #94a3b8;
+  color: var(--sidebar-muted);
   font-size: 12px;
 }
 
@@ -258,8 +330,8 @@ h4 {
   padding: 12px 16px;
   border: none;
   border-bottom: 1px solid var(--border);
-  background: var(--bg);
-  color: #fff;
+  background: var(--surface);
+  color: var(--text);
   font-family: inherit;
   font-size: 15px;
   font-weight: 600;
@@ -275,9 +347,15 @@ h4 {
 }
 
 .topbar {
-  background: var(--surface);
+  background: color-mix(in srgb, var(--surface) 82%, transparent);
+  /* Sticky and translucent, so scrolling a long scan log keeps the page
+     title and the actions in reach without a hard band across the top. */
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  backdrop-filter: saturate(1.6) blur(10px);
   border-bottom: 1px solid var(--border);
-  padding: 14px 24px;
+  padding: 15px 26px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -290,13 +368,13 @@ h4 {
 }
 
 .topbar h1 {
-  font-size: 19px;
+  font-size: 20px;
 }
 
 .topbar-sub {
   font-size: 13px;
   color: var(--text-muted);
-  margin-top: 2px;
+  margin-top: 3px;
 }
 
 .topbar-actions {
@@ -307,9 +385,13 @@ h4 {
 }
 
 .content {
-  padding: 24px;
+  padding: 26px;
   flex: 1;
   min-width: 0;
+  /* Long tables and dashboards read better with a measure that stops
+     stretching on a wide desktop monitor. */
+  max-width: 1560px;
+  width: 100%;
 }
 
 /* ---------- Buttons and forms ---------- */
@@ -331,44 +413,69 @@ h4 {
   white-space: nowrap;
   text-decoration: none;
   line-height: 1.3;
+  letter-spacing: -0.006em;
+  transition: background-color 0.12s ease, border-color 0.12s ease,
+    box-shadow 0.12s ease, transform 0.06s ease;
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(0.5px);
+}
+
+/* One focus treatment for everything focusable, and it is a ring rather than
+   the browser default outline so it survives on coloured buttons too. */
+.btn:focus-visible,
+.input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
 }
 
 .btn:disabled {
-  opacity: 0.5;
+  opacity: 0.55;
   cursor: not-allowed;
 }
 
 .btn-primary {
   background: var(--brand);
   color: #fff;
+  box-shadow: var(--shadow-sm);
 }
 
 .btn-primary:hover:not(:disabled) {
   background: var(--brand-dark);
+  box-shadow: var(--shadow);
 }
 
 .btn-pass {
   background: var(--pass);
   color: #fff;
+  box-shadow: var(--shadow-sm);
 }
 
 .btn-hold {
   background: var(--hold);
   color: #fff;
+  box-shadow: var(--shadow-sm);
 }
 
 .btn-warn {
   background: var(--warn);
   color: #fff;
+  box-shadow: var(--shadow-sm);
 }
 
 .btn-outline {
-  border-color: var(--border);
+  border-color: var(--border-strong);
   background: var(--surface);
+  box-shadow: var(--shadow-sm);
 }
 
 .btn-outline:hover:not(:disabled) {
   background: var(--surface-muted);
+  border-color: var(--text-faint);
 }
 
 .btn-ghost {
@@ -400,21 +507,36 @@ select,
 textarea {
   font-family: inherit;
   font-size: 14px;
-  padding: 9px 11px;
-  border: 1px solid var(--border);
+  padding: 9px 12px;
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-sm);
   background: var(--surface);
   color: var(--text);
   width: 100%;
+  box-shadow: var(--shadow-sm);
+  transition: border-color 0.12s ease, box-shadow 0.12s ease;
   /* 16px on touch stops iOS Safari zooming in on focus. */
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-faint);
+}
+
+input:hover:not(:disabled),
+select:hover:not(:disabled),
+textarea:hover:not(:disabled) {
+  border-color: var(--text-faint);
 }
 
 input:focus,
 select:focus,
 textarea:focus {
-  outline: 2px solid var(--brand);
-  outline-offset: -1px;
+  outline: none;
   border-color: var(--brand);
+  /* A soft halo instead of a hard outline. Same job, and it does not shift
+     the field's box by a pixel the way an inset outline appears to. */
+  box-shadow: 0 0 0 3px var(--brand-soft);
 }
 
 textarea {
@@ -488,8 +610,8 @@ textarea {
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 18px;
+  border-radius: var(--radius-lg);
+  padding: 20px;
   box-shadow: var(--shadow);
   min-width: 0;
 }
@@ -657,18 +779,19 @@ table {
 
 th {
   text-align: left;
-  padding: 11px 14px;
+  padding: 11px 15px;
   background: var(--surface-muted);
-  font-size: 11.5px;
+  font-size: 11px;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
+  font-weight: 600;
   color: var(--text-muted);
   border-bottom: 1px solid var(--border);
   white-space: nowrap;
 }
 
 td {
-  padding: 11px 14px;
+  padding: 12px 15px;
   border-bottom: 1px solid var(--border);
   vertical-align: middle;
 }
@@ -678,7 +801,7 @@ tbody tr:last-child td {
 }
 
 tbody tr:hover {
-  background: #f8fafc;
+  background: var(--brand-softer);
 }
 
 .mono {
@@ -1107,10 +1230,15 @@ tbody tr:hover {
 }
 
 .verdict-banner {
-  border-radius: var(--radius-sm);
-  padding: 12px 14px;
+  border-radius: var(--radius);
+  padding: 13px 15px;
   margin-top: 12px;
   font-size: 14px;
+  /* The page behind this is lighter than it used to be, so the tinted fill
+     alone no longer reads as a distinct block. The border is currentColor,
+     which means it tracks the verdict and adds no new colour value to keep
+     in step with the contrast work. */
+  border: 1px solid color-mix(in srgb, currentColor 28%, transparent);
 }
 
 .verdict-headline {
@@ -1331,21 +1459,31 @@ tbody tr:hover {
 
 /* ---------- Login ---------- */
 
+/* Light, with two very faint accent washes rather than the old near-black
+   gradient. The portal's colour still identifies which door you are at,
+   which was the point of the dark panel, but at a fraction of the weight. */
 .login-page {
   min-height: 100vh;
   display: grid;
   place-items: center;
-  background: linear-gradient(140deg, #0f172a, var(--brand-dark));
+  background: var(--bg);
+  background-image: radial-gradient(
+      60rem 32rem at 15% -10%,
+      color-mix(in srgb, var(--brand) 13%, transparent),
+      transparent 60%
+    ),
+    radial-gradient(48rem 28rem at 90% 110%, var(--info-soft), transparent 62%);
   padding: 20px;
 }
 
 .login-card {
   background: var(--surface);
-  border-radius: 16px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
   padding: 34px;
   width: 100%;
-  max-width: 400px;
-  box-shadow: 0 20px 50px rgb(0 0 0 / 0.3);
+  max-width: 410px;
+  box-shadow: var(--shadow-lg);
 }
 
 .login-head {
@@ -1375,35 +1513,47 @@ tbody tr:hover {
   min-height: 100vh;
   display: grid;
   place-items: center;
-  padding: 32px 16px;
-  background: linear-gradient(140deg, #0f172a, #1e3a8a);
+  padding: 40px 16px;
+  background: var(--bg);
+  /* Two wide, pale washes. They give the page somewhere for the eye to
+     settle without turning the first thing a student sees into a dark slab. */
+  background-image: radial-gradient(
+      70rem 34rem at 12% -12%,
+      color-mix(in srgb, #1d4ed8 12%, transparent),
+      transparent 62%
+    ),
+    radial-gradient(
+      56rem 30rem at 92% 108%,
+      color-mix(in srgb, #0f766e 10%, transparent),
+      transparent 62%
+    );
 }
 
 .landing-inner {
   width: 100%;
-  max-width: 560px;
+  max-width: 580px;
 }
 
 .landing-head {
   text-align: center;
-  color: #fff;
-  margin-bottom: 26px;
+  color: var(--text);
+  margin-bottom: 28px;
 }
 
 .landing-head .brand-text strong {
-  color: #fff;
+  color: var(--text);
 }
 
-.landing-head .brand-text span,
-.landing-head p {
-  color: #cbd5e1;
+.landing-head .brand-text span {
+  color: var(--text-muted);
 }
 
 .landing-head p {
-  font-size: 14.5px;
+  color: var(--text-muted);
+  font-size: 15px;
   margin: 14px auto 0;
-  max-width: 420px;
-  line-height: 1.55;
+  max-width: 430px;
+  line-height: 1.6;
 }
 
 .landing-primary {
@@ -1411,15 +1561,19 @@ tbody tr:hover {
   align-items: center;
   gap: 16px;
   padding: 20px;
-  border-radius: var(--radius);
+  border-radius: var(--radius-lg);
   background: var(--surface);
-  box-shadow: 0 12px 34px rgb(0 0 0 / 0.25);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-md);
   text-decoration: none;
   color: var(--text);
+  transition: transform 0.14s ease, box-shadow 0.14s ease, border-color 0.14s ease;
 }
 
 .landing-primary:hover {
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--brand-line);
 }
 
 .landing-primary-icon {
@@ -1427,7 +1581,7 @@ tbody tr:hover {
   place-items: center;
   width: 52px;
   height: 52px;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius);
   background: var(--info-soft);
   color: #1e40af;
   flex-shrink: 0;
@@ -1455,11 +1609,12 @@ tbody tr:hover {
   display: flex;
   align-items: center;
   gap: 14px;
-  margin: 26px 0 16px;
-  color: #94a3b8;
-  font-size: 12px;
+  margin: 28px 0 16px;
+  color: var(--text-faint);
+  font-size: 11.5px;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.09em;
 }
 
 .landing-divider::before,
@@ -1467,7 +1622,7 @@ tbody tr:hover {
   content: '';
   flex: 1;
   height: 1px;
-  background: rgb(255 255 255 / 0.18);
+  background: var(--border-strong);
 }
 
 .landing-portals {
@@ -1477,17 +1632,21 @@ tbody tr:hover {
 
 .landing-portal {
   display: block;
-  padding: 15px 17px 15px 20px;
-  border-radius: var(--radius-sm);
-  background: rgb(255 255 255 / 0.07);
-  border: 1px solid rgb(255 255 255 / 0.12);
+  padding: 15px 17px 15px 21px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
   text-decoration: none;
   position: relative;
   overflow: hidden;
+  transition: transform 0.14s ease, box-shadow 0.14s ease, border-color 0.14s ease;
 }
 
 .landing-portal:hover {
-  background: rgb(255 255 255 / 0.13);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--border-strong);
 }
 
 .landing-portal-dot {
@@ -1501,7 +1660,7 @@ tbody tr:hover {
 
 .landing-portal strong {
   display: block;
-  color: #fff;
+  color: var(--text);
   font-size: 14.5px;
 }
 
@@ -1509,7 +1668,7 @@ tbody tr:hover {
   display: block;
   margin-top: 3px;
   font-size: 12.5px;
-  color: #94a3b8;
+  color: var(--text-muted);
 }
 
 .landing-foot,
@@ -1520,7 +1679,7 @@ tbody tr:hover {
   gap: 8px;
   margin-top: 22px;
   font-size: 12.5px;
-  color: #94a3b8;
+  color: var(--text-muted);
   text-align: center;
   line-height: 1.5;
 }
@@ -1528,11 +1687,11 @@ tbody tr:hover {
 .landing-hint {
   margin-top: 10px;
   font-size: 12px;
-  color: #7c8ba1;
+  color: var(--text-faint);
 }
 
 .landing-hint code {
-  color: #cbd5e1;
+  color: var(--text-muted);
 }
 
 .landing-foot svg,
@@ -1746,18 +1905,18 @@ tbody tr:hover {
   flex-shrink: 0;
 }
 
-/* Sits on the dark gradient rather than on the card, so it needs light ink. */
+/* Sits on the page wash rather than on the card, so it takes page ink. */
 .login-aside {
   margin: 18px auto 0;
-  max-width: 400px;
+  max-width: 410px;
   text-align: center;
   font-size: 13px;
   line-height: 1.6;
-  color: #cbd5e1;
+  color: var(--text-muted);
 }
 
 .login-aside a {
-  color: #fff;
+  color: var(--brand);
   font-weight: 600;
   text-decoration: underline;
   text-underline-offset: 2px;
@@ -1842,8 +2001,13 @@ tbody tr:hover {
   background: var(--warn);
 }
 
+/* The other three sit on a saturated status colour and take white ink from
+   the base rule. This one used the page's dark background token, which is now
+   a pale grey, so it has to set its own dark ink or it would be white on
+   near-white and effectively invisible. */
 .toast-info {
-  background: var(--bg-soft);
+  background: #253044;
+  color: #fff;
 }
 
 .toast-close {

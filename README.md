@@ -418,7 +418,7 @@ everything under `/api/public/`.
 
 ```
 backend/
-  config/         settings, urls, pagination
+  config/         settings, urls, pagination, signed media serving
   accounts/       staff users, roles, permissions, throttles, audit log
   campus/         departments and gates
   students/       student records, public form, CSV importer
@@ -426,7 +426,7 @@ backend/
   checkpoint/     gate lookup, scan events, dashboard
   search/         inverted index, indexer, typeahead
   notifications/  outbox, delivery backends, worker command
-  tests/          156 tests
+  tests/          202 tests
 
 frontend/src/
   api/            fetch client (token refresh, cancellation), endpoints
@@ -462,7 +462,7 @@ The brand mark is a **slot**, not a fixed asset. Drop your file at `frontend/src
 
 ```bash
 cd backend
-.venv\Scripts\python.exe manage.py test tests     # 189 tests
+.venv\Scripts\python.exe manage.py test tests     # 202 tests
 
 cd frontend
 npm test                                          # 31 tests
@@ -471,7 +471,7 @@ npm test                                          # 31 tests
 The frontend suite is Vitest and jsdom, covering the two pieces of behaviour that are hard to
 check by hand: the offline scan queue and live-search cancellation.
 
-**189 backend tests.** Notable areas:
+**202 backend tests.** Notable areas:
 
 | Area | Covers |
 |------|--------|
@@ -517,7 +517,16 @@ outcome row carries an icon and a written label with its count, and colour never
 meaning alone.
 
 **The app is deliberately light-only.** It runs on gate kiosks in daylight, and a guard should
-never have to work out which colour scheme they are reading a HOLD banner in.
+never have to work out which colour scheme they are reading a HOLD banner in. The navigation,
+the login and the landing page are light too: the earlier near-black sidebar and dark gradients
+were the heaviest thing on screen and competed with the status colours, which are the one place
+colour has to carry meaning.
+
+**One accent, and everything tinted derives from it.** A portal declares a single colour and the
+soft fills, hover states and active navigation are `color-mix`ed from it, so adding a fourth
+portal means picking one hex value rather than six. The status palette is exempt and unchanged:
+those values were checked for contrast and colour-blind separation, and a redesign is not a
+reason to re-open that.
 
 **Recharts is lazy-loaded.** It is only on the admin dashboard, so a guard on a phone downloads
 110 kB gzipped instead of 224 kB.
@@ -548,6 +557,31 @@ Run the notification worker from cron:
 SQLite is fine for the demo but allows a single writer at a time, which several gates recording at
 once will hit. Switch to PostgreSQL before a pilot.
 
+### Photos
+
+Uploaded photos are **not** served off disk. Whitenoise handles `STATIC_ROOT` only, so a raw
+`/media/` URL is dead with `DJANGO_DEBUG=False`, and serving that directory publicly would put
+every student's face one guessed filename away from anybody. Instead the API returns short-lived
+signed links, and `/api/media/<token>/` checks the signature before releasing a byte.
+
+That works with no web server configuration at all. To let nginx send the file once Django has
+approved it, set `MEDIA_ACCEL_REDIRECT=True` and add:
+
+```nginx
+location /protected-media/ {
+    internal;                       # only reachable via X-Accel-Redirect
+    alias /srv/computer_track/backend/media/;
+}
+```
+
+`internal` is the load-bearing word. Without it that block is a public file listing and you have
+reinvented the problem.
+
+The tradeoff worth knowing: anyone who copies a photo URL out of the page can share it until it
+expires. `MEDIA_LINK_TTL_SECONDS` (default 900) is how long you are willing for that to be true.
+The alternative, fetching each image as an authenticated blob, would break "open the photo full
+size in a new tab" at the gate, which guards actually use.
+
 ---
 
 ## Not built yet
@@ -561,7 +595,20 @@ once will hit. Switch to PostgreSQL before a pilot.
    `AUDIT_RETENTION_DAYS` to whatever the university's data policy actually says.
 2. **Route the alert email somewhere staffed.** `AUDIT_ALERT_RECIPIENTS` is empty by default, so
    alerting stays inert until somebody fills it in.
-3. **Recovery codes for two-factor.** An administrator who loses their phone currently needs
-   another administrator to deactivate and recreate the account.
-4. **Widen the frontend suite.** Three files cover the trickiest hooks. The gate console's
+3. **Recovery codes for two-factor**, and a password reset. Account recovery is the weakest
+   operational surface here: `change-password` needs you to already be signed in, so a guard who
+   forgets their password at 06:00 has to find an administrator, and an administrator who loses
+   their phone needs another administrator.
+4. **A backup and, more importantly, a restore drill.** The scan log is described above as
+   something that may end up being evidence. There is no `pg_dump` schedule in this repository and
+   nothing covering `media/`. A register nobody has ever restored from is a guess.
+5. **Continuous integration.** 202 backend and 31 frontend tests, and nothing runs them on push.
+   Cheapest useful addition in this list.
+6. **A student lifecycle.** Nothing here handles graduation, withdrawal or suspension, so a
+   registration is currently permanent and the gate will keep confirming ownership for somebody
+   who left two years ago. Decide whether registrations expire each academic year.
+7. **Make the gate console work fully offline.** The scan queue survives a dropped connection, but
+   the app shell is not cached, so a guard who reloads the tab with no network gets a blank page.
+   A service worker would close the gap between "tolerates flaky wifi" and "works at a gate".
+8. **Widen the frontend suite.** Three files cover the trickiest hooks. The gate console's
    decision flow and the approval queue are the next most valuable to pin down.
