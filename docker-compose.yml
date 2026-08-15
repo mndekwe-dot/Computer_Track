@@ -1,0 +1,32 @@
+# PostgreSQL for local development and as a starting point for deployment.
+#
+#   docker compose up -d
+#   # then in backend/.env:
+#   #   DB_ENGINE=postgres
+#   #   DB_PASSWORD=computer_track
+#   python manage.py migrate
+#   python manage.py rebuild_search_index
+#
+# SQLite is fine for the demo, but it allows one writer at a time - several
+# gates recording simultaneously will block on each other.
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: computer_track
+      POSTGRES_USER: computer_track
+      POSTGRES_PASSWORD: computer_track
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U computer_track']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:
