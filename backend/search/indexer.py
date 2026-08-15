@@ -17,7 +17,8 @@ MIN_PREFIX = 2
 def _looks_like_identifier(text):
     """Reg numbers, serials and asset tags contain digits; names do not.
 
-    Only identifiers get a punctuation-stripped form added to the index - squashing "Aline Uwase" into "ALINEUWASE" would just be noise nobody will
+    Only identifiers get a punctuation-stripped form added to the index.
+    Squashing "Aline Uwase" into "ALINEUWASE" would just be noise nobody will
     ever type, while "UNI-024/01" genuinely does get typed as "UNI02401".
     """
     return any(character.isdigit() for character in text)
@@ -188,7 +189,8 @@ def _contains_filter(queryset, words, field):
     """Middle-of-word fallback: find `gish` inside `MUGISHA`.
 
     Prefix search structurally cannot do this, so on PostgreSQL the trigram
-    index handles it. Elsewhere this degrades to `icontains`, which is a scan - acceptable precisely because it only ever runs when the fast path already
+    index handles it. Elsewhere this degrades to `icontains`, which is a scan,
+    acceptable precisely because it only ever runs when the fast path already
     came back empty, which is rare.
     """
     for word in words:

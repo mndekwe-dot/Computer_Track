@@ -178,7 +178,13 @@ export const api = {
   baseUrl: BASE_URL,
 }
 
-/** Absolute URL for a media path returned by the API. */
+/**
+ * Absolute URL for a photo path returned by the API.
+ *
+ * These are signed and expiring rather than plain file paths, so they are
+ * only good for about fifteen minutes and must not be cached in component
+ * state across a long-lived session. Take them from the response each time.
+ */
 export function mediaUrl(path) {
   if (!path) return null
   if (path.startsWith('http')) return path

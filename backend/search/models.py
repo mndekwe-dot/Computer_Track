@@ -10,7 +10,8 @@ class SearchToken(models.Model):
     the 40 rows in the demo data and hopeless for a real campus.
 
     Splitting each record into its words and indexing those turns the common
-    case - "the guard is typing the start of a name, a reg number or a serial" - into `LIKE 'mug%'`, which *is* an indexed range scan.
+    case, "the guard is typing the start of a name, a reg number or a serial",
+    into `LIKE 'mug%'`, which *is* an indexed range scan.
 
     Both foreign keys are nullable and exactly one is set per row. They cascade,
     so deleting a student or a computer takes its tokens with it and the index

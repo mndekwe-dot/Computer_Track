@@ -46,7 +46,8 @@ INSTALLED_APPS = [
     "django_filters",
     "corsheaders",
     # Two-factor for administrator accounts. Only the TOTP plugin is enabled;
-    # the middleware is not, because auth here is JWT rather than sessions - # enforcement happens in the login serializer instead.
+    # the middleware is not, because auth here is JWT rather than sessions.
+    # Enforcement happens in the login serializer instead.
     "django_otp",
     "django_otp.plugins.otp_totp",
     # Local
@@ -141,6 +142,17 @@ STORAGES = {
 
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"
+
+# Uploaded photos are handed out as signed, expiring links rather than served
+# off disk. See config/media.py. This is how long one of those links stays
+# valid: long enough to read a page and open a photo full size, short enough
+# that a URL copied out of the browser is stale by the time it travels.
+MEDIA_LINK_TTL_SECONDS = int(env("MEDIA_LINK_TTL_SECONDS", "900"))
+
+# With nginx in front, let it send the bytes once Django has checked the
+# signature. Needs a matching `internal` location block, see the README.
+MEDIA_ACCEL_REDIRECT = env("MEDIA_ACCEL_REDIRECT", "False") == "True"
+MEDIA_ACCEL_PREFIX = env("MEDIA_ACCEL_PREFIX", "/protected-media/")
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 

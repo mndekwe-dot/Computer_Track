@@ -1,10 +1,13 @@
 from rest_framework import serializers
 
+from config.media import SignedImageField
+
 from .models import Student, normalise_reg_number
 
 
 class StudentSerializer(serializers.ModelSerializer):
     full_name = serializers.CharField(read_only=True)
+    photo = SignedImageField(required=False, allow_null=True)
     status_display = serializers.CharField(source="get_status_display", read_only=True)
     department_name = serializers.CharField(source="department.name", read_only=True)
     device_count = serializers.IntegerField(read_only=True)
@@ -54,6 +57,7 @@ class StudentBriefSerializer(serializers.ModelSerializer):
     """Compact shape embedded inside device and scan payloads."""
 
     full_name = serializers.CharField(read_only=True)
+    photo = SignedImageField(read_only=True)
 
     class Meta:
         model = Student

@@ -68,7 +68,8 @@ def verify_student(reg_number, verification):
 class PublicRegistrationSerializer(serializers.ModelSerializer):
     """What a student may tell us about their own computer.
 
-    Owner, status, asset tag and every approval field are absent on purpose - they are set by the server or by a registrar, never by the form.
+    Owner, status, asset tag and every approval field are absent on purpose:
+    they are set by the server or by a registrar, never by the form.
     """
 
     reg_number = serializers.CharField(write_only=True)
@@ -124,7 +125,8 @@ class PublicRegistrationSerializer(serializers.ModelSerializer):
         return Device.objects.create(
             **validated_data,
             owner=student,
-            # A self-registration is a request, not a fact. It stays PENDING - # and therefore blocked at every gate - until a registrar approves.
+            # A self-registration is a request, not a fact. It stays PENDING,
+            # and therefore blocked at every gate, until a registrar approves.
             status=DeviceStatus.PENDING,
             notes="Submitted by the student through the public registration form.",
         )

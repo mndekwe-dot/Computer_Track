@@ -1,6 +1,7 @@
 from django.utils import timezone
 from rest_framework import serializers
 
+from config.media import SignedImageField
 from students.models import Student
 from students.serializers import StudentBriefSerializer
 
@@ -114,6 +115,7 @@ class DeviceSerializer(serializers.ModelSerializer):
     is_blocked = serializers.BooleanField(read_only=True)
     blocking_reasons = serializers.SerializerMethodField()
     active_flag_count = serializers.SerializerMethodField()
+    photo = SignedImageField(required=False, allow_null=True)
 
     class Meta:
         model = Device
@@ -174,7 +176,7 @@ class DeviceGateSerializer(DeviceSerializer):
     valid_permits = serializers.SerializerMethodField()
     active_flags = DeviceFlagSerializer(many=True, read_only=True)
     last_movement = serializers.SerializerMethodField()
-    owner_photo = serializers.ImageField(source="owner.photo", read_only=True)
+    owner_photo = SignedImageField(source="owner.photo", read_only=True)
 
     class Meta(DeviceSerializer.Meta):
         fields = DeviceSerializer.Meta.fields + (
