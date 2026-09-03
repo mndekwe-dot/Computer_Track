@@ -1,0 +1,22 @@
+# Never copy a local environment or database into an image.
+.env
+.env.*
+!.env.example
+db.sqlite3
+db.sqlite3-*
+.venv/
+venv/
+
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+
+# Uploaded photographs are a mounted volume in a deployment, not image
+# content. Baking them in would ship real student data to a registry.
+media/
+staticfiles/
+
+.git/
+.gitignore

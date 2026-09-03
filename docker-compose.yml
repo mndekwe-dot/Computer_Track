@@ -1,32 +1,137 @@
-# PostgreSQL for local development and as a starting point for deployment.
+# The whole system, in one command:
 #
-#   docker compose up -d
-#   # then in backend/.env:
-#   #   DB_ENGINE=postgres
-#   #   DB_PASSWORD=computer_track
-#   python manage.py migrate
-#   python manage.py rebuild_search_index
+#   cp .env.docker.example .env
+#   docker compose up --build
+#   docker compose exec api python manage.py migrate
+#   docker compose exec api python manage.py seed_demo
 #
-# SQLite is fine for the demo, but it allows one writer at a time - several
-# gates recording simultaneously will block on each other.
+# Frontend on http://localhost:8080, API on http://localhost:8000.
+#
+# Five services, and each is here for a reason:
+#
+#   db      PostgreSQL. SQLite allows one writer at a time, which several
+#           gates recording simultaneously will hit.
+#   redis   The cache and the Celery broker. Without it the cache falls back
+#           to per-process memory - which means four gunicorn workers keep
+#           four different copies of the rules - and Celery runs tasks inside
+#           the request.
+#   api     Django under gunicorn.
+#   worker  Drains the notification outbox. Separate from the api so a slow
+#           provider cannot occupy a request thread.
+#   beat    The clock. Without it nothing sweeps the outbox for messages
+#           queued while the broker was down, and the audit alert never runs.
+
+name: computer-track
 
 services:
   db:
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_DB: computer_track
-      POSTGRES_USER: computer_track
-      POSTGRES_PASSWORD: computer_track
-    ports:
-      - '5432:5432'
+      POSTGRES_DB: ${DB_NAME:-computer_track}
+      POSTGRES_USER: ${DB_USER:-computer_track}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in .env}
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U computer_track']
+      test: ['CMD-SHELL', 'pg_isready -U ${DB_USER:-computer_track}']
       interval: 10s
       timeout: 5s
       retries: 5
+    # Not published by default. Nothing outside this network needs to reach
+    # the database, and a Postgres port open on a laptop is how a demo
+    # password becomes a real problem. Uncomment to inspect it with a client.
+    # ports:
+    #   - '5432:5432'
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    # Persistence on, so a restart does not drop every queued task. The cache
+    # would survive being lost; a queued notification would not.
+    command: redis-server --save 60 1 --loglevel warning
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  api:
+    build:
+      context: ./backend
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DB_ENGINE: postgres
+      DB_HOST: db
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/1
+    volumes:
+      # Uploaded photographs. The only path the api writes to, and the one
+      # thing here that cannot be rebuilt from source.
+      - media:/app/media
+    ports:
+      - '${API_PORT:-8000}:8000'
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  worker:
+    build:
+      context: ./backend
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DB_ENGINE: postgres
+      DB_HOST: db
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/1
+    volumes:
+      - media:/app/media
+    command: celery -A config worker --loglevel=info --concurrency=${CELERY_CONCURRENCY:-2}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  beat:
+    build:
+      context: ./backend
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DB_ENGINE: postgres
+      DB_HOST: db
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/1
+    # The schedule file goes in a writable path. Beat's default is the working
+    # directory, which the image owns and the container user cannot write to.
+    command: celery -A config beat --loglevel=info --schedule=/tmp/celerybeat-schedule
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  web:
+    build:
+      context: ./frontend
+      args:
+        # Baked in at build time: Vite inlines it. Point this at the address a
+        # browser will use, which is not necessarily the one this compose file
+        # uses internally.
+        VITE_API_BASE_URL: ${PUBLIC_API_URL:-http://localhost:8000}
+        VITE_SITE_URL: ${PUBLIC_SITE_URL:-http://localhost:8080}
+    restart: unless-stopped
+    ports:
+      - '${WEB_PORT:-8080}:80'
+    depends_on:
+      - api
 
 volumes:
   pgdata:
+  redisdata:
+  media:
