@@ -2,18 +2,21 @@
 
 import uuid
 
-from devices.models import Device, normalise_serial
+from config.qr import strip_prefix
+from devices import queries
+from devices.models import normalise_serial
 from students.models import Student, normalise_reg_number
 
 from .models import LookupMethod
 
-QR_PREFIX = "CTRACK:"
-
 
 def _device_queryset():
-    return Device.objects.select_related("owner", "owner__department").prefetch_related(
-        "flags", "permits"
-    )
+    """The gate shape: flags, permits and the last movement, all prefetched.
+
+    This is the query a guard waits on, several hundred times a shift, so it
+    is the one place where an extra round trip per computer is actually felt.
+    """
+    return queries.for_gate()
 
 
 def _student_queryset():
@@ -31,8 +34,8 @@ def resolve_query(raw_query):
     if not query:
         return "NOT_FOUND", None, [], None, LookupMethod.MANUAL
 
-    # 1. QR sticker - "CTRACK:<uuid>" or a bare UUID.
-    candidate = query[len(QR_PREFIX):] if query.upper().startswith(QR_PREFIX) else query
+    # 1. QR sticker - "<prefix>:<uuid>" or a bare UUID.
+    candidate = strip_prefix(query)
     try:
         device_uid = uuid.UUID(candidate)
     except (ValueError, AttributeError):
