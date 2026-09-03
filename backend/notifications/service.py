@@ -3,6 +3,10 @@
 Nothing in here may ever raise into a caller. A gate decision and a computer
 approval are the records that matter; telling somebody about them is best
 effort, and a mail server outage must not turn into a 500 at the gate.
+
+The wording is not here. It lives in the database and is edited by the
+registration office - see notifications/templating.py. What is here is which
+message gets queued when, for whom, and how it gets off the request path.
 """
 
 import logging
@@ -10,86 +14,105 @@ import threading
 
 from django.conf import settings
 from django.db import transaction
+from django.db.models import Q
+from django.utils import timezone
 
-from .backends import deliver
+from campus.rules import rule
+
+from .backends import PermanentFailure, deliver
 from .models import Channel, Kind, Notification, Status
+from .templating import compose
 
 logger = logging.getLogger(__name__)
 
-MAX_ATTEMPTS = 5
+
+def max_attempts():
+    """How many times a message is retried before it is given up on."""
+    return getattr(settings, "NOTIFY_MAX_ATTEMPTS", 5)
 
 
-def _university():
-    return getattr(settings, "UNIVERSITY_NAME", "the university")
+def _backoff():
+    return getattr(settings, "NOTIFY_RETRY_BACKOFF_SECONDS", 60)
 
 
-# ---------------------------------------------------------------- composing
+def _branding():
+    """The names and numbers every message can refer to."""
+    return {
+        "university": rule("branding.university_name"),
+        "office": rule("branding.office_name"),
+        "security_phone": rule("branding.security_phone"),
+        "support_email": rule("branding.support_email"),
+        "support_phone": rule("branding.support_phone"),
+    }
 
 
-def _exit_message(scan):
-    when = scan.happened_at.strftime("%H:%M on %d %b")
-    gate = scan.gate.name if scan.gate else "a campus gate"
-    return (
-        f"Your computer ({scan.device_label or scan.claimed_serial}) was recorded leaving "
-        f"{_university()} through {gate} at {when}. "
-        f"If this was not you, contact campus security immediately."
-    )
+def _student_context(student):
+    if not student:
+        return {"student_name": "", "student_first_name": "", "reg_number": ""}
+    return {
+        "student_name": student.full_name,
+        # Used as a greeting, so it falls back to the full name rather than
+        # opening a message with a blank line.
+        "student_first_name": student.first_name or student.full_name,
+        "reg_number": student.reg_number,
+    }
 
 
-def _approved_message(device):
-    tag = f" Its asset tag is {device.asset_tag}." if device.asset_tag else ""
-    return (
-        f"Good news - your {device.label} (serial {device.serial_number}) has been approved "
-        f"and is now on the {_university()} computer register.{tag} "
-        f"You may carry it through any gate. Collect its QR sticker from the registration "
-        f"office if you have not already."
-    )
-
-
-def _rejected_message(device, reason):
-    return (
-        f"Your registration for {device.label} (serial {device.serial_number}) was not "
-        f"approved.\n\nReason: {reason}\n\n"
-        f"Please visit the registration office with the computer to sort this out. Until it is "
-        f"registered, it will be held at the gate."
-    )
+def _device_context(device):
+    if not device:
+        return {"device": "", "serial": "", "brand": "", "asset_tag": ""}
+    return {
+        "device": device.label,
+        "serial": device.serial_number,
+        "brand": device.brand,
+        # Rendered as a whole clause, so a device with no tag yields nothing
+        # rather than a sentence trailing off after "Its asset tag is".
+        "asset_tag": f" Its asset tag is {device.asset_tag}." if device.asset_tag else "",
+    }
 
 
 # ------------------------------------------------------------------ queueing
 
 
-def _queue(kind, subject, body, student, device=None):
-    """Write the outbox rows for whichever contact details we hold."""
-    if not getattr(settings, "NOTIFY_ON_EXIT", True) and kind == Kind.EXIT:
-        return []
+def _queue(kind, student, context, device=None):
+    """Write the outbox rows for whichever contact details we hold.
+
+    Email and SMS are composed separately from separate templates, because
+    they are read in different places and one of them is billed by the
+    segment.
+    """
     if not student:
         return []
 
     rows = []
     if student.email:
-        rows.append(
-            Notification(
-                kind=kind,
-                channel=Channel.EMAIL,
-                recipient=student.email,
-                subject=subject,
-                body=body,
-                student=student,
-                device=device,
+        subject, body = compose(kind, Channel.EMAIL, context)
+        if body.strip():
+            rows.append(
+                Notification(
+                    kind=kind,
+                    channel=Channel.EMAIL,
+                    recipient=student.email,
+                    subject=subject,
+                    body=body,
+                    student=student,
+                    device=device,
+                )
             )
-        )
     if student.phone:
-        rows.append(
-            Notification(
-                kind=kind,
-                channel=Channel.SMS,
-                recipient=student.phone,
-                subject="",
-                body=body,
-                student=student,
-                device=device,
+        _, body = compose(kind, Channel.SMS, context)
+        if body.strip():
+            rows.append(
+                Notification(
+                    kind=kind,
+                    channel=Channel.SMS,
+                    recipient=student.phone,
+                    subject="",
+                    body=body,
+                    student=student,
+                    device=device,
+                )
             )
-        )
     if not rows:
         return []
 
@@ -105,31 +128,50 @@ def notify_owner_of_exit(scan):
             return []
         if scan.verdict not in {"ALLOWED", "OVERRIDE"}:
             return []
-        return _queue(
-            Kind.EXIT,
-            "Your computer just left campus",
-            _exit_message(scan),
-            scan.student,
-            scan.device,
-        )
+        # A rule rather than a setting: a university may want this off during
+        # exam week, and that is not a decision worth a deployment.
+        if not rule("gate.notify_owner_on_exit"):
+            return []
+
+        context = {
+            **_branding(),
+            **_student_context(scan.student),
+            **_device_context(scan.device),
+            "gate": scan.gate.name if scan.gate else "a campus gate",
+            "time": timezone.localtime(scan.happened_at).strftime("%H:%M on %d %b"),
+        }
+        # The device may already be gone from the register by the time this
+        # runs. The scan's own snapshot is what the log will always show.
+        if not context["device"]:
+            context["device"] = scan.device_label or scan.claimed_serial
+            context["serial"] = scan.claimed_serial
+        return _queue(Kind.EXIT, scan.student, context, scan.device)
     except Exception:
         logger.exception("Could not queue exit notification for scan %s", getattr(scan, "pk", "?"))
         return []
 
 
-def _missing_message(device, reason_label):
-    return (
-        f"{reason_label}: {device.label}",
-        (
-            f"{device.owner.first_name},\n\n"
-            f"{device.label} (serial {device.serial_number}) has been reported "
-            f"{reason_label.lower()} using the public form on the {_university()} computer "
-            f"register.\n\n"
-            "Every gate on campus will now stop this computer.\n\n"
-            "If you did not make this report, take your student ID to the registration "
-            "office and they will lift the hold.\n"
-        ),
-    )
+def notify_registration_approved(device):
+    try:
+        context = {**_branding(), **_student_context(device.owner), **_device_context(device)}
+        return _queue(Kind.APPROVED, device.owner, context, device)
+    except Exception:
+        logger.exception("Could not queue approval notice for device %s", device.pk)
+        return []
+
+
+def notify_registration_rejected(device, reason):
+    try:
+        context = {
+            **_branding(),
+            **_student_context(device.owner),
+            **_device_context(device),
+            "reason": reason,
+        }
+        return _queue(Kind.REJECTED, device.owner, context, device)
+    except Exception:
+        logger.exception("Could not queue rejection notice for device %s", device.pk)
+        return []
 
 
 def notify_owner_of_missing_report(device, reason_label):
@@ -142,11 +184,16 @@ def notify_owner_of_missing_report(device, reason_label):
     """
     if not device.owner:
         # University property has a department rather than a person; there is
-        # nobody to write to, and _missing_message would dereference None.
+        # nobody to write to.
         return []
     try:
-        subject, body = _missing_message(device, reason_label)
-        return _queue(Kind.MISSING, subject, body, device.owner, device)
+        context = {
+            **_branding(),
+            **_student_context(device.owner),
+            **_device_context(device),
+            "report": reason_label.lower(),
+        }
+        return _queue(Kind.MISSING, device.owner, context, device)
     except Exception:
         # Never let a mail problem undo the block. The hold is the safety
         # critical half; the message is the courtesy half.
@@ -154,32 +201,29 @@ def notify_owner_of_missing_report(device, reason_label):
         return []
 
 
-def notify_registration_approved(device):
-    try:
-        return _queue(
-            Kind.APPROVED,
-            "Your computer registration was approved",
-            _approved_message(device),
-            device.owner,
-            device,
-        )
-    except Exception:
-        logger.exception("Could not queue approval notice for device %s", device.pk)
-        return []
+def notify_staff(kind, recipients, subject, body):
+    """A message to staff addresses rather than to a student record.
 
-
-def notify_registration_rejected(device, reason):
-    try:
-        return _queue(
-            Kind.REJECTED,
-            "Your computer registration needs attention",
-            _rejected_message(device, reason),
-            device.owner,
-            device,
+    Used by the audit alert and the suspicious-registration notice. These are
+    not templated: they are read during an incident, and their wording is part
+    of the procedure rather than a matter of house style.
+    """
+    rows = [
+        Notification(
+            kind=kind,
+            channel=Channel.EMAIL,
+            recipient=address,
+            subject=subject,
+            body=body,
         )
-    except Exception:
-        logger.exception("Could not queue rejection notice for device %s", device.pk)
+        for address in recipients
+        if address
+    ]
+    if not rows:
         return []
+    created = Notification.objects.bulk_create(rows)
+    _schedule_dispatch()
+    return created
 
 
 # ----------------------------------------------------------------- draining
@@ -193,25 +237,39 @@ def send_one(notification):
         notification.mark_sent()
         return True
     except Exception as error:
+        permanent = isinstance(error, PermanentFailure)
         logger.warning(
-            "Notification %s to %s failed (attempt %s): %s",
+            "Notification %s to %s failed (attempt %s, %s): %s",
             notification.pk,
             notification.recipient,
             notification.attempts,
+            "permanent" if permanent else "will retry",
             error,
         )
-        notification.mark_failed(error, MAX_ATTEMPTS)
+        notification.mark_failed(
+            error, max_attempts(), permanent=permanent, backoff_seconds=_backoff()
+        )
         return False
 
 
-def dispatch_pending(limit=100):
-    """Drain the outbox. Used by the worker command and by inline dispatch."""
-    pending = Notification.objects.filter(
-        status=Status.PENDING, attempts__lt=MAX_ATTEMPTS
-    ).order_by("created_at")[:limit]
+def pending_queryset():
+    """What is due to be sent right now.
 
+    `next_attempt_at` in the future means a previous attempt failed and the
+    backoff has not elapsed; picking those up anyway would turn the backoff
+    into a no-op.
+    """
+    now = timezone.now()
+    return Notification.objects.filter(
+        status=Status.PENDING, attempts__lt=max_attempts()
+    ).filter(Q(next_attempt_at__isnull=True) | Q(next_attempt_at__lte=now)).order_by("created_at")
+
+
+def dispatch_pending(limit=None):
+    """Drain the outbox. Used by the worker, the Celery task and inline mode."""
+    limit = limit or getattr(settings, "NOTIFY_BATCH_SIZE", 100)
     sent = failed = 0
-    for notification in pending:
+    for notification in pending_queryset()[:limit]:
         if send_one(notification):
             sent += 1
         else:
@@ -220,23 +278,43 @@ def dispatch_pending(limit=100):
 
 
 def _dispatch_mode():
-    default = "inline" if settings.DEBUG else "worker"
+    default = "inline" if settings.DEBUG else "celery"
     return getattr(settings, "NOTIFY_DISPATCH", default)
 
 
 def _schedule_dispatch():
     """Get the sending off the request path, according to the configured mode.
 
-    inline - send immediately. Convenient in development and tests; this is
-              the only mode that puts SMTP back on the request path.
-    thread - hand off to a daemon thread after the transaction commits. Good
-              for a single-process deployment with no worker to run.
+    celery - hand to a worker after the transaction commits. The right answer
+             for anything real: the request returns immediately, the work
+             survives a restart, and retries are somebody else's problem.
+    inline - send during the request. Convenient in development and tests;
+             the only mode that puts a provider round trip on the request path.
+    thread - a daemon thread after commit. For a single-process deployment
+             with no broker to run.
     worker - do nothing here; `manage.py process_notifications` drains the
-              outbox. The right answer for anything real, and the point at
-              which Celery or django-q would slot in instead.
+             outbox from cron.
+
+    Every mode writes the outbox row first, so nothing is lost whichever is
+    chosen. That is the point of the outbox: a broker that loses a message and
+    a committed database row are different guarantees.
     """
     mode = _dispatch_mode()
     if mode == "worker":
+        return
+
+    if mode == "celery":
+        def enqueue():
+            try:
+                from .tasks import dispatch_notifications
+
+                dispatch_notifications.delay()
+            except Exception:
+                # A broker that is down must not fail the request that queued
+                # the message. The row is committed; beat will drain it.
+                logger.warning("Could not reach the Celery broker; leaving it to the worker")
+
+        transaction.on_commit(enqueue)
         return
 
     if mode == "inline":

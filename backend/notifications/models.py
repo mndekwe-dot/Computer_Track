@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from django.db import models
 from django.utils import timezone
 
@@ -18,9 +20,16 @@ class Kind(models.TextChoices):
     APPROVED = "APPROVED", "Registration approved"
     REJECTED = "REJECTED", "Registration rejected"
     MISSING = "MISSING", "Computer reported missing"
-    # Goes to the security office rather than a student, so `student` and
-    # `device` stay null on these.
+    # Both of these go to staff rather than to a student, so `student` and
+    # `device` stay null on them.
     AUDIT_ALERT = "AUDIT_ALERT", "Unusual register activity"
+    SUSPICIOUS = "SUSPICIOUS", "Registration worth a second look"
+
+
+# Which kinds a registrar may reword. AUDIT_ALERT and SUSPICIOUS are excluded
+# on purpose: they are read by staff during an incident, and their wording is
+# part of the procedure rather than a matter of tone.
+EDITABLE_KINDS = [Kind.EXIT, Kind.APPROVED, Kind.REJECTED, Kind.MISSING]
 
 
 class Notification(models.Model):
@@ -64,12 +73,18 @@ class Notification(models.Model):
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.PENDING)
     attempts = models.PositiveSmallIntegerField(default=0)
     last_error = models.TextField(blank=True)
+    # When this may next be tried. Set on failure so a provider having a bad
+    # minute is backed off rather than hammered once a minute by the worker.
+    next_attempt_at = models.DateTimeField(null=True, blank=True, db_index=True)
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     sent_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         ordering = ("-created_at",)
-        indexes = [models.Index(fields=["status", "created_at"], name="notif_status_created_idx")]
+        indexes = [
+            models.Index(fields=["status", "created_at"], name="notif_status_created_idx"),
+            models.Index(fields=["status", "next_attempt_at"], name="notif_status_retry_idx"),
+        ]
 
     def __str__(self):
         return f"{self.get_kind_display()} to {self.recipient} ({self.status})"
@@ -77,10 +92,68 @@ class Notification(models.Model):
     def mark_sent(self):
         self.status = Status.SENT
         self.sent_at = timezone.now()
-        self.save(update_fields=["status", "sent_at", "attempts", "last_error"])
+        self.next_attempt_at = None
+        self.save(
+            update_fields=["status", "sent_at", "attempts", "last_error", "next_attempt_at"]
+        )
 
-    def mark_failed(self, error, max_attempts):
+    def mark_failed(self, error, max_attempts, permanent=False, backoff_seconds=60):
+        """Record a failed attempt and decide whether there will be another.
+
+        `permanent` matters more than the attempt count. An address that does
+        not exist, an unverified sending domain, a phone number that is not a
+        phone number: none of those get better on the fifth try, and retrying
+        them costs money on SMS and sender reputation on email.
+        """
         self.last_error = str(error)[:2000]
-        # Kept PENDING while retries remain, so the worker picks it up again.
-        self.status = Status.FAILED if self.attempts >= max_attempts else Status.PENDING
-        self.save(update_fields=["status", "attempts", "last_error"])
+        if permanent or self.attempts >= max_attempts:
+            self.status = Status.FAILED
+            self.next_attempt_at = None
+        else:
+            # Kept PENDING so the worker picks it up again, but not before the
+            # backoff has passed. Linear rather than exponential: five attempts
+            # spread over a quarter of an hour is the right shape for a message
+            # somebody is waiting on.
+            self.status = Status.PENDING
+            self.next_attempt_at = timezone.now() + timedelta(
+                seconds=backoff_seconds * self.attempts
+            )
+        self.save(update_fields=["status", "attempts", "last_error", "next_attempt_at"])
+
+
+class NotificationTemplate(models.Model):
+    """The wording of one kind of message on one channel.
+
+    Separate rows for email and SMS rather than one body used for both. They
+    are not the same message written twice: an email can afford a greeting and
+    a paragraph of explanation, and an SMS is billed by the segment and read
+    on a lock screen. Forcing one text to serve both makes the email curt and
+    the SMS expensive.
+
+    See notifications/templating.py for the placeholders and the fallbacks.
+    """
+
+    kind = models.CharField(max_length=20, choices=Kind.choices)
+    channel = models.CharField(max_length=10, choices=Channel.choices)
+    subject = models.CharField(max_length=200, blank=True, help_text="Email only.")
+    body = models.TextField()
+    is_active = models.BooleanField(
+        default=True, help_text="Turn off to fall back to the built-in wording."
+    )
+    updated_by = models.ForeignKey(
+        "accounts.User",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="templates_edited",
+    )
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ("kind", "channel")
+        constraints = [
+            models.UniqueConstraint(fields=["kind", "channel"], name="one_template_per_channel")
+        ]
+
+    def __str__(self):
+        return f"{self.get_kind_display()} ({self.get_channel_display()})"

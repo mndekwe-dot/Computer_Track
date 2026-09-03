@@ -14,7 +14,7 @@ from checkpoint.models import ScanEvent
 from notifications.models import Channel, Kind, Notification, Status
 from students.models import Student
 
-from .factories import api_client, make_device, make_gate, make_student, make_user
+from .factories import api_client, make_device, make_gate, make_student, make_user, set_rule
 
 PREVIEW = "/api/students/import-preview/"
 COMMIT = "/api/students/import-commit/"
@@ -139,15 +139,14 @@ class CsvImportTests(TestCase):
 
 
 @override_settings(
-    NOTIFY_ON_EXIT=True,
     NOTIFY_DISPATCH="inline",
     EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
-    SMS_BACKEND="notifications.backends.NullSMSBackend",
-    UNIVERSITY_NAME="Test University",
+    SMS_BACKEND="notifications.providers.console.NullSMSBackend",
 )
 class ExitNotificationTests(TestCase):
     def setUp(self):
         mail.outbox = []
+        set_rule("branding.university_name", "Test University")
         self.gate = make_gate()
         self.guard = make_user("guard1", role="GUARD", default_gate=self.gate)
         self.client = api_client(self.guard)
@@ -199,13 +198,13 @@ class ExitNotificationTests(TestCase):
 
     def test_a_mail_failure_never_fails_the_scan(self):
         """The gate record is what matters; the notification is best effort."""
-        with patch("notifications.backends.send_mail", side_effect=RuntimeError("smtp down")):
+        with patch("notifications.backends.EmailMessage.send", side_effect=RuntimeError("smtp down")):
             response = self.scan()
         self.assertEqual(response.status_code, 201, response.content)
         self.assertEqual(ScanEvent.objects.count(), 1)
 
     def test_a_failed_send_is_kept_for_retry_not_lost(self):
-        with patch("notifications.backends.send_mail", side_effect=RuntimeError("smtp down")):
+        with patch("notifications.backends.EmailMessage.send", side_effect=RuntimeError("smtp down")):
             self.scan()
         row = Notification.objects.get()
         # Still PENDING, because attempts remain - the worker will try again.
@@ -213,21 +212,38 @@ class ExitNotificationTests(TestCase):
         self.assertEqual(row.attempts, 1)
         self.assertIn("smtp down", row.last_error)
 
+    @override_settings(NOTIFY_RETRY_BACKOFF_SECONDS=0)
     def test_it_gives_up_after_repeated_failures(self):
-        from notifications.service import MAX_ATTEMPTS, dispatch_pending
+        """Backoff is switched off here so the retries can be driven in a loop.
 
-        with patch("notifications.backends.send_mail", side_effect=RuntimeError("smtp down")):
+        With it on, each failure pushes `next_attempt_at` into the future and
+        the following pass correctly finds nothing to do - which is the point
+        of the backoff, and would make this test hang rather than fail.
+        """
+        from notifications.service import dispatch_pending, max_attempts
+
+        ceiling = max_attempts()
+        with patch(
+            "notifications.backends.EmailMessage.send", side_effect=RuntimeError("smtp down")
+        ):
             self.scan()
-            for _ in range(MAX_ATTEMPTS):
+            for _ in range(ceiling):
                 dispatch_pending()
         row = Notification.objects.get()
         self.assertEqual(row.status, Status.FAILED)
-        self.assertGreaterEqual(row.attempts, MAX_ATTEMPTS)
+        self.assertGreaterEqual(row.attempts, ceiling)
 
+    @override_settings(NOTIFY_RETRY_BACKOFF_SECONDS=0)
     def test_a_recovered_mail_server_sends_the_queued_message(self):
+        """Backoff off, so "the server is back" means the very next pass.
+
+        With the normal backoff the first failure holds the message for a
+        minute, which is the intended behaviour and would make this test
+        about the clock rather than about recovery.
+        """
         from notifications.service import dispatch_pending
 
-        with patch("notifications.backends.send_mail", side_effect=RuntimeError("smtp down")):
+        with patch("notifications.backends.EmailMessage.send", side_effect=RuntimeError("smtp down")):
             self.scan()
         self.assertEqual(mail.outbox, [])
 
@@ -235,8 +251,9 @@ class ExitNotificationTests(TestCase):
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(Notification.objects.get().status, Status.SENT)
 
-    @override_settings(NOTIFY_ON_EXIT=False)
     def test_notifications_can_be_switched_off(self):
+        """Turned off by a registrar in the portal, not by a redeployment."""
+        set_rule("gate.notify_owner_on_exit", False)
         self.scan()
         self.assertEqual(mail.outbox, [])
         self.assertEqual(Notification.objects.count(), 0)
@@ -256,7 +273,7 @@ class ExitNotificationTests(TestCase):
 @override_settings(
     NOTIFY_DISPATCH="worker",
     EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
-    SMS_BACKEND="notifications.backends.NullSMSBackend",
+    SMS_BACKEND="notifications.providers.console.NullSMSBackend",
 )
 class OutboxTests(TestCase):
     """The whole point: sending is not on the request path."""
@@ -303,13 +320,14 @@ class OutboxTests(TestCase):
         call_command("process_notifications", verbosity=0)
         self.assertEqual(len(mail.outbox), 1)
 
+    @override_settings(NOTIFY_RETRY_BACKOFF_SECONDS=0)
     def test_retry_failed_resets_and_resends(self):
         from django.core.management import call_command
-        from notifications.service import MAX_ATTEMPTS, dispatch_pending
+        from notifications.service import dispatch_pending, max_attempts
 
-        with patch("notifications.backends.send_mail", side_effect=RuntimeError("down")):
+        with patch("notifications.backends.EmailMessage.send", side_effect=RuntimeError("down")):
             self.scan()
-            for _ in range(MAX_ATTEMPTS):
+            for _ in range(max_attempts()):
                 dispatch_pending()
         self.assertEqual(Notification.objects.get().status, Status.FAILED)
 
@@ -321,8 +339,7 @@ class OutboxTests(TestCase):
 @override_settings(
     NOTIFY_DISPATCH="inline",
     EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
-    SMS_BACKEND="notifications.backends.NullSMSBackend",
-    UNIVERSITY_NAME="Test University",
+    SMS_BACKEND="notifications.providers.console.NullSMSBackend",
 )
 class ApprovalNotificationTests(TestCase):
     """A student should be told the outcome, not have to keep checking."""
