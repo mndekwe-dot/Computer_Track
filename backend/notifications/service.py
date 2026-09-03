@@ -117,6 +117,43 @@ def notify_owner_of_exit(scan):
         return []
 
 
+def _missing_message(device, reason_label):
+    return (
+        f"{reason_label}: {device.label}",
+        (
+            f"{device.owner.first_name},\n\n"
+            f"{device.label} (serial {device.serial_number}) has been reported "
+            f"{reason_label.lower()} using the public form on the {_university()} computer "
+            f"register.\n\n"
+            "Every gate on campus will now stop this computer.\n\n"
+            "If you did not make this report, take your student ID to the registration "
+            "office and they will lift the hold.\n"
+        ),
+    )
+
+
+def notify_owner_of_missing_report(device, reason_label):
+    """Tell the owner a hold was placed in their name.
+
+    The public report blocks the computer immediately, because a stolen laptop
+    is walking away while anyone deliberates. This message is the counterweight:
+    a report the real owner did not make cannot stay quiet, and the person best
+    placed to notice it is the owner.
+    """
+    if not device.owner:
+        # University property has a department rather than a person; there is
+        # nobody to write to, and _missing_message would dereference None.
+        return []
+    try:
+        subject, body = _missing_message(device, reason_label)
+        return _queue(Kind.MISSING, subject, body, device.owner, device)
+    except Exception:
+        # Never let a mail problem undo the block. The hold is the safety
+        # critical half; the message is the courtesy half.
+        logger.exception("Could not queue missing-report notice for device %s", device.pk)
+        return []
+
+
 def notify_registration_approved(device):
     try:
         return _queue(

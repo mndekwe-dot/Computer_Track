@@ -64,6 +64,11 @@ def device_tokens(device):
         device.owner.reg_number if device.owner_id else "",
         device.owner.first_name if device.owner_id else "",
         device.owner.last_name if device.owner_id else "",
+        # University property has no student to search by, so the department
+        # and the custodian take that job: a guard holding a projector at a
+        # gate types "physics" or the name of whoever signed it out.
+        device.department.name if device.department_id else "",
+        device.custodian_name,
     )
 
 

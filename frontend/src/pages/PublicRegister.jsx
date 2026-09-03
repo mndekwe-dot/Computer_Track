@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import {
   CircleCheck,
   CircleHelp,
@@ -6,6 +7,7 @@ import {
   LaptopMinimal,
   Search,
   ShieldCheck,
+  Siren,
   TriangleAlert,
 } from 'lucide-react'
 import { publicApi } from '../api/endpoints'
@@ -19,13 +21,21 @@ import { Field, StatusPill, formatDateTime } from '../components/ui'
  * office's approval queue rather than on the register directly.
  */
 export default function PublicRegister() {
-  const [tab, setTab] = useState('register')
+  // The tab lives in the URL rather than in state, so "check my computers"
+  // can be linked to and bookmarked, and the back button steps between the
+  // two rather than leaving the page entirely.
+  const [params, setParams] = useSearchParams()
+  const TABS = ['register', 'status', 'missing']
+  const requested = params.get('tab')
+  const tab = TABS.includes(requested) ? requested : 'register'
+  const setTab = (next) =>
+    setParams(next === 'register' ? {} : { tab: next }, { replace: true })
 
   return (
     <div className="public-page">
       <div className="public-shell">
         <header className="public-head">
-          <Brand title="Computer Registration" subtitle="University gate register" size="lg" stacked />
+          <Brand title="Computer Registration" subtitle="University gate register" size="lg" stacked as="h1" />
           <p>
             Register your laptop so security can confirm it is yours when you carry it through a
             gate. You do not need an account.
@@ -51,9 +61,20 @@ export default function PublicRegister() {
             <Search size={16} aria-hidden="true" />
             Check my computers
           </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={tab === 'missing'}
+            onClick={() => setTab('missing')}
+          >
+            <Siren size={16} aria-hidden="true" />
+            Report lost or stolen
+          </button>
         </div>
 
-        {tab === 'register' ? <RegisterForm /> : <StatusCheck />}
+        {tab === 'register' && <RegisterForm />}
+        {tab === 'status' && <StatusCheck />}
+        {tab === 'missing' && <MissingReport />}
 
         <footer className="public-foot">
           <ShieldCheck size={15} aria-hidden="true" />
@@ -275,6 +296,142 @@ function RegisterForm() {
 
       <button type="submit" className="btn btn-primary btn-lg btn-block" disabled={busy}>
         {busy ? 'Submitting…' : 'Submit registration'}
+      </button>
+    </form>
+  )
+}
+
+/**
+ * Report your own computer lost or stolen, without an account.
+ *
+ * This is the only public form that changes something rather than requesting
+ * something, so the copy is deliberately blunt about the consequence before
+ * the button is pressed, and blunt about what to do if it was a mistake.
+ */
+function MissingReport() {
+  const [form, setForm] = useState({
+    reg_number: '',
+    verification: '',
+    serial_number: '',
+    kind: 'STOLEN',
+    details: '',
+  })
+  const [errors, setErrors] = useState({})
+  const [busy, setBusy] = useState(false)
+  const [done, setDone] = useState(null)
+
+  const set = (field) => (event) => setForm({ ...form, [field]: event.target.value })
+
+  const submit = async (event) => {
+    event.preventDefault()
+    setBusy(true)
+    setErrors({})
+    try {
+      setDone(await publicApi.reportMissing(form))
+    } catch (error) {
+      setErrors(
+        error.status === 429
+          ? { detail: 'Too many attempts from this device. Try again later, or call security.' }
+          : { ...error.fieldErrors, detail: error.fieldErrors?.detail || error.readable },
+      )
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  if (done) {
+    return (
+      <div className="card public-card">
+        <div className="public-success public-success-hold">
+          <Siren size={40} aria-hidden="true" />
+          <h2>Every gate will now stop this computer</h2>
+          <p>{done.detail}</p>
+          <dl className="reference-box">
+            <div>
+              <dt>Serial</dt>
+              <dd className="mono">{done.serial_number}</dd>
+            </div>
+            <div>
+              <dt>Recorded as</dt>
+              <dd>{done.status === 'STOLEN' ? 'Reported stolen' : 'Reported lost'}</dd>
+            </div>
+          </dl>
+          <p className="muted">
+            We have emailed the address on your record. If you find the computer, the registration
+            office can lift the hold once they have seen your student ID.
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <form className="card public-card" onSubmit={submit}>
+      <div className="note note-warn">
+        <TriangleAlert size={16} aria-hidden="true" />
+        <span>
+          This blocks the computer at every gate straight away. Only report a computer that is
+          registered to you. If it was taken from you, tell security control as well.
+        </span>
+      </div>
+
+      {errors.detail && <div className="note note-error">{errors.detail}</div>}
+
+      <h2 className="form-section">Who you are</h2>
+      <div className="form-grid">
+        <Field label="Registration number" required error={errors.reg_number}>
+          <input
+            value={form.reg_number}
+            onChange={set('reg_number')}
+            autoComplete="off"
+            placeholder="218001234"
+          />
+        </Field>
+        <Field
+          label="Email or national ID"
+          required
+          error={errors.verification}
+          hint="Whichever the university holds for you. This proves the record is yours."
+        >
+          <input
+            value={form.verification}
+            onChange={set('verification')}
+            placeholder="you@student.university.edu"
+          />
+        </Field>
+      </div>
+
+      <h2 className="form-section">Which computer</h2>
+      <Field
+        label="Serial number"
+        required
+        error={errors.serial_number}
+        hint="The serial you registered. Check my computers will show it if you are not sure."
+      >
+        <input value={form.serial_number} onChange={set('serial_number')} placeholder="5CD1234ABC" />
+      </Field>
+
+      <Field label="What happened" required error={errors.kind}>
+        <select value={form.kind} onChange={set('kind')}>
+          <option value="STOLEN">It was stolen</option>
+          <option value="LOST">I lost it</option>
+        </select>
+      </Field>
+
+      <Field
+        label="Anything that would help"
+        error={errors.details}
+        hint="Where and roughly when you last had it. Security reads this."
+      >
+        <textarea
+          value={form.details}
+          onChange={set('details')}
+          placeholder="Last had it in the library reading room on Tuesday afternoon."
+        />
+      </Field>
+
+      <button type="submit" className="btn btn-hold btn-lg btn-block" disabled={busy}>
+        {busy ? 'Reporting…' : 'Report it and block it at every gate'}
       </button>
     </form>
   )

@@ -46,13 +46,21 @@ export function Logo({ size = 'sm', alt = 'University logo' }) {
   )
 }
 
-/** Logo plus the portal's name, used in sidebars and on login screens. */
-export function Brand({ title, subtitle, size = 'sm', stacked = false }) {
+/**
+ * Logo plus the portal's name, used in sidebars and on login screens.
+ *
+ * `as` exists because this block plays two roles. In a sidebar it is chrome
+ * repeated on every screen, so a heading element would be wrong. On the login
+ * and public pages it *is* the page title, and rendering it as a <strong>
+ * left those pages with no heading at all: nothing to navigate to, and an
+ * <h2> further down with no parent.
+ */
+export function Brand({ title, subtitle, size = 'sm', stacked = false, as: Title = 'strong' }) {
   return (
     <div className={stacked ? 'brand brand-stacked' : 'brand'}>
       <Logo size={size} />
       <span className="brand-text">
-        <strong>{title}</strong>
+        <Title>{title}</Title>
         {subtitle && <span>{subtitle}</span>}
       </span>
     </div>

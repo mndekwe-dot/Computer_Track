@@ -232,9 +232,15 @@ h4 {
 
 .brand-stacked {
   flex-direction: column;
+  align-items: center;
   text-align: center;
   gap: 12px;
   color: inherit;
+}
+
+.brand-stacked .logo-placeholder,
+.brand-stacked .logo-img {
+  margin-top: 0;
 }
 
 .logo-placeholder {
@@ -258,7 +264,8 @@ h4 {
   min-width: 0;
 }
 
-.brand-text strong {
+.brand-text strong,
+.brand-text h1 {
   display: block;
   font-size: 15px;
   letter-spacing: -0.01em;
@@ -267,15 +274,34 @@ h4 {
   text-overflow: ellipsis;
 }
 
+/* The longest tagline ("Computer checks at the gate") wraps to two lines in
+   the sidebar. That is fine, but at the inherited line-height the two lines
+   crowded each other and sat taller than the logo beside them, which is what
+   made the whole brand block read as clipped. */
 .brand-text span {
+  display: block;
   font-size: 10.5px;
+  line-height: 1.45;
   color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.07em;
   font-weight: 600;
+  text-wrap: balance;
 }
 
-.brand-stacked .brand-text strong {
+/* Wrapping means the logo should sit against the top of the text, not float
+   in the middle of a two-line block. */
+.brand {
+  align-items: flex-start;
+}
+
+.brand .logo-placeholder,
+.brand .logo-img {
+  margin-top: 1px;
+}
+
+.brand-stacked .brand-text strong,
+.brand-stacked .brand-text h1 {
   font-size: 20px;
   white-space: normal;
 }
@@ -969,7 +995,7 @@ tbody tr:last-child td {
 
 .console {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 300px;
+  grid-template-columns: minmax(0, 1fr) 340px;
   gap: 18px;
   align-items: start;
 }
@@ -1321,6 +1347,21 @@ tbody tr:last-child td {
   margin-top: 3px;
 }
 
+/* Who to call about a piece of university equipment, in the place the
+   student card would otherwise be. */
+.device-custody {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 9px;
+  padding: 5px 11px;
+  border-radius: 999px;
+  background: var(--info-soft);
+  color: #1e40af;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
 .device-specs {
   display: flex;
   gap: 14px;
@@ -1404,20 +1445,34 @@ tbody tr:last-child td {
 }
 
 .recent-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-  padding: 9px 11px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 2px 10px;
+  padding: 10px 12px;
   border-radius: var(--radius-sm);
   background: var(--surface-muted);
   font-size: 12.5px;
 }
 
 .recent-item strong {
+  grid-column: 1;
   display: block;
   font-size: 13px;
-  word-break: break-word;
+  line-height: 1.35;
+  overflow-wrap: break-word;
+}
+
+/* Full width on its own row rather than flowing around the pill. */
+.recent-item .muted {
+  grid-column: 1;
+  display: block;
+}
+
+.recent-item .pill {
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: end;
 }
 
 .connection-badge {
@@ -2069,19 +2124,86 @@ tbody tr:last-child td {
 }
 
 .landing-footer {
-  padding: 32px 24px 48px;
-  background: var(--bg);
+  padding: 48px 24px 40px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
   font-size: 13px;
 }
 
-.landing-footer p {
+.footer-grid {
+  display: grid;
+  /* The about block gets more room than the link columns, and the whole thing
+     collapses when three columns genuinely stop fitting. */
+  grid-template-columns: minmax(260px, 1.6fr) repeat(3, minmax(150px, 1fr));
+  gap: 32px;
+}
+
+.footer-about p {
+  margin: 14px 0 0;
+  color: var(--text-muted);
+  line-height: 1.6;
+  max-width: 40ch;
+  text-wrap: pretty;
+}
+
+.footer-col h2 {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin: 0 0 12px;
+}
+
+.footer-col ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 9px;
+}
+
+.footer-col a {
+  color: var(--text);
+  text-decoration: none;
+  text-underline-offset: 3px;
+}
+
+.footer-col a:hover {
+  text-decoration: underline;
+}
+
+.footer-note {
+  color: var(--text-muted);
+  line-height: 1.5;
+  display: block;
+  text-wrap: pretty;
+}
+
+.footer-base {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 24px;
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+}
+
+.footer-base p {
   margin: 0;
 }
 
-.landing-footer .muted {
-  margin-top: 6px;
-  max-width: 60ch;
-  text-wrap: pretty;
+@media (max-width: 700px) {
+  .footer-grid {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 28px 20px;
+  }
+
+  .footer-about {
+    grid-column: 1 / -1;
+  }
 }
 
 @media (max-width: 560px) {
@@ -2167,6 +2289,22 @@ tbody tr:last-child td {
   margin-bottom: 16px;
 }
 
+/* Three tabs do not fit side by side on a phone: every label wrapped to two
+   or three lines and the icons collapsed to smudges. Stacked, each one is a
+   full-width row with a comfortable target, which is the right shape for the
+   device a student is actually holding. */
+@media (max-width: 560px) {
+  .public-tabs {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .public-tabs button {
+    justify-content: flex-start;
+    padding: 13px 14px;
+  }
+}
+
 .public-tabs button {
   flex: 1;
   display: inline-flex;
@@ -2191,6 +2329,12 @@ tbody tr:last-child td {
 
 .public-card + .public-card {
   margin-top: 16px;
+}
+
+/* Same success layout, but this outcome is a hold rather than good news, so
+   it takes the hold colour instead of the green one. */
+.public-success-hold svg {
+  color: var(--hold);
 }
 
 .form-section {

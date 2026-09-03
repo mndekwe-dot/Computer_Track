@@ -18,7 +18,17 @@ from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from devices.models import Device, DeviceStatus, DeviceType, normalise_serial
+from django.db import transaction
+
+from devices.models import (
+    Device,
+    DeviceFlag,
+    DeviceStatus,
+    DeviceType,
+    FlagReason,
+    normalise_serial,
+)
+from notifications.service import notify_owner_of_missing_report
 
 from .models import Student, normalise_reg_number
 
@@ -237,3 +247,98 @@ class PublicLookupChoicesView(APIView):
                 ]
             }
         )
+
+
+class PublicMissingReportSerializer(serializers.Serializer):
+    """Report your own computer lost or stolen, without an account.
+
+    The obvious objection to an open endpoint that blocks a computer is that
+    somebody could block a computer that is not theirs. Three things bound
+    that. It takes the same identity check as registration, so a reporter
+    needs the reg number *and* the email or national ID already on file. It
+    can only touch a device that belongs to the verified student. And the
+    owner is emailed the moment it happens, so a report they did not make
+    cannot sit there unnoticed.
+
+    Against that: a stolen laptop is leaving campus while anyone deliberates,
+    and the alternative is a student walking to the registration office during
+    opening hours. The hold is reversible by any registrar in one click; the
+    laptop is not.
+    """
+
+    reg_number = serializers.CharField()
+    verification = serializers.CharField()
+    serial_number = serializers.CharField()
+    kind = serializers.ChoiceField(choices=[FlagReason.STOLEN, FlagReason.LOST])
+    details = serializers.CharField(allow_blank=True, required=False)
+
+    def validate(self, attrs):
+        student = verify_student(attrs.pop("reg_number"), attrs.pop("verification"))
+        device = Device.objects.filter(
+            owner=student,
+            serial_key=normalise_serial(attrs["serial_number"]),
+            is_archived=False,
+        ).first()
+        if not device:
+            # Says nothing about whether the serial exists on somebody else's
+            # record, which would turn this into a lookup tool.
+            raise serializers.ValidationError(
+                {
+                    "serial_number": (
+                        "No computer with that serial is registered to you. Check the serial, "
+                        "or use 'Check my computers' to see what is on your record."
+                    )
+                }
+            )
+        if device.status in {DeviceStatus.LOST, DeviceStatus.STOLEN}:
+            raise serializers.ValidationError(
+                {"serial_number": "This computer is already reported missing. Every gate is "
+                                  "already stopping it."}
+            )
+        attrs["device"] = device
+        return attrs
+
+
+class PublicMissingReportView(APIView):
+    """POST /api/public/report-missing/ - block a computer you own, now."""
+
+    permission_classes = ()
+    authentication_classes = ()
+    throttle_scope = "public-form"
+
+    def post(self, request):
+        serializer = PublicMissingReportSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        device = serializer.validated_data["device"]
+        kind = serializer.validated_data["kind"]
+        details = serializer.validated_data.get("details", "").strip()
+
+        stolen = kind == FlagReason.STOLEN
+        with transaction.atomic():
+            device.status = DeviceStatus.STOLEN if stolen else DeviceStatus.LOST
+            device.save(update_fields=["status", "updated_at"])
+            DeviceFlag.objects.create(
+                device=device,
+                reason=kind,
+                details=(f"Reported by the owner through the public form. {details}").strip(),
+                # No `raised_by`: nobody signed in raised this. The flag list
+                # shows it as an owner report rather than attributing it to a
+                # member of staff who had nothing to do with it.
+                raised_by=None,
+            )
+
+        notify_owner_of_missing_report(device, "Reported stolen" if stolen else "Reported lost")
+
+        return Response(
+            {
+                "detail": (
+                    "Reported. Every gate on campus will now stop this computer. "
+                    "Take your student ID to the registration office to follow it up, and "
+                    "report a theft to security control as well."
+                ),
+                "serial_number": device.serial_number,
+                "status": device.status,
+            },
+            status=status.HTTP_201_CREATED,
+        )
+

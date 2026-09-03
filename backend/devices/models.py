@@ -19,6 +19,19 @@ class DeviceType(models.TextChoices):
     OTHER = "OTHER", "Other equipment"
 
 
+class Ownership(models.TextChoices):
+    """Who the equipment belongs to.
+
+    Student-owned equipment and university property are checked at the same
+    gate by the same guard, but the question being asked is different. For a
+    laptop it is "does this belong to the person carrying it". For a projector
+    it is "is this authorised to leave at all". Same register, two rules.
+    """
+
+    STUDENT = "STUDENT", "Student-owned"
+    UNIVERSITY = "UNIVERSITY", "University property"
+
+
 class DeviceStatus(models.TextChoices):
     PENDING = "PENDING", "Pending approval"
     ACTIVE = "ACTIVE", "Active"
@@ -51,9 +64,29 @@ class Device(models.Model):
         blank=True,
         help_text="Stickers, cracks, engravings - what the guard can see at a glance.",
     )
-    owner = models.ForeignKey(
-        "students.Student", on_delete=models.PROTECT, related_name="devices"
+    ownership = models.CharField(
+        max_length=20, choices=Ownership.choices, default=Ownership.STUDENT, db_index=True
     )
+    # Null for university property, which belongs to a department rather than
+    # to a person. Everything that reads this has to cope with None.
+    owner = models.ForeignKey(
+        "students.Student",
+        on_delete=models.PROTECT,
+        related_name="devices",
+        null=True,
+        blank=True,
+    )
+    # University property only: the department that owns it and the member of
+    # staff answerable for it. A guard needs a name to call when a projector
+    # turns up at a gate at nine at night.
+    department = models.ForeignKey(
+        "campus.Department",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="equipment",
+    )
+    custodian_name = models.CharField(max_length=120, blank=True)
     photo = models.ImageField(upload_to="devices/", null=True, blank=True)
     status = models.CharField(
         max_length=20, choices=DeviceStatus.choices, default=DeviceStatus.ACTIVE
@@ -111,11 +144,28 @@ class Device(models.Model):
             reasons.append("This device was retired from the register.")
         for flag in self.active_flags:
             reasons.append(f"{flag.get_reason_display()}: {flag.details or 'no details given'}")
-        if not self.owner.is_clear_to_pass:
+        if self.owner and not self.owner.is_clear_to_pass:
             reasons.append(
                 f"Owner status is {self.owner.get_status_display()}, not active."
             )
         return reasons
+
+    def exit_restrictions(self):
+        """Reasons this may not *leave*, as distinct from being blocked outright.
+
+        Kept separate from `blocking_reasons` because direction matters here
+        and nowhere else. University property returning to campus must not be
+        stopped for the want of a gate pass; the same projector on its way out
+        must be.
+        """
+        if self.ownership != Ownership.UNIVERSITY:
+            return []
+        if self.valid_permits().exists():
+            return []
+        return [
+            "University property. It needs a gate pass before it can leave campus. "
+            "Issue one under Permits, or record an override with a reason."
+        ]
 
     @property
     def is_blocked(self):

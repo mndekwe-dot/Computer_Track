@@ -223,11 +223,66 @@ export default function Landing() {
 
       <footer className="landing-footer">
         <div className="band-inner">
-          <p>Computer Track, campus gate computer register.</p>
-          <p className="muted">
-            Lost your sticker, or registered a computer you no longer own? Speak to the
-            registration office.
-          </p>
+          <div className="footer-grid">
+            <div className="footer-about">
+              <Brand title="Computer Track" subtitle="Campus gate computer register" />
+              <p>
+                Every computer carried through a campus gate is checked against the student it
+                belongs to.
+              </p>
+            </div>
+
+            {/* Each column is a nav with its own name, so a screen reader user
+                gets three labelled groups rather than one undifferentiated
+                pile of links at the end of the page. */}
+            <nav className="footer-col" aria-labelledby="footer-students">
+              <h2 id="footer-students">For students</h2>
+              <ul>
+                <li>
+                  <Link to="/register">Register a computer</Link>
+                </li>
+                <li>
+                  <Link to="/register?tab=status">Check my computers</Link>
+                </li>
+                <li>
+                  <a href="#what-to-expect">What a guard can see</a>
+                </li>
+              </ul>
+            </nav>
+
+            <nav className="footer-col" aria-labelledby="footer-staff">
+              <h2 id="footer-staff">For staff</h2>
+              <ul>
+                {PORTAL_LIST.map((portal) => (
+                  <li key={portal.key}>
+                    <Link to={`${portal.base}/login`}>{portal.name}</Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+
+            <nav className="footer-col" aria-labelledby="footer-help">
+              <h2 id="footer-help">Help</h2>
+              <ul>
+                <li>
+                  <a href="#how-it-works">How registration works</a>
+                </li>
+                <li>
+                  <a href="#staff-sign-in">Staff sign in</a>
+                </li>
+                <li>
+                  <span className="footer-note">
+                    Anything else: the registration office handles stickers, transfers and holds.
+                  </span>
+                </li>
+              </ul>
+            </nav>
+          </div>
+
+          <div className="footer-base">
+            <p>Computer Track, campus gate computer register.</p>
+            <p>Records opened by staff are logged and reviewed.</p>
+          </div>
         </div>
       </footer>
     </div>

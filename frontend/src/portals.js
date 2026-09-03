@@ -60,6 +60,7 @@ export const PORTALS = {
       { to: '/registry/devices', label: 'Computers', icon: LaptopMinimal },
       { to: '/registry/flags', label: 'Holds & Theft', icon: Flag },
       { to: '/registry/permits', label: 'Permits', icon: Ticket },
+      { to: '/registry/gates', label: 'Gates', icon: DoorOpen },
       { to: '/registry/account', label: 'My Account', icon: UserCog },
     ],
   },

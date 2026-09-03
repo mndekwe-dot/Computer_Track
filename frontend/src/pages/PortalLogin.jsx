@@ -80,7 +80,7 @@ export default function PortalLogin({ portal }) {
     <div className="login-page" style={{ '--brand': portal.accent, '--brand-dark': portal.accentDark }}>
       <form className="login-card" onSubmit={submit}>
         <div className="login-head">
-          <Brand title={portal.loginTitle} subtitle={portal.tagline} size="lg" stacked />
+          <Brand title={portal.loginTitle} subtitle={portal.tagline} size="lg" stacked as="h1" />
           <p>{portal.loginBlurb}</p>
         </div>
 
