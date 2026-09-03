@@ -3,11 +3,59 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#0f172a" />
-    <title>Computer Track — Campus Gate Register</title>
+
+    <!-- Overwritten per route by src/components/PageMeta.jsx. These are what
+         a crawler that does not run JavaScript sees, and what shows in the tab
+         before the bundle has parsed, so they describe the landing page. -->
+    <title>Computer Track - Campus Computer Register</title>
+    <meta
+      name="description"
+      content="Register your computer with the university and carry it through any gate. Security staff verify at the gate that a computer belongs to the person carrying it."
+    />
+    <link rel="canonical" href="/" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Computer Track - Campus Computer Register" />
+    <meta
+      property="og:description"
+      content="Register your computer with the university and carry it through any gate."
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <meta name="theme-color" content="#1d4ed8" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)" />
+    <meta name="color-scheme" content="light" />
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/icon-180.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <!-- The font files are same-origin (bundled, not from a CDN), so only the
+         connection to the API is worth opening early. -->
+    <link rel="dns-prefetch" href="/api" />
   </head>
   <body>
     <div id="root"></div>
+
+    <!-- A crawler or a browser with JavaScript off gets an empty page
+         otherwise, and so does anyone on a connection where the bundle fails.
+         This says what the site is and where to go instead. -->
+    <noscript>
+      <div style="max-width: 34rem; margin: 4rem auto; padding: 0 1.5rem; font-family: system-ui, sans-serif; line-height: 1.6">
+        <h1>Computer Track</h1>
+        <p>
+          The campus computer register. Students register a computer here so it can be carried
+          through any campus gate; security staff check at the gate that it belongs to the person
+          carrying it.
+        </p>
+        <p>
+          This page needs JavaScript. If you cannot enable it, please visit the registration
+          office in person to register a computer or to report one missing.
+        </p>
+      </div>
+    </noscript>
+
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

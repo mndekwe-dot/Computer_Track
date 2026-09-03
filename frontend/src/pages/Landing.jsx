@@ -10,6 +10,8 @@ import {
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Brand } from '../components/Brand'
+import { PageMeta } from '../components/PageMeta'
+import { useSiteSettings } from '../hooks/useSiteSettings'
 import { PORTAL_LIST } from '../portals'
 
 const PORTAL_BLURB = {
@@ -18,7 +20,10 @@ const PORTAL_BLURB = {
   admin: 'Oversight of every gate, staff accounts and the read audit log.',
 }
 
-const STEPS = [
+// Built from the university's own names rather than fixed text: "the
+// registration office" is called something different at every institution,
+// and it appears in the one sentence telling a student where to go.
+const steps = (office) => [
   {
     icon: ClipboardCheck,
     title: 'Register your computer',
@@ -27,7 +32,7 @@ const STEPS = [
   {
     icon: BadgeCheck,
     title: 'Get it approved',
-    body: 'Bring the computer to the registration office. A registrar checks it against your record and fits its QR sticker.',
+    body: `Bring the computer to ${office}. A registrar checks it against your record and fits its QR sticker.`,
   },
   {
     icon: ScanLine,
@@ -36,7 +41,7 @@ const STEPS = [
   },
 ]
 
-const ASSURANCES = [
+const assurances = (office) => [
   {
     icon: Eye,
     title: 'What a guard can see',
@@ -50,7 +55,7 @@ const ASSURANCES = [
   {
     icon: Siren,
     title: 'If yours is lost or stolen',
-    body: 'Report it to the registration office. Every gate on campus refuses that computer from the moment the report is filed.',
+    body: `Report it to ${office}. Every gate on campus refuses that computer from the moment the report is filed.`,
   },
 ]
 
@@ -109,10 +114,41 @@ function GateCheckPreview() {
  * it costs a returning user nothing.
  */
 export default function Landing() {
+  const { settings } = useSiteSettings()
+  const systemName = settings['branding.system_name']
+  const university = settings['branding.university_name']
+  const office = settings['branding.office_name']
+  const supportEmail = settings['branding.support_email']
+
   return (
     <div className="landing">
+      <PageMeta
+        index
+        title={null}
+        description={`Register your computer with ${university} and carry it through any campus gate. Security staff verify at the gate that a computer belongs to the person carrying it.`}
+      />
+      {/* Search engines read this to describe the site in a result. It is the
+          same three facts the page states in prose, in the shape a crawler
+          understands. */}
+      <script
+        type="application/ld+json"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'WebSite',
+            name: systemName,
+            description: `The campus computer register for ${university}.`,
+            potentialAction: {
+              '@type': 'RegisterAction',
+              name: 'Register a computer',
+              target: `${window.location.origin}/register`,
+            },
+          }),
+        }}
+      />
       <header className="landing-bar">
-        <Brand title="Computer Track" subtitle="Campus gate computer register" />
+        <Brand title={systemName} subtitle="Campus gate computer register" />
         <a className="landing-bar-link" href="#staff-sign-in">
           Staff sign in
           <ArrowRight size={15} aria-hidden="true" />
@@ -153,7 +189,7 @@ export default function Landing() {
           <div className="band-inner">
             <h2 id="how-it-works">How it works</h2>
             <ol className="step-list">
-              {STEPS.map((step, index) => (
+              {steps(office).map((step, index) => (
                 <li key={step.title} className="step">
                   {/* The digit is decorative: the ordered list already tells
                       assistive technology this is step 2 of 3. */}
@@ -175,7 +211,7 @@ export default function Landing() {
           <div className="band-inner">
             <h2 id="what-to-expect">What to expect</h2>
             <div className="assurance-grid">
-              {ASSURANCES.map((item) => (
+              {assurances(office).map((item) => (
                 <article key={item.title} className="assurance">
                   <span className="assurance-icon" aria-hidden="true">
                     <item.icon size={18} />
@@ -192,8 +228,7 @@ export default function Landing() {
           <div className="band-inner">
             <h2 id="staff-heading">Staff sign in</h2>
             <p className="band-lede">
-              Each portal is a separate door with its own login. Accounts are issued by the
-              registration office.
+              Each portal is a separate door with its own login. Accounts are issued by {office}.
             </p>
             <div className="landing-portals">
               {PORTAL_LIST.map((portal) => (
@@ -225,7 +260,7 @@ export default function Landing() {
         <div className="band-inner">
           <div className="footer-grid">
             <div className="footer-about">
-              <Brand title="Computer Track" subtitle="Campus gate computer register" />
+              <Brand title={systemName} subtitle="Campus gate computer register" />
               <p>
                 Every computer carried through a campus gate is checked against the student it
                 belongs to.
@@ -270,9 +305,17 @@ export default function Landing() {
                 <li>
                   <a href="#staff-sign-in">Staff sign in</a>
                 </li>
+                {supportEmail && (
+                  <li>
+                    {/* Link text has to make sense read out of context, since
+                        screen reader users navigate by a list of a page's
+                        links. The address is the destination. */}
+                    <a href={`mailto:${supportEmail}`}>Email {supportEmail}</a>
+                  </li>
+                )}
                 <li>
                   <span className="footer-note">
-                    Anything else: the registration office handles stickers, transfers and holds.
+                    Anything else: {office} handles stickers, transfers and holds.
                   </span>
                 </li>
               </ul>
@@ -280,7 +323,7 @@ export default function Landing() {
           </div>
 
           <div className="footer-base">
-            <p>Computer Track, campus gate computer register.</p>
+            <p>{systemName}, campus gate computer register.</p>
             <p>Records opened by staff are logged and reviewed.</p>
           </div>
         </div>

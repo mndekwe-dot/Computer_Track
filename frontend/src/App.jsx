@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import { useAuth } from './auth/AuthContext'
 import { RequirePortal } from './auth/RequireAuth'
 import { ErrorBoundary } from './components/ErrorBoundary'
+import { ToastProvider } from './components/Toasts'
 import { IdleWarning } from './components/IdleWarning'
 import { PortalShell } from './components/PortalShell'
 import { PORTALS, homePortalFor } from './portals'
@@ -24,6 +25,11 @@ import Permits from './pages/Permits'
 import Gates from './pages/Gates'
 import Staff from './pages/Staff'
 import Settings from './pages/Settings'
+import NotFound from './pages/NotFound'
+import Attempts from './pages/Attempts'
+import EquipmentTypes from './pages/EquipmentTypes'
+import Messages from './pages/Messages'
+import Rules from './pages/Rules'
 
 /*
  * The dashboard is the only screen that uses Recharts, and it is admin-only.
@@ -62,13 +68,6 @@ function Root() {
   return <Landing />
 }
 
-/** Anything unrecognised: back to the landing page rather than a dead end. */
-function NotFound() {
-  const { user, isAuthenticated, loading } = useAuth()
-  if (loading) return <div className="page-loading">Checking your session…</div>
-  return <Navigate to={isAuthenticated ? homePortalFor(user).home : '/'} replace />
-}
-
 function portalRoutes(portal, children) {
   return (
     <>
@@ -91,6 +90,7 @@ function portalRoutes(portal, children) {
 export default function App() {
   return (
     <ErrorBoundary>
+      <ToastProvider>
       <IdleWarning />
       <Routes>
         <Route path="/" element={<Root />} />
@@ -125,6 +125,10 @@ export default function App() {
                 already allowed this (CanManageRecords covers registrars);
                 only the navigation was withholding it. */}
             <Route path="gates" element={<Gates />} />
+            <Route path="attempts" element={<Attempts />} />
+            <Route path="equipment-types" element={<EquipmentTypes />} />
+            <Route path="messages" element={<Messages />} />
+            <Route path="rules" element={<Rules />} />
             <Route path="account" element={<Settings />} />
           </>,
         )}
@@ -143,6 +147,10 @@ export default function App() {
             <Route path="flags" element={<Flags />} />
             <Route path="permits" element={<Permits />} />
             <Route path="gates" element={<Gates />} />
+            <Route path="attempts" element={<Attempts />} />
+            <Route path="equipment-types" element={<EquipmentTypes />} />
+            <Route path="messages" element={<Messages />} />
+            <Route path="rules" element={<Rules />} />
             <Route path="staff" element={<Staff />} />
             <Route path="audit" element={<AuditLog />} />
             <Route path="account" element={<Settings />} />
@@ -151,6 +159,7 @@ export default function App() {
 
         <Route path="*" element={<NotFound />} />
       </Routes>
+      </ToastProvider>
     </ErrorBoundary>
   )
 }
