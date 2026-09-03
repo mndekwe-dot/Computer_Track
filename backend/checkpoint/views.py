@@ -12,6 +12,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from accounts import audit
+from config.exports import csv_safe_row
 from accounts.throttles import LookupBurstThrottle, LookupDailyThrottle
 from campus.models import Gate
 from students.serializers import StudentSerializer
@@ -45,6 +46,12 @@ class GateLookupView(APIView):
 
     def get(self, request):
         query = request.query_params.get("q", "")
+        # The console's Entering/Leaving toggle. It changes the answer for
+        # university property, which may come back in freely but needs a pass
+        # to go out, so the lookup has to know which way it is travelling.
+        direction = (
+            Direction.IN if request.query_params.get("direction") == Direction.IN else Direction.OUT
+        )
         resolved_as, student, devices, matched, method = resolve_query(query)
 
         warnings = []
@@ -64,7 +71,9 @@ class GateLookupView(APIView):
             "resolved_as": resolved_as,
             "method": method,
             "student": StudentSerializer(student).data if student else None,
-            "devices": GateLookupDeviceSerializer(devices, many=True).data,
+            "devices": GateLookupDeviceSerializer(
+                devices, many=True, context={"direction": direction}
+            ).data,
             "matched_device_id": matched.id if matched else None,
             "warnings": warnings,
             "message": "",
@@ -183,8 +192,11 @@ class ScanEventViewSet(viewsets.ModelViewSet):
             ]
         )
         for scan in queryset:
+            # Every cell goes through csv_safe_row: a value beginning with `=`
+            # is a formula to a spreadsheet, and much of what follows was typed
+            # by a student on the public form or a guard at a gate.
             writer.writerow(
-                [
+                csv_safe_row([
                     timezone.localtime(scan.happened_at).strftime("%Y-%m-%d %H:%M:%S"),
                     scan.gate.name if scan.gate else "",
                     (scan.guard.get_full_name() or scan.guard.username) if scan.guard else "",
@@ -198,7 +210,7 @@ class ScanEventViewSet(viewsets.ModelViewSet):
                     scan.bearer_name,
                     scan.override_reason,
                     scan.notes,
-                ]
+                ])
             )
         return response
 

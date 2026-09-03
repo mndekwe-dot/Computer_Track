@@ -177,7 +177,10 @@ REST_FRAMEWORK = {
         # The student form is the only endpoint with no login in front of it,
         # so it is throttled hard: enough for a genuine student filling in a
         # form and correcting a typo, far too little to grind reg numbers.
-        "public-form": "12/hour",
+        # Configurable only so an end-to-end suite can run against a real
+        # server; the default is the number that matters and should not be
+        # raised on anything a student can reach.
+        "public-form": env("PUBLIC_FORM_RATE", "12/hour"),
         # Per-account ceilings on the endpoints that can read the whole
         # register. See accounts/throttles.py for why there are two windows.
         "lookup-burst": env("LOOKUP_BURST_RATE", "120/min"),
