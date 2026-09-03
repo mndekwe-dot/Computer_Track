@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import {
-  IDLE_MINUTES,
+  idleMinutes,
   REASONS,
-  REASON_TEXT,
+  reasonText,
   clearActivity,
   isExpired,
   lastActivity,
@@ -27,18 +27,18 @@ describe('session lifetime', () => {
   it('counts down from the last activity', () => {
     markActivity(Date.now())
     const left = secondsRemaining()
-    expect(left).toBeGreaterThan(IDLE_MINUTES * 60 - 5)
-    expect(left).toBeLessThanOrEqual(IDLE_MINUTES * 60)
+    expect(left).toBeGreaterThan(idleMinutes() * 60 - 5)
+    expect(left).toBeLessThanOrEqual(idleMinutes() * 60)
   })
 
   it('expires once the idle period has passed', () => {
-    markActivity(Date.now() - (IDLE_MINUTES + 1) * 60 * 1000)
+    markActivity(Date.now() - (idleMinutes() + 1) * 60 * 1000)
     expect(isExpired()).toBe(true)
     expect(secondsRemaining()).toBeLessThan(0)
   })
 
   it('is still live just inside the window', () => {
-    markActivity(Date.now() - (IDLE_MINUTES - 1) * 60 * 1000)
+    markActivity(Date.now() - (idleMinutes() - 1) * 60 * 1000)
     expect(isExpired()).toBe(false)
   })
 
@@ -53,7 +53,7 @@ describe('session lifetime', () => {
   })
 
   it('activity pushes the deadline back', () => {
-    markActivity(Date.now() - (IDLE_MINUTES - 1) * 60 * 1000)
+    markActivity(Date.now() - (idleMinutes() - 1) * 60 * 1000)
     const before = secondsRemaining()
     markActivity(Date.now())
     expect(secondsRemaining()).toBeGreaterThan(before)
@@ -79,14 +79,14 @@ describe('session lifetime', () => {
   })
 
   it('has readable text for every reason a user would see', () => {
-    expect(REASON_TEXT[REASONS.IDLE]).toContain(String(IDLE_MINUTES))
-    expect(REASON_TEXT[REASONS.EXPIRED]).toBeTruthy()
+    expect(reasonText(REASONS.IDLE)).toContain(String(idleMinutes()))
+    expect(reasonText(REASONS.EXPIRED)).toBeTruthy()
     // A deliberate sign-out needs no explanation.
-    expect(REASON_TEXT[REASONS.MANUAL]).toBeUndefined()
+    expect(reasonText(REASONS.MANUAL)).toBe('')
   })
 
   it('never leaves an em dash in a message shown to a user', () => {
-    Object.values(REASON_TEXT).forEach((text) => {
+    [reasonText(REASONS.IDLE), reasonText(REASONS.EXPIRED)].forEach((text) => {
       expect(text).not.toMatch(/[—–]/)
     })
   })

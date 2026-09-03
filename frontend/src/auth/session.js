@@ -19,8 +19,31 @@ const minutes = (value, fallback) => {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback
 }
 
-export const IDLE_MINUTES = minutes(import.meta.env.VITE_IDLE_MINUTES, 30)
-export const WARN_SECONDS = 60
+/**
+ * How long a session may sit idle, and how much warning it gives first.
+ *
+ * These were module constants read from the build environment, which meant
+ * changing the timeout on a terminal facing an open queue required a rebuild
+ * and a redeploy. They are policy, not deployment: the registration office
+ * sets them, and `configureSession` applies what the server sends.
+ *
+ * The build-time value stays as the starting point, so the console behaves
+ * sensibly for the moment between first paint and the settings arriving.
+ */
+let config = {
+  idleMinutes: minutes(import.meta.env.VITE_IDLE_MINUTES, 30),
+  warnSeconds: minutes(import.meta.env.VITE_IDLE_WARN_SECONDS, 60),
+}
+
+export function configureSession(next = {}) {
+  config = {
+    idleMinutes: minutes(next.idleMinutes, config.idleMinutes),
+    warnSeconds: minutes(next.warnSeconds, config.warnSeconds),
+  }
+}
+
+export const idleMinutes = () => config.idleMinutes
+export const warnSeconds = () => config.warnSeconds
 
 export const ACTIVITY_EVENTS = [
   'mousedown',
@@ -46,8 +69,8 @@ export function lastActivity() {
 /** Seconds until the session ends. Negative once it already has. */
 export function secondsRemaining(now = Date.now()) {
   const last = lastActivity()
-  if (last === null) return IDLE_MINUTES * 60
-  return Math.round((last + IDLE_MINUTES * 60 * 1000 - now) / 1000)
+  if (last === null) return idleMinutes() * 60
+  return Math.round((last + idleMinutes() * 60 * 1000 - now) / 1000)
 }
 
 export function isExpired(now = Date.now()) {
@@ -79,7 +102,16 @@ export const REASONS = {
   MANUAL: 'manual',
 }
 
-export const REASON_TEXT = {
-  [REASONS.IDLE]: `You were signed out after ${IDLE_MINUTES} minutes without activity.`,
-  [REASONS.EXPIRED]: 'Your session expired. Please sign in again.',
+/**
+ * A function rather than a table, because the idle timeout is no longer known
+ * at module load. Built as a table, the message quoted whatever the build
+ * happened to be configured with, however the university had since set it.
+ */
+export function reasonText(reason) {
+  if (reason === REASONS.IDLE) {
+    const count = idleMinutes()
+    return `You were signed out after ${count} ${count === 1 ? 'minute' : 'minutes'} without activity.`
+  }
+  if (reason === REASONS.EXPIRED) return 'Your session expired. Please sign in again.'
+  return ''
 }
