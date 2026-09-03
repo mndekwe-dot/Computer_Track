@@ -1,6 +1,12 @@
 from django.contrib import admin
 
-from .models import Device, DeviceFlag, OwnershipTransfer, TemporaryPermit
+from .models import (
+    Device,
+    DeviceFlag,
+    OwnershipTransfer,
+    RegistrationAttempt,
+    TemporaryPermit,
+)
 
 
 class DeviceFlagInline(admin.TabularInline):
@@ -38,3 +44,19 @@ class TemporaryPermitAdmin(admin.ModelAdmin):
 class OwnershipTransferAdmin(admin.ModelAdmin):
     list_display = ("device", "from_student", "to_student", "created_at")
     search_fields = ("device__serial_number",)
+
+
+@admin.register(RegistrationAttempt)
+class RegistrationAttemptAdmin(admin.ModelAdmin):
+    """Read-only: this log is evidence, and evidence that can be edited is not."""
+
+    list_display = ("created_at", "reg_number", "serial_number", "outcome", "reviewed_at")
+    list_filter = ("outcome",)
+    search_fields = ("reg_number", "serial_number", "brand", "detail")
+    readonly_fields = [field.name for field in RegistrationAttempt._meta.fields]
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False

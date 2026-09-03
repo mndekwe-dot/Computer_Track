@@ -4,19 +4,26 @@ import uuid
 from django.db import models
 from django.utils import timezone
 
+from campus import equipment
+from campus.rules import rule, text as rule_text
+
 
 def normalise_serial(value):
     """Serials get read off tiny stickers - ignore spacing and case."""
     return re.sub(r"[\s\-]", "", (value or "")).upper()
 
 
-class DeviceType(models.TextChoices):
-    LAPTOP = "LAPTOP", "Laptop"
-    TABLET = "TABLET", "Tablet"
-    DESKTOP = "DESKTOP", "Desktop / tower"
-    MONITOR = "MONITOR", "Monitor"
-    PROJECTOR = "PROJECTOR", "Projector"
-    OTHER = "OTHER", "Other equipment"
+# The codes a fresh database is seeded with, kept as names so the rest of the
+# code can refer to LAPTOP without a string literal. This is *not* the list of
+# valid types any more: that is a table the registration office owns, in
+# campus.EquipmentType. Nothing here validates anything.
+class DeviceType:
+    LAPTOP = "LAPTOP"
+    TABLET = "TABLET"
+    DESKTOP = "DESKTOP"
+    MONITOR = "MONITOR"
+    PROJECTOR = "PROJECTOR"
+    OTHER = "OTHER"
 
 
 class Ownership(models.TextChoices):
@@ -53,9 +60,9 @@ class Device(models.Model):
         blank=True,
         help_text="University sticker code applied at registration.",
     )
-    device_type = models.CharField(
-        max_length=20, choices=DeviceType.choices, default=DeviceType.LAPTOP
-    )
+    # No `choices`: the valid list is campus.EquipmentType, which a registrar
+    # edits. Validated in the serializers against the active rows there.
+    device_type = models.CharField(max_length=30, default=DeviceType.LAPTOP, db_index=True)
     brand = models.CharField(max_length=60)
     model_name = models.CharField(max_length=80, blank=True)
     colour = models.CharField(max_length=40, blank=True)
@@ -87,6 +94,16 @@ class Device(models.Model):
         related_name="equipment",
     )
     custodian_name = models.CharField(max_length=120, blank=True)
+    # Where and when it was bought, when the registration office asks for it
+    # (registration.require_ownership_proof). Not proof of anything by itself:
+    # its value is that somebody registering a computer they picked up an hour
+    # ago has to invent an answer, and the answer is on the record when the
+    # real owner reports it missing.
+    purchase_details = models.CharField(
+        max_length=200,
+        blank=True,
+        help_text="Where and roughly when this was bought, as the owner describes it.",
+    )
     photo = models.ImageField(upload_to="devices/", null=True, blank=True)
     status = models.CharField(
         max_length=20, choices=DeviceStatus.choices, default=DeviceStatus.ACTIVE
@@ -119,34 +136,72 @@ class Device(models.Model):
         super().save(*args, **kwargs)
 
     @property
+    def device_type_label(self):
+        return equipment.label_for(self.device_type)
+
+    @property
     def label(self):
         parts = [self.brand, self.model_name]
-        return " ".join(p for p in parts if p) or self.get_device_type_display()
+        return " ".join(p for p in parts if p) or self.device_type_label
+
+    def _prefetched(self, name):
+        """The prefetched rows for a relation, or None if it was not prefetched.
+
+        This is the difference between one query and one query per device.
+        `self.flags.filter(is_active=True)` reads correctly and looks harmless,
+        but calling `.filter()` on a related manager always goes back to the
+        database - it cannot use `prefetch_related`, which caches the result of
+        `.all()` and nothing else. A device list rendering blocking reasons for
+        fifty rows therefore issued fifty extra queries, and the gate console
+        does exactly that on every lookup.
+        """
+        return getattr(self, "_prefetched_objects_cache", {}).get(name)
 
     @property
     def active_flags(self):
-        return self.flags.filter(is_active=True)
+        cached = self._prefetched("flags")
+        if cached is not None:
+            return [flag for flag in cached if flag.is_active]
+        return list(self.flags.filter(is_active=True))
+
+    def valid_permits(self):
+        """Permits in force right now, as a list.
+
+        Was a queryset. Callers only ever iterated it or asked whether it was
+        empty, and returning a list lets the prefetched rows be reused.
+        """
+        cached = self._prefetched("permits")
+        if cached is not None:
+            return [permit for permit in cached if permit.is_valid_now]
+        now = timezone.now()
+        return list(self.permits.filter(is_revoked=False, valid_from__lte=now, valid_to__gte=now))
 
     def blocking_reasons(self):
         """Everything that should stop this device leaving, in plain language.
 
         Returned as a list so the console can show every problem at once
-        instead of the guard discovering them one at a time.
+        instead of the guard discovering them one at a time. Both the wording
+        and whether each check applies at all are rules the registration
+        office owns; see campus/rules.py.
         """
         reasons = []
         if self.status == DeviceStatus.STOLEN:
-            reasons.append("This device is reported STOLEN. Hold it and call security control.")
+            reasons.append(rule_text("gate.message_stolen"))
         elif self.status == DeviceStatus.LOST:
-            reasons.append("This device is reported LOST by its owner.")
-        elif self.status == DeviceStatus.PENDING:
-            reasons.append("Registration is still pending approval by the registration office.")
+            reasons.append(rule_text("gate.message_lost"))
+        elif self.status == DeviceStatus.PENDING and rule("gate.block_pending"):
+            reasons.append(rule_text("gate.message_pending"))
         elif self.status == DeviceStatus.RETIRED:
-            reasons.append("This device was retired from the register.")
+            reasons.append(rule_text("gate.message_retired"))
         for flag in self.active_flags:
             reasons.append(f"{flag.get_reason_display()}: {flag.details or 'no details given'}")
-        if self.owner and not self.owner.is_clear_to_pass:
+        if (
+            self.owner
+            and not self.owner.is_clear_to_pass
+            and rule("gate.block_suspended_owner")
+        ):
             reasons.append(
-                f"Owner status is {self.owner.get_status_display()}, not active."
+                rule_text("gate.message_owner_inactive", status=self.owner.get_status_display())
             )
         return reasons
 
@@ -160,20 +215,15 @@ class Device(models.Model):
         """
         if self.ownership != Ownership.UNIVERSITY:
             return []
-        if self.valid_permits().exists():
+        if not rule("gate.university_property_needs_pass"):
             return []
-        return [
-            "University property. It needs a gate pass before it can leave campus. "
-            "Issue one under Permits, or record an override with a reason."
-        ]
+        if self.valid_permits():
+            return []
+        return [rule_text("gate.message_needs_pass")]
 
     @property
     def is_blocked(self):
         return bool(self.blocking_reasons())
-
-    def valid_permits(self):
-        now = timezone.now()
-        return self.permits.filter(is_revoked=False, valid_from__lte=now, valid_to__gte=now)
 
 
 class FlagReason(models.TextChoices):
@@ -279,3 +329,88 @@ class TemporaryPermit(models.Model):
     def is_valid_now(self):
         now = timezone.now()
         return not self.is_revoked and self.valid_from <= now <= self.valid_to
+
+
+class AttemptOutcome(models.TextChoices):
+    """Why a public registration attempt is on the record."""
+
+    DUPLICATE_SERIAL = "DUPLICATE_SERIAL", "Serial already on the register"
+    MATCHED_MISSING = "MATCHED_MISSING", "Serial matches a computer reported missing"
+    LIMIT_REACHED = "LIMIT_REACHED", "Student is at their registration limit"
+    TOO_MANY_ATTEMPTS = "TOO_MANY_ATTEMPTS", "Repeated submissions in a short window"
+    VERIFY_FAILED = "VERIFY_FAILED", "Identity check failed"
+    ACCEPTED = "ACCEPTED", "Accepted for approval"
+
+
+class RegistrationAttempt(models.Model):
+    """Every submission to the public form, including the refused ones.
+
+    The refusals are the point. A student registering their own laptop
+    succeeds once and is never seen here again. What this table catches is the
+    shape of somebody working through a bag: a run of different serials from
+    one registration number, or one serial tried against several.
+
+    Before this existed, a refused submission returned an error message and
+    left no trace at all - so the single most informative event the public
+    form can produce was the one thing it did not record.
+
+    It deliberately holds no photograph and no description, only what is
+    needed to see a pattern and find the submission it refers to.
+    """
+
+    reg_number = models.CharField(max_length=40, blank=True, help_text="Exactly as submitted.")
+    student = models.ForeignKey(
+        "students.Student",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="registration_attempts",
+    )
+    serial_number = models.CharField(max_length=80, blank=True)
+    serial_key = models.CharField(max_length=80, blank=True, db_index=True)
+    brand = models.CharField(max_length=60, blank=True)
+    outcome = models.CharField(max_length=30, choices=AttemptOutcome.choices, db_index=True)
+    detail = models.CharField(max_length=300, blank=True)
+    # The device this collided with, when it collided with one. Kept so an
+    # officer reviewing the attempt can open the record without searching.
+    existing_device = models.ForeignKey(
+        Device,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="registration_collisions",
+    )
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    reviewed_by = models.ForeignKey(
+        "accounts.User",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="attempts_reviewed",
+    )
+    review_note = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta:
+        ordering = ("-created_at",)
+        indexes = [
+            models.Index(fields=["outcome", "-created_at"], name="attempt_outcome_idx"),
+            models.Index(fields=["reg_number", "-created_at"], name="attempt_reg_idx"),
+        ]
+
+    def __str__(self):
+        return f"{self.reg_number} {self.serial_number} {self.outcome}"
+
+    @property
+    def needs_review(self):
+        """Worth an officer's time, as distinct from merely being recorded.
+
+        An accepted registration and a mistyped serial are noise. A serial
+        that matches a computer somebody has reported stolen is not.
+        """
+        return self.outcome in {
+            AttemptOutcome.MATCHED_MISSING,
+            AttemptOutcome.TOO_MANY_ATTEMPTS,
+            AttemptOutcome.LIMIT_REACHED,
+        }

@@ -11,7 +11,7 @@ from rest_framework.throttling import SimpleRateThrottle
 
 from devices.models import Device, DeviceStatus
 
-from .factories import api_client, make_device, make_student, make_user
+from .factories import api_client, make_device, make_student, make_user, photo_bytes, set_rule
 
 REGISTER = "/api/public/register-computer/"
 STATUS = "/api/public/my-computers/"
@@ -27,6 +27,11 @@ def throttle_rate(rate):
 class PublicRegistrationTests(TestCase):
     def setUp(self):
         cache.clear()
+        # These tests are about what the form will and will not accept, not
+        # about the photograph. The photo requirement has its own tests in
+        # RegistrationDefenceTests, where it is the subject rather than a
+        # prerequisite of every payload.
+        set_rule("registration.require_photo", False)
         self.client = api_client()  # deliberately signed out
         self.student = make_student(
             "218001234",
