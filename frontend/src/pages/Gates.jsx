@@ -3,7 +3,8 @@ import { Pencil, Plus } from 'lucide-react'
 import { campus } from '../api/endpoints'
 import { DataState } from '../components/DataState'
 import { PageHeader } from '../components/PortalShell'
-import { Field, Modal, StatusPill, Toast } from '../components/ui'
+import { Field, Modal, StatusPill } from '../components/ui'
+import { useToast } from '../components/Toasts'
 
 const GATE_COLUMNS = ['Gate', 'Code', 'Location', 'Scans today', 'State', ' ']
 
@@ -12,7 +13,7 @@ export default function Gates() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [editing, setEditing] = useState(null)
-  const [toast, setToast] = useState(null)
+  const toast = useToast()
 
   const load = useCallback(() => {
     setLoading(true)
@@ -98,13 +99,12 @@ export default function Gates() {
           onClose={() => setEditing(null)}
           onDone={(message) => {
             setEditing(null)
-            setToast({ tone: 'success', message })
+            toast.show({ tone: 'success', message })
             load()
           }}
         />
       )}
 
-      <Toast toast={toast} onDismiss={() => setToast(null)} />
     </>
   )
 }

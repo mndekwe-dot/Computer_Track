@@ -4,7 +4,8 @@ import { useSearchParams } from 'react-router-dom'
 import { campus, checkpoint } from '../api/endpoints'
 import { DataState } from '../components/DataState'
 import { PageHeader } from '../components/PortalShell'
-import { Pagination, StatusPill, Toast, formatDateTime } from '../components/ui'
+import { Pagination, StatusPill, formatDateTime } from '../components/ui'
+import { useToast } from '../components/Toasts'
 import { useDebouncedValue } from '../hooks/useLiveSearch'
 
 const VERDICTS = ['ALLOWED', 'DENIED', 'OVERRIDE', 'UNREGISTERED']
@@ -47,7 +48,7 @@ export default function ScanLog() {
   const [page, setPage] = useState(1)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [toast, setToast] = useState(null)
+  const toast = useToast()
 
   const search = useDebouncedValue(filters.search)
 
@@ -91,7 +92,7 @@ export default function ScanLog() {
       link.click()
       URL.revokeObjectURL(url)
     } catch {
-      setToast({
+      toast.show({
         tone: 'error',
         message: 'Could not build the export. Try a narrower date range.',
       })
@@ -232,7 +233,6 @@ export default function ScanLog() {
         </DataState>
       </div>
 
-      <Toast toast={toast} onDismiss={() => setToast(null)} />
     </>
   )
 }

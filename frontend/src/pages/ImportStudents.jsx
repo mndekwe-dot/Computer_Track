@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { CircleCheck, FileUp, TriangleAlert, Upload } from 'lucide-react'
 import { students } from '../api/endpoints'
 import { PageHeader } from '../components/PortalShell'
-import { ErrorNote, Toast } from '../components/ui'
+import { ErrorNote } from '../components/ui'
+import { useToast } from '../components/Toasts'
 
 const SAMPLE = `reg_number,first_name,last_name,email,phone,department,programme,year_of_study
 218001234,Aline,Uwase,aline@student.university.edu,+250788000001,CS,BSc Computer Science,2
@@ -15,7 +16,7 @@ export default function ImportStudents() {
   const [error, setError] = useState(null)
   const [busy, setBusy] = useState(false)
   const [updateExisting, setUpdateExisting] = useState(true)
-  const [toast, setToast] = useState(null)
+  const toast = useToast()
 
   const choose = (event) => {
     setFile(event.target.files?.[0] || null)
@@ -45,7 +46,7 @@ export default function ImportStudents() {
       const outcome = await students.importCommit(file, updateExisting)
       setResult(outcome)
       setPreview(null)
-      setToast({ tone: 'success', message: outcome.detail })
+      toast.show({ tone: 'success', message: outcome.detail })
     } catch (err) {
       setError(err)
     } finally {
@@ -232,7 +233,6 @@ export default function ImportStudents() {
         )}
       </div>
 
-      <Toast toast={toast} onDismiss={() => setToast(null)} />
     </>
   )
 }

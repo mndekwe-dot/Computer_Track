@@ -4,7 +4,8 @@ import { auth, campus } from '../api/endpoints'
 import { useAuth } from '../auth/AuthContext'
 import { usePortal } from '../auth/PortalContext'
 import { PageHeader } from '../components/PortalShell'
-import { Field, StatusPill, Toast } from '../components/ui'
+import { Field, StatusPill } from '../components/ui'
+import { useToast } from '../components/Toasts'
 
 export default function Settings() {
   const { user, patchUser } = useAuth()
@@ -19,7 +20,7 @@ export default function Settings() {
   })
   const [passwords, setPasswords] = useState({ current_password: '', new_password: '' })
   const [errors, setErrors] = useState({})
-  const [toast, setToast] = useState(null)
+  const toast = useToast()
   const [busy, setBusy] = useState(false)
 
   useEffect(() => {
@@ -36,7 +37,7 @@ export default function Settings() {
         default_gate: profile.default_gate || null,
       })
       patchUser(updated)
-      setToast({ tone: 'success', message: 'Your details were saved.' })
+      toast.show({ tone: 'success', message: 'Your details were saved.' })
     } catch (error) {
       setErrors(error.fieldErrors || { detail: error.readable })
     } finally {
@@ -51,7 +52,7 @@ export default function Settings() {
     try {
       await auth.changePassword(passwords)
       setPasswords({ current_password: '', new_password: '' })
-      setToast({ tone: 'success', message: 'Password changed.' })
+      toast.show({ tone: 'success', message: 'Password changed.' })
     } catch (error) {
       setErrors(error.fieldErrors || { detail: error.readable })
     } finally {
@@ -162,10 +163,9 @@ export default function Settings() {
           </form>
         </div>
 
-        <TwoFactorPanel onToast={setToast} />
+        <TwoFactorPanel onToast={toast.show} />
       </div>
 
-      <Toast toast={toast} onDismiss={() => setToast(null)} />
     </>
   )
 }

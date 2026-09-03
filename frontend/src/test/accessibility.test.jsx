@@ -4,9 +4,11 @@
  * something checks it. Each test names the failure it prevents.
  */
 import { act, fireEvent, render, screen } from '@testing-library/react'
+import { useEffect } from 'react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { Field, Modal, Toast } from '../components/ui'
+import { Field, Modal } from '../components/ui'
+import { ToastProvider, useToast } from '../components/Toasts'
 
 afterEach(() => {
   vi.useRealTimers()
@@ -57,30 +59,87 @@ describe('Field', () => {
   })
 })
 
-describe('Toast', () => {
-  it('keeps the live region mounted when there is nothing to say', () => {
-    const { container } = render(<Toast toast={null} onDismiss={() => {}} />)
+describe('Toasts', () => {
+  function Harness({ onReady }) {
+    const toast = useToast()
+    // Block body, not a concise one. `useEffect(() => onReady(toast), ...)`
+    // returns whatever onReady returns, and React takes an effect's return
+    // value to be its cleanup function - the same mistake that was crashing
+    // the account screen on unmount.
+    useEffect(() => {
+      onReady(toast)
+    }, [toast, onReady])
+    return null
+  }
+
+  function mount() {
+    let api = null
+    const result = render(
+      <ToastProvider>
+        <Harness onReady={(value) => (api = value)} />
+      </ToastProvider>,
+    )
+    return { ...result, api: () => api }
+  }
+
+  it('keeps both live regions mounted when there is nothing to say', () => {
+    const { container } = mount()
     // A region inserted at the same moment as its text is announced
     // inconsistently, which is why a repeat message often went unread.
     expect(container.querySelector('[role="status"]')).toBeTruthy()
+    // Failures need to interrupt; confirmations need to wait their turn. One
+    // region can only have one politeness setting.
+    expect(container.querySelector('[role="alert"]')).toBeTruthy()
+  })
+
+  it('announces a failure assertively and a confirmation politely', () => {
+    const { container, api } = mount()
+    act(() => {
+      api().success('Saved')
+      api().error('Unable to record the scan')
+    })
+    const polite = container.querySelector('[role="status"]')
+    const assertive = container.querySelector('[role="alert"]')
+    expect(polite.textContent).toContain('Saved')
+    expect(assertive.textContent).toContain('Unable to record the scan')
   })
 
   it('dismisses a routine message on its own', () => {
     vi.useFakeTimers()
-    const onDismiss = vi.fn()
-    render(<Toast toast={{ tone: 'success', message: 'Saved' }} onDismiss={onDismiss} />)
-    act(() => vi.advanceTimersByTime(5000))
-    expect(onDismiss).toHaveBeenCalled()
+    const { container, api } = mount()
+    act(() => api().success('Saved'))
+    expect(container.textContent).toContain('Saved')
+    act(() => vi.advanceTimersByTime(6000))
+    expect(container.textContent).not.toContain('Saved')
   })
 
   it('leaves an error on screen until it is dismissed', () => {
     vi.useFakeTimers()
-    const onDismiss = vi.fn()
-    render(<Toast toast={{ tone: 'error', message: 'Unable to record the scan' }} onDismiss={onDismiss} />)
-    act(() => vi.advanceTimersByTime(60000))
+    const { container, api } = mount()
+    act(() => api().error('Unable to record the scan'))
+    act(() => vi.advanceTimersByTime(120000))
     // A message naming what went wrong is no use if it removes itself before
     // the guard looks up.
-    expect(onDismiss).not.toHaveBeenCalled()
+    expect(container.textContent).toContain('Unable to record the scan')
+  })
+
+  it('stops the clock while the pointer is over a message', () => {
+    vi.useFakeTimers()
+    const { container, api } = mount()
+    act(() => api().success('Saved'))
+    fireEvent.mouseEnter(container.querySelector('.toast'))
+    act(() => vi.advanceTimersByTime(30000))
+    // Reading is the one activity a disappearing message punishes.
+    expect(container.textContent).toContain('Saved')
+  })
+
+  it('gives the dismiss button a label that says what it dismisses', () => {
+    const { api } = mount()
+    act(() => api().error('Unable to record the scan'))
+    // "Dismiss" alone is ambiguous the moment two messages are on screen.
+    expect(
+      screen.getByRole('button', { name: /Dismiss: Unable to record the scan/ }),
+    ).toBeTruthy()
   })
 })
 

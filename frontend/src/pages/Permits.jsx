@@ -6,7 +6,8 @@ import { useAuth } from '../auth/AuthContext'
 import { usePortal } from '../auth/PortalContext'
 import { DataState } from '../components/DataState'
 import { PageHeader } from '../components/PortalShell'
-import { Field, Modal, Pagination, StatusPill, Toast, formatDateTime } from '../components/ui'
+import { Field, Modal, Pagination, StatusPill, formatDateTime } from '../components/ui'
+import { useToast } from '../components/Toasts'
 
 const PERMIT_COLUMNS = ['Carrier', 'Computer', 'Owner', 'Valid from', 'Valid until', 'State', ' ']
 
@@ -25,7 +26,7 @@ export default function Permits() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [creating, setCreating] = useState(false)
-  const [toast, setToast] = useState(null)
+  const toast = useToast()
 
   const load = useCallback(() => {
     setLoading(true)
@@ -42,10 +43,10 @@ export default function Permits() {
   const revoke = async (permit) => {
     try {
       await devices.revokePermit(permit.id)
-      setToast({ tone: 'success', message: `Permit for ${permit.bearer_name} revoked.` })
+      toast.show({ tone: 'success', message: `Permit for ${permit.bearer_name} revoked.` })
       load()
     } catch (err) {
-      setToast({ tone: 'error', message: err.readable })
+      toast.show({ tone: 'error', message: err.readable })
     }
   }
 
@@ -156,13 +157,12 @@ export default function Permits() {
           onClose={() => setCreating(false)}
           onDone={(message) => {
             setCreating(false)
-            setToast({ tone: 'success', message })
+            toast.show({ tone: 'success', message })
             load()
           }}
         />
       )}
 
-      <Toast toast={toast} onDismiss={() => setToast(null)} />
     </>
   )
 }

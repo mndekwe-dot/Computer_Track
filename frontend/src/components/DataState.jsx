@@ -1,4 +1,4 @@
-import { EmptyState, ErrorNote, Refreshing, SkeletonTable } from './ui'
+import { EmptyState, ErrorNote, Refreshing, SkeletonCard, SkeletonTable } from './ui'
 
 /**
  * The one place that decides how a data screen behaves while it loads, fails
@@ -29,7 +29,15 @@ export function DataState({
 
   const hasLoaded = rows !== null && rows !== undefined
   if (loading && !hasLoaded) {
-    return <SkeletonTable columns={columns} rows={skeletonRows} />
+    // Not every screen that loads data is a table. `columns` was effectively
+    // required - omitting it crashed the page into the error boundary rather
+    // than showing a skeleton - which made this shared component a trap for
+    // every screen that is a list of cards or a settings form.
+    return columns?.length ? (
+      <SkeletonTable columns={columns} rows={skeletonRows} />
+    ) : (
+      <SkeletonCard lines={skeletonRows} />
+    )
   }
   if (hasLoaded && rows.length === 0) {
     return (

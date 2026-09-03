@@ -8,7 +8,8 @@ import { usePortal } from '../auth/PortalContext'
 import { DataState } from '../components/DataState'
 import { PhotoInput } from '../components/PhotoInput'
 import { PageHeader } from '../components/PortalShell'
-import { Field, Modal, Pagination, StatusPill, Toast } from '../components/ui'
+import { Field, Modal, Pagination, StatusPill } from '../components/ui'
+import { useToast } from '../components/Toasts'
 import { useDebouncedValue } from '../hooks/useLiveSearch'
 
 const TYPES = ['LAPTOP', 'TABLET', 'DESKTOP', 'MONITOR', 'PROJECTOR', 'OTHER']
@@ -35,7 +36,7 @@ export default function Devices() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [editing, setEditing] = useState(null)
-  const [toast, setToast] = useState(null)
+  const toast = useToast()
 
   const search = useDebouncedValue(filters.search)
 
@@ -197,13 +198,12 @@ export default function Devices() {
           onClose={() => setEditing(null)}
           onSaved={(message) => {
             setEditing(null)
-            setToast({ tone: 'success', message })
+            toast.show({ tone: 'success', message })
             load()
           }}
         />
       )}
 
-      <Toast toast={toast} onDismiss={() => setToast(null)} />
     </>
   )
 }

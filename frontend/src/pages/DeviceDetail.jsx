@@ -5,16 +5,8 @@ import { devices } from '../api/endpoints'
 import { useAuth } from '../auth/AuthContext'
 import { usePortal } from '../auth/PortalContext'
 import { PageHeader } from '../components/PortalShell'
-import {
-  ErrorNote,
-  Field,
-  Modal,
-  SkeletonBar,
-  SkeletonCard,
-  StatusPill,
-  Toast,
-  formatDateTime,
-} from '../components/ui'
+import { ErrorNote, Field, Modal, SkeletonBar, SkeletonCard, StatusPill, formatDateTime } from '../components/ui'
+import { useToast } from '../components/Toasts'
 import { DeviceForm } from './Devices'
 
 export default function DeviceDetail() {
@@ -27,7 +19,7 @@ export default function DeviceDetail() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [dialog, setDialog] = useState(null)
-  const [toast, setToast] = useState(null)
+  const toast = useToast()
 
   const load = useCallback(() => {
     setLoading(true)
@@ -91,7 +83,7 @@ export default function DeviceDetail() {
 
   const done = (message) => {
     setDialog(null)
-    setToast({ tone: 'success', message })
+    toast.show({ tone: 'success', message })
     load()
   }
 
@@ -311,7 +303,6 @@ export default function DeviceDetail() {
         <StolenDialog device={device} onClose={() => setDialog(null)} onDone={done} />
       )}
 
-      <Toast toast={toast} onDismiss={() => setToast(null)} />
     </>
   )
 }
