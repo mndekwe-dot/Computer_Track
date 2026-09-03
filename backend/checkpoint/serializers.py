@@ -88,8 +88,41 @@ class ScanEventCreateSerializer(ScanEventSerializer):
                 }
             )
 
+        # University property needs a gate pass to leave, and only to leave:
+        # the same projector coming back in must not be stopped for want of
+        # one. Enforced here rather than in the console, because the console
+        # is a client and the offline queue lives in localStorage.
+        if (
+            device
+            and verdict == Verdict.ALLOWED
+            and attrs.get("direction") == Direction.OUT
+            and device.exit_restrictions()
+        ):
+            raise serializers.ValidationError(
+                {
+                    "verdict": "This is university property with no valid gate pass. "
+                    "Issue a permit, record DENIED, or use OVERRIDE with a written reason."
+                }
+            )
+
         if device and not attrs.get("student"):
             attrs["student"] = device.owner
+
+        # `claimed_serial` and `claimed_reg_number` stay as the guard typed
+        # them: they are the claim, and a mistyped one is evidence too. But
+        # `device_label` and `student_name` are snapshots of the register at
+        # decision time, so they are taken from the record rather than from
+        # whatever the client sent. Trusting the client for those let a
+        # tampered request write a history that never happened, and put
+        # attacker-chosen text into the administrator's CSV export.
+        if device:
+            # The serial is part of the snapshot on purpose. It has to stay
+            # readable after the device row is gone, and `claimed_serial` only
+            # holds one when the guard happened to search by serial rather
+            # than by registration number.
+            attrs["device_label"] = f"{device.label} · {device.serial_number}"
+        if attrs.get("student"):
+            attrs["student_name"] = attrs["student"].full_name
         return attrs
 
     def create(self, validated_data):
@@ -113,6 +146,11 @@ class GateLookupDeviceSerializer(DeviceGateSerializer):
 
     def get_recommendation(self, obj):
         reasons = obj.blocking_reasons()
+        # `direction` comes from the console's Entering/Leaving toggle. Absent,
+        # assume the equipment is leaving: that is the direction the checks
+        # exist for, and the safer assumption of the two.
+        if self.context.get("direction", Direction.OUT) == Direction.OUT:
+            reasons = reasons + obj.exit_restrictions()
         if reasons:
             return {"action": "HOLD", "reasons": reasons}
         return {"action": "PASS", "reasons": []}
