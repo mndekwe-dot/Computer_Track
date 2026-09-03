@@ -517,7 +517,8 @@ class PublicLookupChoicesView(APIView):
 
     permission_classes = ()
     authentication_classes = ()
-    throttle_scope = "public-form"
+    # A read, not a submission. See the note beside "public-read" in settings.
+    throttle_scope = "public-read"
 
     def get(self, request):
         return Response(

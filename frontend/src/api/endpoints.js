@@ -27,8 +27,30 @@ export const campus = {
   gates: () => api.get('/api/campus/gates/'),
   createGate: (payload) => api.post('/api/campus/gates/', payload),
   updateGate: (id, payload) => api.patch(`/api/campus/gates/${id}/`, payload),
+  closeGate: (id) => api.delete(`/api/campus/gates/${id}/`),
   departments: () => api.get('/api/campus/departments/'),
   createDepartment: (payload) => api.post('/api/campus/departments/', payload),
+
+  equipmentTypes: () => api.get('/api/campus/equipment-types/'),
+  createEquipmentType: (payload) => api.post('/api/campus/equipment-types/', payload),
+  updateEquipmentType: (id, payload) => api.patch(`/api/campus/equipment-types/${id}/`, payload),
+  retireEquipmentType: (id) => api.delete(`/api/campus/equipment-types/${id}/`),
+
+  // Policy the registration office sets. `saveRules` takes a partial map of
+  // key to value; the server validates all of it before writing any of it.
+  rules: () => api.get('/api/campus/rules/'),
+  saveRules: (values) => api.post('/api/campus/rules/', { values }),
+  resetRule: (key) => api.delete('/api/campus/rules/', { key }),
+}
+
+export const notifications = {
+  templates: () => api.get('/api/notifications/templates/'),
+  updateTemplate: (id, payload) => api.patch(`/api/notifications/templates/${id}/`, payload),
+  previewTemplate: (id, payload) => api.post(`/api/notifications/templates/${id}/preview/`, payload),
+  resetTemplate: (id) => api.post(`/api/notifications/templates/${id}/reset/`, {}),
+  outbox: (params) => api.get('/api/notifications/outbox/', params),
+  outboxSummary: () => api.get('/api/notifications/outbox/summary/'),
+  retry: (id) => api.post(`/api/notifications/outbox/${id}/retry/`, {}),
 }
 
 export const students = {
@@ -67,6 +89,11 @@ export const devices = {
   createFlag: (payload) => api.post('/api/devices/flags/', payload),
   resolveFlag: (id, note) =>
     api.post(`/api/devices/flags/${id}/resolve/`, { resolution_note: note }),
+
+  registrationAttempts: (params) => api.get('/api/devices/registration-attempts/', params),
+  attemptsSummary: () => api.get('/api/devices/registration-attempts/summary/'),
+  reviewAttempt: (id, note) =>
+    api.post(`/api/devices/registration-attempts/${id}/review/`, { note }),
 
   permits: (params) => api.get('/api/devices/permits/', params),
   createPermit: (payload) => api.post('/api/devices/permits/', payload),
