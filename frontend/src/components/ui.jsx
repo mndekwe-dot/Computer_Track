@@ -30,7 +30,7 @@ export function SkeletonBar({ width = '100%', height = 12 }) {
   return <span className="skeleton-bar" style={{ width, height }} aria-hidden="true" />
 }
 
-export function SkeletonTable({ columns, rows = 6 }) {
+export function SkeletonTable({ columns = [], rows = 6 }) {
   return (
     <div className="table-wrap" aria-busy="true" aria-label="Loading records">
       <table>
@@ -251,41 +251,6 @@ export function Modal({ title, onClose, children, wide = false }) {
           {children}
         </div>
       </div>
-    </div>
-  )
-}
-
-/**
- * Two things here are deliberate.
- *
- * The live region is always in the DOM, even with nothing to say. A region
- * inserted at the same moment as its text is announced inconsistently, which
- * is why a second identical toast often went unread; a stable empty region
- * whose text changes is announced reliably.
- *
- * Errors do not auto-dismiss. A message that names what went wrong is no use
- * if it removes itself before it has been read, and a guard mid-decision is
- * exactly the person who will look up too late.
- */
-export function Toast({ toast, onDismiss }) {
-  const isError = toast?.tone === 'error'
-
-  useEffect(() => {
-    if (!toast || isError) return undefined
-    const timer = setTimeout(onDismiss, 4000)
-    return () => clearTimeout(timer)
-  }, [toast, isError, onDismiss])
-
-  return (
-    <div className="toast-region" role="status" aria-live="polite">
-      {toast && (
-        <div className={`toast toast-${toast.tone || 'info'}`}>
-          {toast.message}
-          <button type="button" className="toast-close" onClick={onDismiss} aria-label="Dismiss">
-            <X size={14} aria-hidden="true" />
-          </button>
-        </div>
-      )}
     </div>
   )
 }

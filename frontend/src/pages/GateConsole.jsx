@@ -6,6 +6,7 @@ import {
   Building2,
   Check,
   CircleCheck,
+  CloudOff,
   CircleHelp,
   GraduationCap,
   LaptopMinimal,
@@ -24,19 +25,11 @@ import { auth, campus, checkpoint } from '../api/endpoints'
 import { useAuth } from '../auth/AuthContext'
 import { PageHeader } from '../components/PortalShell'
 import { QrScanner } from '../components/QrScanner'
-import {
-  EmptyState,
-  ErrorNote,
-  Field,
-  Modal,
-  SkeletonCard,
-  SkeletonStudentCard,
-  StatusPill,
-  Toast,
-  formatTime,
-} from '../components/ui'
+import { EmptyState, ErrorNote, Field, Modal, SkeletonCard, SkeletonStudentCard, StatusPill, formatTime } from '../components/ui'
+import { useToast } from '../components/Toasts'
 import { useLiveSearch } from '../hooks/useLiveSearch'
 import { useOfflineQueue } from '../hooks/useOfflineQueue'
+import { recall, remember } from '../hooks/useLookupCache'
 
 export default function GateConsole() {
   const { user, patchUser } = useAuth()
@@ -53,7 +46,7 @@ export default function GateConsole() {
   const [error, setError] = useState(null)
 
   const [recent, setRecent] = useState([])
-  const [toast, setToast] = useState(null)
+  const toast = useToast()
   const [scanning, setScanning] = useState(false)
   const [dialog, setDialog] = useState(null)
 
@@ -100,11 +93,27 @@ export default function GateConsole() {
       setSearching(true)
       setError(null)
       try {
-        setResult(await checkpoint.lookup(value, direction))
+        const payload = await checkpoint.lookup(value, direction)
+        setResult(payload)
+        // Kept so the same person coming back through the gate can still be
+        // checked if the network has gone. Only what has been looked up, and
+        // only for a few minutes - see hooks/useLookupCache.js for why this
+        // is deliberately not a copy of the register.
+        remember(value, direction, payload)
         lookedUpQuery.current = value
       } catch (err) {
-        setError(err)
-        setResult(null)
+        // A network failure is the one case worth falling back for. A 404 or
+        // a 403 is an answer, and showing a stale one instead would be worse
+        // than showing the error.
+        const cached = err.isNetwork ? recall(value, direction) : null
+        if (cached) {
+          setResult(cached)
+          setError(null)
+          lookedUpQuery.current = value
+        } else {
+          setError(err)
+          setResult(null)
+        }
       } finally {
         setSearching(false)
       }
@@ -179,7 +188,7 @@ export default function GateConsole() {
 
   const record = async ({ device, verdict, overrideReason = '', notes = '', permit = null }) => {
     if (!gateId) {
-      setToast({ tone: 'error', message: 'Choose which gate you are working at first.' })
+      toast.show({ tone: 'error', message: 'Choose which gate you are working at first.' })
       return
     }
     try {
@@ -213,7 +222,7 @@ export default function GateConsole() {
         ].slice(0, 12),
       )
 
-      setToast({
+      toast.show({
         tone: verdict === 'ALLOWED' ? 'success' : 'warn',
         message: wasQueued
           ? `Saved on this device - ${label} will sync when the network returns.`
@@ -222,7 +231,7 @@ export default function GateConsole() {
       setDialog(null)
       clearAll()
     } catch (err) {
-      setToast({ tone: 'error', message: err.readable || 'Could not record that decision.' })
+      toast.show({ tone: 'error', message: err.readable || 'Could not record that decision.' })
     }
   }
 
@@ -433,6 +442,23 @@ export default function GateConsole() {
               />
             )}
 
+            {result?.from_cache && (
+              /*
+                A guard has to know they are looking at a copy. A computer
+                reported stolen in the last few minutes would still read as
+                clear here, and that is the one situation where the console
+                being confidently wrong matters most.
+              */
+              <div className="note note-warn" role="status">
+                <CloudOff size={16} aria-hidden="true" />
+                <span>
+                  Offline. This is what the register said at{' '}
+                  <strong>{formatTime(result.cached_at)}</strong>, not what it says now. A hold
+                  placed since then will not show. Check again once the network returns.
+                </span>
+              </div>
+            )}
+
             {result && result.resolved_as !== 'NOT_FOUND' && (
               <>
                 {result.student && (
@@ -511,7 +537,6 @@ export default function GateConsole() {
         />
       )}
 
-      <Toast toast={toast} onDismiss={() => setToast(null)} />
     </>
   )
 }

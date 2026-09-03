@@ -6,7 +6,8 @@ import { useAuth } from '../auth/AuthContext'
 import { usePortal } from '../auth/PortalContext'
 import { DataState } from '../components/DataState'
 import { PageHeader } from '../components/PortalShell'
-import { Field, Modal, Pagination, StatusPill, Toast } from '../components/ui'
+import { Field, Modal, Pagination, StatusPill } from '../components/ui'
+import { useToast } from '../components/Toasts'
 import { useDebouncedValue } from '../hooks/useLiveSearch'
 
 const STATUSES = ['ACTIVE', 'SUSPENDED', 'GRADUATED', 'WITHDRAWN']
@@ -26,7 +27,7 @@ export default function Students() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [editing, setEditing] = useState(null)
-  const [toast, setToast] = useState(null)
+  const toast = useToast()
 
   // Search is debounced so typing a reg number is one request, not nine.
   const search = useDebouncedValue(filters.search)
@@ -168,13 +169,12 @@ export default function Students() {
           onClose={() => setEditing(null)}
           onSaved={(message) => {
             setEditing(null)
-            setToast({ tone: 'success', message })
+            toast.show({ tone: 'success', message })
             load()
           }}
         />
       )}
 
-      <Toast toast={toast} onDismiss={() => setToast(null)} />
     </>
   )
 }

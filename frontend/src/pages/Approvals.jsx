@@ -6,7 +6,8 @@ import { useAuth } from '../auth/AuthContext'
 import { usePortal } from '../auth/PortalContext'
 import { DataState } from '../components/DataState'
 import { PageHeader } from '../components/PortalShell'
-import { Field, Modal, Pagination, Toast, formatDateTime } from '../components/ui'
+import { Field, Modal, Pagination, formatDateTime } from '../components/ui'
+import { useToast } from '../components/Toasts'
 
 const COLUMNS = ['Submitted', 'Computer', 'Owner', 'Details', ' ']
 
@@ -18,7 +19,7 @@ export default function Approvals() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [dialog, setDialog] = useState(null)
-  const [toast, setToast] = useState(null)
+  const toast = useToast()
 
   const load = useCallback(() => {
     setLoading(true)
@@ -34,7 +35,7 @@ export default function Approvals() {
 
   const done = (message) => {
     setDialog(null)
-    setToast({ tone: 'success', message })
+    toast.show({ tone: 'success', message })
     load()
   }
 
@@ -137,7 +138,6 @@ export default function Approvals() {
         <RejectDialog device={dialog.device} onClose={() => setDialog(null)} onDone={done} />
       )}
 
-      <Toast toast={toast} onDismiss={() => setToast(null)} />
     </>
   )
 }

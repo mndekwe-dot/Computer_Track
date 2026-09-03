@@ -3,7 +3,8 @@ import { KeyRound, Pencil, Plus } from 'lucide-react'
 import { auth, campus } from '../api/endpoints'
 import { DataState } from '../components/DataState'
 import { PageHeader } from '../components/PortalShell'
-import { Field, Modal, Pagination, StatusPill, Toast, formatDateTime } from '../components/ui'
+import { Field, Modal, Pagination, StatusPill, formatDateTime } from '../components/ui'
+import { useToast } from '../components/Toasts'
 import { useDebouncedValue } from '../hooks/useLiveSearch'
 
 const ROLES = [
@@ -22,7 +23,7 @@ export default function Staff() {
   const [error, setError] = useState(null)
   const [editing, setEditing] = useState(null)
   const [resetting, setResetting] = useState(null)
-  const [toast, setToast] = useState(null)
+  const toast = useToast()
 
   const debouncedSearch = useDebouncedValue(search)
 
@@ -145,7 +146,7 @@ export default function Staff() {
           onClose={() => setEditing(null)}
           onDone={(message) => {
             setEditing(null)
-            setToast({ tone: 'success', message })
+            toast.show({ tone: 'success', message })
             load()
           }}
         />
@@ -157,12 +158,11 @@ export default function Staff() {
           onClose={() => setResetting(null)}
           onDone={(message) => {
             setResetting(null)
-            setToast({ tone: 'success', message })
+            toast.show({ tone: 'success', message })
           }}
         />
       )}
 
-      <Toast toast={toast} onDismiss={() => setToast(null)} />
     </>
   )
 }

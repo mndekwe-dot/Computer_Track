@@ -6,7 +6,8 @@ import { useAuth } from '../auth/AuthContext'
 import { usePortal } from '../auth/PortalContext'
 import { DataState } from '../components/DataState'
 import { PageHeader } from '../components/PortalShell'
-import { Field, Modal, Pagination, StatusPill, Toast, formatDateTime } from '../components/ui'
+import { Field, Modal, Pagination, StatusPill, formatDateTime } from '../components/ui'
+import { useToast } from '../components/Toasts'
 
 const FLAG_COLUMNS = ['Raised', 'Computer', 'Owner', 'Reason', 'Details', 'State', ' ']
 
@@ -19,7 +20,7 @@ export default function Flags() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [resolving, setResolving] = useState(null)
-  const [toast, setToast] = useState(null)
+  const toast = useToast()
 
   const load = useCallback(() => {
     setLoading(true)
@@ -132,13 +133,12 @@ export default function Flags() {
           onClose={() => setResolving(null)}
           onDone={(message) => {
             setResolving(null)
-            setToast({ tone: 'success', message })
+            toast.show({ tone: 'success', message })
             load()
           }}
         />
       )}
 
-      <Toast toast={toast} onDismiss={() => setToast(null)} />
     </>
   )
 }
