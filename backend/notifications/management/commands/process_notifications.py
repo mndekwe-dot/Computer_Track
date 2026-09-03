@@ -13,7 +13,7 @@ import time
 from django.core.management.base import BaseCommand
 
 from notifications.models import Notification, Status
-from notifications.service import MAX_ATTEMPTS, dispatch_pending
+from notifications.service import dispatch_pending, max_attempts
 
 
 class Command(BaseCommand):
@@ -31,8 +31,12 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         if options["retry_failed"]:
+            # `next_attempt_at` has to be cleared as well. Without it a
+            # message reset here keeps the backoff stamp from its last failure
+            # and the very next pass skips it, so --retry-failed appears to do
+            # nothing at all.
             reset = Notification.objects.filter(status=Status.FAILED).update(
-                status=Status.PENDING, attempts=0, last_error=""
+                status=Status.PENDING, attempts=0, last_error="", next_attempt_at=None
             )
             self.stdout.write(f"Reset {reset} failed notification(s) for another attempt.")
 
@@ -47,12 +51,12 @@ class Command(BaseCommand):
             time.sleep(options["interval"])
 
         stuck = Notification.objects.filter(
-            status=Status.FAILED, attempts__gte=MAX_ATTEMPTS
+            status=Status.FAILED, attempts__gte=max_attempts()
         ).count()
         if stuck:
             self.stdout.write(
                 self.style.WARNING(
-                    f"{stuck} notification(s) gave up after {MAX_ATTEMPTS} attempts. "
+                    f"{stuck} notification(s) gave up after {max_attempts()} attempts. "
                     f"Re-run with --retry-failed once the cause is fixed."
                 )
             )
