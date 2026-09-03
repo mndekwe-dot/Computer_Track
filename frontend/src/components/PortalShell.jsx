@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Menu, LogOut, X } from 'lucide-react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
@@ -12,16 +12,24 @@ export function PortalShell({ portal }) {
   const navigate = useNavigate()
   const location = useLocation()
   const [navOpen, setNavOpen] = useState(false)
+  const toggleRef = useRef(null)
 
   // On a phone the nav is a drawer; it must close on navigation, otherwise it
   // covers the page the guard just asked for.
   useEffect(() => setNavOpen(false), [location.pathname])
 
   useEffect(() => {
-    const onKey = (event) => event.key === 'Escape' && setNavOpen(false)
+    const onKey = (event) => {
+      if (event.key !== 'Escape' || !navOpen) return
+      setNavOpen(false)
+      // Escape that leaves focus on a now-hidden drawer strands the keyboard
+      // user at the top of the document. Hand it back to the control they
+      // opened it with.
+      toggleRef.current?.focus()
+    }
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
-  }, [])
+  }, [navOpen])
 
   const signOut = () => {
     logout()
@@ -40,7 +48,12 @@ export function PortalShell({ portal }) {
         data-portal={portal.key}
         style={{ '--brand': portal.accent, '--brand-dark': portal.accentDark }}
       >
+        <a className="skip-link" href="#main-content">
+          Skip to content
+        </a>
+
         <button
+          ref={toggleRef}
           type="button"
           className="nav-toggle"
           onClick={() => setNavOpen((open) => !open)}
@@ -58,7 +71,7 @@ export function PortalShell({ portal }) {
         <aside className="sidebar" id="portal-nav" data-open={navOpen}>
           <Brand title={portal.name} subtitle={portal.tagline} />
 
-          <nav className="nav">
+          <nav className="nav" aria-label={`${portal.name} sections`}>
             {portal.nav.map((link) => {
               const Icon = link.icon
               return (
@@ -102,11 +115,11 @@ export function PortalShell({ portal }) {
           </div>
         </aside>
 
-        <div className="main">
+        <main className="main" id="main-content" tabIndex={-1}>
           <ErrorBoundary key={location.pathname}>
             <Outlet />
           </ErrorBoundary>
-        </div>
+        </main>
       </div>
     </PortalProvider>
   )

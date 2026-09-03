@@ -72,6 +72,11 @@ export default function Staff() {
           skeletonRows={5}
           emptyTitle="No staff match that search"
           emptyBody="Try a different name, username or staff number."
+          emptyAction={
+            <button type="button" className="btn btn-outline" onClick={() => setSearch('')}>
+              Clear search
+            </button>
+          }
         >
           <div className="table-wrap">
               <table>
@@ -240,7 +245,7 @@ function StaffForm({ person, gates, onClose, onDone }) {
           </Field>
           <Field label="Default gate" error={errors.default_gate}>
             <select value={form.default_gate} onChange={set('default_gate')}>
-              <option value=""> - </option>
+              <option value="">No default gate</option>
               {gates.map((gate) => (
                 <option key={gate.id} value={gate.id}>
                   {gate.name}

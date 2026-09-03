@@ -18,6 +18,10 @@ export default function Students() {
   const [data, setData] = useState(null)
   const [departments, setDepartments] = useState([])
   const [filters, setFilters] = useState({ search: '', status: '', department: '' })
+  const clearFilters = () => {
+    setFilters({ search: '', status: '', department: '' })
+    setPage(1)
+  }
   const [page, setPage] = useState(1)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -98,6 +102,11 @@ export default function Students() {
           columns={STUDENT_COLUMNS}
           emptyTitle="No students match"
           emptyBody="Try a different search or filter."
+          emptyAction={
+            <button type="button" className="btn btn-outline" onClick={clearFilters}>
+              Clear filters
+            </button>
+          }
         >
           <div className="table-wrap">
               <table>
@@ -243,7 +252,7 @@ function StudentForm({ student, departments, onClose, onSaved }) {
           </Field>
           <Field label="Department" error={errors.department}>
             <select value={form.department} onChange={set('department')}>
-              <option value=""> - </option>
+              <option value="">No department</option>
               {departments.map((dept) => (
                 <option key={dept.id} value={dept.id}>
                   {dept.name}

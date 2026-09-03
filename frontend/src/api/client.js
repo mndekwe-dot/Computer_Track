@@ -47,6 +47,12 @@ export class ApiError extends Error {
     return out
   }
 
+  /**
+   * What a person is shown. Every branch has to end in something they can
+   * act on: the last resort used to fall through to the raw Error message,
+   * which produced "Request failed with 500" on screen. That names no way to
+   * recover, and at a gate the person reading it cannot open a console.
+   */
   get readable() {
     if (this.isNetwork) return 'Cannot reach the server. Check the network connection.'
     const errors = this.fieldErrors
@@ -54,7 +60,15 @@ export class ApiError extends Error {
     if (detail) return detail
     const first = Object.entries(errors)[0]
     if (first) return `${first[0].replace(/_/g, ' ')}: ${first[1]}`
-    return this.message
+
+    if (this.status === 404) return 'That record no longer exists. Refresh the page.'
+    if (this.status === 429) {
+      return 'Too many requests from this account. Wait a minute, then try again.'
+    }
+    if (this.status >= 500) {
+      return 'The server could not complete that. Try again, and tell IT if it keeps happening.'
+    }
+    return 'Unable to complete that request. Try again.'
   }
 }
 

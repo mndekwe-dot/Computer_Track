@@ -27,6 +27,10 @@ export default function Devices() {
     owner: params.get('owner') || '',
     flagged: params.get('flagged') || '',
   })
+  const clearFilters = () => {
+    setFilters({ search: '', status: '', device_type: '', owner: '', flagged: '' })
+    setPage(1)
+  }
   const [page, setPage] = useState(1)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -115,6 +119,11 @@ export default function Devices() {
           columns={DEVICE_COLUMNS}
           emptyTitle="No computers match"
           emptyBody="Adjust the filters above."
+          emptyAction={
+            <button type="button" className="btn btn-outline" onClick={clearFilters}>
+              Clear filters
+            </button>
+          }
         >
           <div className="table-wrap">
               <table>

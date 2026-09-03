@@ -20,6 +20,10 @@ export default function AuditLog() {
   const [data, setData] = useState(null)
   const [summary, setSummary] = useState(null)
   const [filters, setFilters] = useState({ q: '', action: '', date_from: '', date_to: '' })
+  const clearFilters = () => {
+    setFilters({ q: '', action: '', date_from: '', date_to: '' })
+    setPage(1)
+  }
   const [page, setPage] = useState(1)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -155,6 +159,11 @@ export default function AuditLog() {
           skeletonRows={10}
           emptyTitle="Nothing recorded for those filters"
           emptyBody="Widen the date range or clear a filter."
+          emptyAction={
+            <button type="button" className="btn btn-outline" onClick={clearFilters}>
+              Clear filters
+            </button>
+          }
         >
           <div className="table-wrap">
             <table>

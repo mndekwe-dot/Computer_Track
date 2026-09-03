@@ -109,7 +109,7 @@ export default function Settings() {
                 value={profile.default_gate}
                 onChange={(e) => setProfile({ ...profile, default_gate: e.target.value })}
               >
-                <option value=""> - </option>
+                <option value="">No default gate</option>
                 {gates.map((gate) => (
                   <option key={gate.id} value={gate.id}>
                     {gate.name}
@@ -120,7 +120,7 @@ export default function Settings() {
             <div className="form-actions">
               <button type="submit" className="btn btn-primary" disabled={busy}>
                 <Save size={16} aria-hidden="true" />
-                Save details
+                {busy ? 'Saving…' : 'Save changes'}
               </button>
             </div>
           </form>

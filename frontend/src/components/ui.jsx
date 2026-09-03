@@ -1,4 +1,5 @@
-import { useEffect, useRef } from 'react'
+import { cloneElement, isValidElement, useEffect, useId, useRef } from 'react'
+import { ChevronLeft, ChevronRight, X } from 'lucide-react'
 
 export function StatusPill({ status, children }) {
   const tone = String(status || '').toUpperCase()
@@ -108,49 +109,145 @@ export function Refreshing({ active, children }) {
   )
 }
 
-export function EmptyState({ title, children }) {
+/**
+ * An empty state that only describes the exit ("clear a filter") makes the
+ * reader go and find the control. `action` puts the control here, which is
+ * where they already are.
+ */
+export function EmptyState({ title, children, action }) {
   return (
     <div className="empty-state">
       <h3>{title}</h3>
       {children && <p>{children}</p>}
+      {action && <div className="empty-state-action">{action}</div>}
     </div>
   )
 }
 
+/**
+ * The hint and the error used to sit inside the `<label>`, which made them
+ * part of the control's accessible name: a screen reader announced the label,
+ * the hint and the error as one long run of words every time focus landed.
+ * They now sit outside it and are attached with `aria-describedby`, which is
+ * the mechanism meant for exactly this, and the control is marked invalid so
+ * the state is announced rather than only coloured.
+ */
 export function Field({ label, error, hint, children, required }) {
+  const id = useId()
+  const hintId = `${id}-hint`
+  const errorId = `${id}-error`
+  const describedBy = error ? errorId : hint ? hintId : undefined
+
+  const control =
+    isValidElement(children) && describedBy
+      ? cloneElement(children, {
+          'aria-describedby':
+            [children.props['aria-describedby'], describedBy].filter(Boolean).join(' '),
+          'aria-invalid': error ? 'true' : children.props['aria-invalid'],
+        })
+      : children
+
   return (
-    <label className="field">
-      <span className="field-label">
-        {label}
-        {required && <em aria-hidden="true"> *</em>}
-      </span>
-      {children}
-      {hint && !error && <span className="field-hint">{hint}</span>}
-      {error && <span className="field-error">{error}</span>}
-    </label>
+    <div className="field">
+      <label className="field-control">
+        <span className="field-label">
+          {label}
+          {required && <em aria-hidden="true"> *</em>}
+          {/* The asterisk is decorative, so without this the requirement is
+              carried by a glyph assistive technology never sees. */}
+          {required && <span className="visually-hidden"> (required)</span>}
+        </span>
+        {control}
+      </label>
+      {hint && !error && (
+        <span className="field-hint" id={hintId}>
+          {hint}
+        </span>
+      )}
+      {error && (
+        <span className="field-error" id={errorId}>
+          {error}
+        </span>
+      )}
+    </div>
   )
 }
 
+const FOCUSABLE =
+  'a[href], button:not(:disabled), input:not(:disabled), select:not(:disabled), ' +
+  'textarea:not(:disabled), [tabindex]:not([tabindex="-1"])'
+
+/**
+ * `aria-modal` tells assistive technology the rest of the page is inert, but
+ * it does nothing for the Tab key: without a trap, focus walked straight out
+ * of the dialog and into the page behind it, where the user could operate
+ * controls they could no longer see. This keeps Tab and Shift+Tab inside the
+ * dialog and returns focus to whatever opened it on close.
+ */
 export function Modal({ title, onClose, children, wide = false }) {
-  const ref = useRef(null)
+  const bodyRef = useRef(null)
+  const dialogRef = useRef(null)
 
   useEffect(() => {
-    const onKey = (event) => event.key === 'Escape' && onClose()
+    const opener = document.activeElement
+    bodyRef.current?.focus()
+
+    const onKey = (event) => {
+      if (event.key === 'Escape') {
+        onClose()
+        return
+      }
+      if (event.key !== 'Tab' || !dialogRef.current) return
+
+      // Deliberately not an `offsetParent` visibility test: that is null for
+      // anything inside a fixed-position ancestor and null throughout jsdom,
+      // so it would quietly switch the trap off in the two places it matters
+      // most. `hidden` is the attribute that actually means "not here", and a
+      // visually-hidden control (the file input behind a styled button) is
+      // meant to stay reachable.
+      const items = [...dialogRef.current.querySelectorAll(FOCUSABLE)].filter(
+        (node) => !node.closest('[hidden]'),
+      )
+      if (items.length === 0) return
+      const first = items[0]
+      const last = items[items.length - 1]
+      const active = document.activeElement
+
+      if (event.shiftKey && (active === first || active === bodyRef.current)) {
+        event.preventDefault()
+        last.focus()
+      } else if (!event.shiftKey && active === last) {
+        event.preventDefault()
+        first.focus()
+      }
+    }
+
     document.addEventListener('keydown', onKey)
-    ref.current?.focus()
-    return () => document.removeEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      // Returning focus is what makes a dialog feel like it closed rather
+      // than like the page reloaded underneath you.
+      if (opener instanceof HTMLElement) opener.focus()
+    }
   }, [onClose])
 
   return (
     <div className="modal-backdrop" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="modal" role="dialog" aria-modal="true" aria-label={title} data-wide={wide}>
+      <div
+        ref={dialogRef}
+        className="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+        data-wide={wide}
+      >
         <header className="modal-header">
           <h2>{title}</h2>
           <button type="button" className="btn btn-ghost" onClick={onClose} aria-label="Close">
-            ✕
+            <X size={16} aria-hidden="true" />
           </button>
         </header>
-        <div className="modal-body" ref={ref} tabIndex={-1}>
+        <div className="modal-body" ref={bodyRef} tabIndex={-1}>
           {children}
         </div>
       </div>
@@ -158,20 +255,37 @@ export function Modal({ title, onClose, children, wide = false }) {
   )
 }
 
+/**
+ * Two things here are deliberate.
+ *
+ * The live region is always in the DOM, even with nothing to say. A region
+ * inserted at the same moment as its text is announced inconsistently, which
+ * is why a second identical toast often went unread; a stable empty region
+ * whose text changes is announced reliably.
+ *
+ * Errors do not auto-dismiss. A message that names what went wrong is no use
+ * if it removes itself before it has been read, and a guard mid-decision is
+ * exactly the person who will look up too late.
+ */
 export function Toast({ toast, onDismiss }) {
-  useEffect(() => {
-    if (!toast) return undefined
-    const timer = setTimeout(onDismiss, toast.tone === 'error' ? 7000 : 4000)
-    return () => clearTimeout(timer)
-  }, [toast, onDismiss])
+  const isError = toast?.tone === 'error'
 
-  if (!toast) return null
+  useEffect(() => {
+    if (!toast || isError) return undefined
+    const timer = setTimeout(onDismiss, 4000)
+    return () => clearTimeout(timer)
+  }, [toast, isError, onDismiss])
+
   return (
-    <div className={`toast toast-${toast.tone || 'info'}`} role="status" aria-live="polite">
-      {toast.message}
-      <button type="button" className="toast-close" onClick={onDismiss} aria-label="Dismiss">
-        ✕
-      </button>
+    <div className="toast-region" role="status" aria-live="polite">
+      {toast && (
+        <div className={`toast toast-${toast.tone || 'info'}`}>
+          {toast.message}
+          <button type="button" className="toast-close" onClick={onDismiss} aria-label="Dismiss">
+            <X size={14} aria-hidden="true" />
+          </button>
+        </div>
+      )}
     </div>
   )
 }
@@ -187,7 +301,8 @@ export function Pagination({ count, page, pageSize = 25, onChange }) {
         disabled={page <= 1}
         onClick={() => onChange(page - 1)}
       >
-        ← Previous
+        <ChevronLeft size={15} aria-hidden="true" />
+        Previous
       </button>
       <span>
         Page {page} of {pages} · {count} records
@@ -198,7 +313,8 @@ export function Pagination({ count, page, pageSize = 25, onChange }) {
         disabled={page >= pages}
         onClick={() => onChange(page + 1)}
       >
-        Next →
+        Next
+        <ChevronRight size={15} aria-hidden="true" />
       </button>
     </nav>
   )

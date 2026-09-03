@@ -7,7 +7,8 @@ import { EmptyState, ErrorNote, Refreshing, SkeletonTable } from './ui'
  *
  *   error          → a message with a retry, and nothing else
  *   first load     → a skeleton shaped like the table that is coming
- *   empty result   → an empty state that says what to do next
+ *   empty result   → an empty state that says what to do next, and where a
+ *                    filter caused it, a control that undoes the filter
  *   refetch        → the existing rows stay put and dim
  *
  * `rows` is the already-loaded array (or null before the first response).
@@ -21,6 +22,7 @@ export function DataState({
   skeletonRows = 8,
   emptyTitle = 'Nothing to show',
   emptyBody,
+  emptyAction,
   children,
 }) {
   if (error) return <ErrorNote error={error} onRetry={onRetry} />
@@ -30,7 +32,11 @@ export function DataState({
     return <SkeletonTable columns={columns} rows={skeletonRows} />
   }
   if (hasLoaded && rows.length === 0) {
-    return <EmptyState title={emptyTitle}>{emptyBody}</EmptyState>
+    return (
+      <EmptyState title={emptyTitle} action={emptyAction}>
+        {emptyBody}
+      </EmptyState>
+    )
   }
   if (!hasLoaded) return null
 
