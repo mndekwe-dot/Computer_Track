@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { ExternalLink, Pencil, Plus } from 'lucide-react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { mediaUrl } from '../api/client'
-import { devices, students } from '../api/endpoints'
+import { campus, devices, students } from '../api/endpoints'
 import { useAuth } from '../auth/AuthContext'
 import { usePortal } from '../auth/PortalContext'
 import { DataState } from '../components/DataState'
@@ -218,11 +218,19 @@ export function DeviceForm({ device, onClose, onSaved }) {
     model_name: device.model_name || '',
     colour: device.colour || '',
     distinguishing_marks: device.distinguishing_marks || '',
+    ownership: device.ownership || 'STUDENT',
     owner: device.owner || '',
+    department: device.department || '',
+    custodian_name: device.custodian_name || '',
     status: device.status || 'ACTIVE',
     notes: device.notes || '',
     photo: null,
   })
+  const [departments, setDepartments] = useState([])
+
+  useEffect(() => {
+    campus.departments().then(setDepartments).catch(() => {})
+  }, [])
   const [ownerQuery, setOwnerQuery] = useState(
     device.owner_detail
       ? `${device.owner_detail.reg_number} - ${device.owner_detail.full_name}`
@@ -277,22 +285,77 @@ export function DeviceForm({ device, onClose, onSaved }) {
       <form onSubmit={submit}>
         {errors.detail && <div className="note note-error">{errors.detail}</div>}
 
-        <Field
-          label="Owner"
-          required
-          error={errors.owner}
-          hint="Type a registration number or name, then choose from the list."
-        >
-          <input
-            value={ownerQuery}
-            onChange={(e) => {
-              setOwnerQuery(e.target.value)
-              setForm({ ...form, owner: '' })
-            }}
-            placeholder="218001234 or Aline Uwase"
-            autoFocus={isNew}
-          />
+        {/* Two kinds of equipment, two different questions at the gate, so
+            two different sets of fields. A student laptop needs an owner; a
+            projector needs a department and somebody answerable for it. */}
+        <Field label="Belongs to" error={errors.ownership}>
+          <select
+            value={form.ownership}
+            onChange={(event) =>
+              setForm({
+                ...form,
+                ownership: event.target.value,
+                // Clear whichever half no longer applies, so a switched form
+                // never submits a stale owner alongside a department.
+                owner: event.target.value === 'UNIVERSITY' ? '' : form.owner,
+                department: event.target.value === 'STUDENT' ? '' : form.department,
+                custodian_name: event.target.value === 'STUDENT' ? '' : form.custodian_name,
+              })
+            }
+          >
+            <option value="STUDENT">A student</option>
+            <option value="UNIVERSITY">The university</option>
+          </select>
         </Field>
+
+        {form.ownership === 'STUDENT' ? (
+          <Field
+            label="Owner"
+            required
+            error={errors.owner}
+            hint="Type a registration number or name, then choose from the list."
+          >
+            <input
+              value={ownerQuery}
+              onChange={(e) => {
+                setOwnerQuery(e.target.value)
+                setForm({ ...form, owner: '' })
+              }}
+              placeholder="218001234 or Aline Uwase"
+              autoFocus={isNew}
+            />
+          </Field>
+        ) : (
+          <>
+            <div className="note note-info">
+              University property is held at the gate on its way out unless it has a valid gate
+              pass. Issue one under Permits.
+            </div>
+            <div className="form-grid">
+              <Field label="Department" error={errors.department}>
+                <select value={form.department} onChange={set('department')}>
+                  <option value="">No department</option>
+                  {departments.map((dept) => (
+                    <option key={dept.id} value={dept.id}>
+                      {dept.name}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+              <Field
+                label="Custodian"
+                error={errors.custodian_name}
+                hint="Who a guard should call about this. A department or a name is required."
+              >
+                <input
+                  value={form.custodian_name}
+                  onChange={set('custodian_name')}
+                  placeholder="Dr Habimana"
+                />
+              </Field>
+            </div>
+          </>
+        )}
         {matches.length > 0 && (
           <div className="row-actions" style={{ marginTop: -6, marginBottom: 14 }}>
             {matches.map((student) => (

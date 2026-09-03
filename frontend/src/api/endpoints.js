@@ -92,6 +92,7 @@ export const publicApi = {
       payload.photo ? toFormData(payload) : payload,
     ),
   myComputers: (payload) => api.publicPost('/api/public/my-computers/', payload),
+  reportMissing: (payload) => api.publicPost('/api/public/report-missing/', payload),
 }
 
 export const search = {
@@ -101,7 +102,9 @@ export const search = {
 }
 
 export const checkpoint = {
-  lookup: (q) => api.get('/api/checkpoint/lookup/', { q }),
+  // `direction` changes the answer for university property, which may come
+  // back in freely but needs a gate pass to go out.
+  lookup: (q, direction) => api.get('/api/checkpoint/lookup/', { q, direction }),
   recordScan: (payload) => api.post('/api/checkpoint/scans/', payload),
   bulkScans: (scans) => api.post('/api/checkpoint/scans/bulk/', { scans }),
   scans: (params) => api.get('/api/checkpoint/scans/', params),

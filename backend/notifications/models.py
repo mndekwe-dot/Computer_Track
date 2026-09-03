@@ -17,6 +17,7 @@ class Kind(models.TextChoices):
     EXIT = "EXIT", "Computer left campus"
     APPROVED = "APPROVED", "Registration approved"
     REJECTED = "REJECTED", "Registration rejected"
+    MISSING = "MISSING", "Computer reported missing"
     # Goes to the security office rather than a student, so `student` and
     # `device` stay null on these.
     AUDIT_ALERT = "AUDIT_ALERT", "Unusual register activity"

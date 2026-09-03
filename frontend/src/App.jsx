@@ -119,11 +119,17 @@ export default function App() {
             <Route path="devices/:id" element={<DeviceDetail />} />
             <Route path="flags" element={<Flags />} />
             <Route path="permits" element={<Permits />} />
+            {/* Gates are part of the register a registrar keeps, not an
+                administrative setting: a new entrance opens and the office
+                that maintains the register is the one that knows. The API
+                already allowed this (CanManageRecords covers registrars);
+                only the navigation was withholding it. */}
+            <Route path="gates" element={<Gates />} />
             <Route path="account" element={<Settings />} />
           </>,
         )}
 
-        {/* Administration - everything, plus gates and staff */}
+        {/* Administration - everything, plus staff accounts and the audit log */}
         {portalRoutes(
           PORTALS.admin,
           <>

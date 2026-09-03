@@ -431,7 +431,7 @@ backend/
   checkpoint/     gate lookup, scan events, dashboard
   search/         inverted index, indexer, typeahead
   notifications/  outbox, delivery backends, worker command
-  tests/          202 tests
+  tests/          230 tests
 
 frontend/src/
   api/            fetch client (token refresh, cancellation), endpoints
@@ -467,16 +467,16 @@ The brand mark is a **slot**, not a fixed asset. Drop your file at `frontend/src
 
 ```bash
 cd backend
-.venv\Scripts\python.exe manage.py test tests     # 202 tests
+.venv\Scripts\python.exe manage.py test tests     # 230 tests
 
 cd frontend
-npm test                                          # 47 tests
+npm test                                          # 48 tests
 ```
 
 The frontend suite is Vitest and jsdom, covering the two pieces of behaviour that are hard to
 check by hand: the offline scan queue and live-search cancellation.
 
-**202 backend tests.** Notable areas:
+**230 backend tests.** Notable areas:
 
 | Area | Covers |
 |------|--------|
@@ -489,6 +489,144 @@ check by hand: the offline scan queue and live-search cancellation.
 | `test_audit` | What is logged, who can read it, append-only enforcement |
 | `test_retention_2fa` | Prune safety rails, baseline alerting, the whole 2FA flow |
 | `test_auth` | Login, token use, self-service limits |
+
+---
+
+## University property
+
+The register holds two kinds of equipment, and the question at the gate is
+different for each. For a student laptop it is *does this belong to the person
+carrying it*. For a departmental projector it is *is this authorised to leave
+at all*.
+
+A registrar sets **Belongs to** when registering equipment. University property
+takes a department and a custodian instead of a student owner, and both appear
+at the gate so a guard holding a projector at nine at night has somebody to
+call.
+
+**The rule is direction-dependent, and only university property has it.**
+Equipment on its way *out* is held unless it carries a valid gate pass; the
+same projector coming back *in* passes freely, because stopping returning
+equipment for want of a pass would be absurd. Issue passes under **Permits**,
+or record an override with a written reason like any other exception.
+
+That rule is enforced in the API, not in the console. The gate console is a
+client, its offline queue lives in `localStorage`, and anything only checked
+there is not checked at all.
+
+Registrars can also add and edit **gates**. A new entrance opens and the office
+that keeps the register is the one that knows; the API always permitted this,
+only the navigation was withholding it.
+
+---
+
+## How someone would get a computer out
+
+Worth being blunt about this, because the software is the easy half. Most ways
+past this system are physical or procedural, and no amount of Django fixes
+them.
+
+### What the software does stop
+
+- **Recording a blocked computer as allowed.** The server re-checks the block
+  on every scan, so it does not matter what the client sends. This is why the
+  offline queue is safe: it lives in `localStorage` where anyone with the
+  terminal can edit it, and a tampered entry claiming `ALLOWED` on a stolen
+  laptop is refused on sync. There is a test for exactly this.
+- **Falsifying the record.** `device_label` and `student_name` are taken from
+  the register at decision time rather than from the request, so a tampered
+  client cannot write a history that never happened. `claimed_serial` and
+  `claimed_reg_number` stay as the guard typed them, because a mistyped claim
+  is evidence too.
+- **Registering a computer that is already somebody else's.** A duplicate
+  serial is refused, without naming the current owner.
+- **Walking out on a self-registration.** Anything submitted through the public
+  form is PENDING, and PENDING is blocked at every gate until a registrar has
+  seen the machine.
+- **Grinding the register through the public form.** Twelve requests an hour
+  per IP, and identical wording for "no such student" and "details do not
+  match" so it cannot be used to discover who is enrolled.
+- **Reading a student's photo from a leaked URL.** Links are signed and expire.
+- **Formulas in the exported gate log.** A cell beginning with `=` is a formula
+  to Excel, and the public registration form sets a computer's brand and model
+  with no login at all, so a stranger could plant one that runs weeks later on
+  an administrator's machine. Every exported cell is now escaped.
+
+### What it does not stop
+
+These are the ones to design procedure around.
+
+**Swap the sticker.** Peel the QR sticker off a registered laptop, put it on a
+stolen one, walk out. The scan says "registered" and the guard waves it
+through. The only defence is the one already on screen: the registered photo
+and serial sit beside the decision buttons, and the guard has to actually
+compare them. Software cannot force that. It is worth making "check the serial
+on the machine, not just the sticker" the trained habit, because this is the
+cheapest attack in the list.
+
+**Register the stolen machine first.** Steal a laptop whose owner never
+registered it, then register it in your own name through the public form. It
+comes out PENDING, so it will not pass a gate until a registrar approves it,
+which means the whole defence rests on the registrar asking for proof of
+purchase or a receipt for a machine nobody has seen before. That check is a
+procedure, not a field in the database.
+
+**Use a gate nobody is watching.** Every control here assumes the computer is
+presented at a manned gate. An unmanned side gate defeats all of it.
+
+**Borrow a guard's session.** A gate terminal left signed in is a guard
+account. The idle timeout closes the session after thirty minutes, which
+narrows the window rather than closing it. Two-factor is currently
+administrator-only; guards sign in with a password alone.
+
+**Override.** A guard can wave any blocked computer through by writing a
+reason. That is deliberate, because real gates have real exceptions, and every
+override is recorded and surfaced for review. But it is only a control if
+somebody reads the overrides. `Recent problems` on the dashboard is where they
+appear; nobody is currently obliged to look.
+
+**Report someone else's computer stolen.** The public report blocks a machine
+immediately, which is the entire point when a laptop is walking away. It takes
+the same identity check as registration, so it needs the registration number
+*and* the email or national ID already on file, it can only touch a device
+belonging to that student, and the owner is emailed the moment it happens. A
+malicious report is therefore possible for someone who holds both details, and
+noisy: the hold is reversible by any registrar in one click, and the laptop is
+not.
+
+### Worth doing before a real deployment
+
+1. **Two-factor for guards, not just administrators.** A guard account is the
+   one that can wave things through.
+2. **Somebody owns the override queue.** A control nobody reads is not a
+   control. A weekly review, or an alert past a threshold.
+3. **Rate-limit the public form by more than IP.** A phone hopping cell towers
+   gets a fresh IP; the current limit is a speed bump, not a wall.
+4. **Decide what a registrar must see** before approving a self-registration.
+   That decision is the difference between the register meaning something and
+   not.
+
+---
+
+## Looking at it
+
+The project had no way to see its own output, and it showed: a landing page shipped with a
+tiling background artefact, cards that rendered as empty placeholders, and a crash on the
+settings page. All three were obvious within a minute of seeing them and invisible in the source.
+
+```bash
+# with the API on :8000 and the app on :5173
+cd frontend
+npm run shots -- screenshots
+```
+
+`scripts/shoot.mjs` signs in as a guard, a registrar and an administrator in turn, walks every
+screen at 1440 and 390, and writes a PNG per screen per viewport. It also fails loudly on console
+errors and reports any page that redirected somewhere unexpected, which is how the settings crash
+surfaced.
+
+The app must be served on `:5173`: that is the only origin in `CORS_ALLOWED_ORIGINS`, and on any
+other port every request is blocked and every screenshot is an error state.
 
 ---
 
@@ -629,7 +767,9 @@ size in a new tab" at the gate, which guards actually use.
 4. **A backup and, more importantly, a restore drill.** The scan log is described above as
    something that may end up being evidence. There is no `pg_dump` schedule in this repository and
    nothing covering `media/`. A register nobody has ever restored from is a guess.
-5. **Continuous integration.** 202 backend and 31 frontend tests, and nothing runs them on push.
+5. **Continuous integration.** 230 backend, 48 frontend and 42 end-to-end tests. The
+   Playwright workflow in `.github/workflows` still needs the API and seed data brought up
+   before it will pass.
    Cheapest useful addition in this list.
 6. **A student lifecycle.** Nothing here handles graduation, withdrawal or suspension, so a
    registration is currently permanent and the gate will keep confirming ownership for somebody

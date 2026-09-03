@@ -3,6 +3,7 @@ import {
   ArrowDownToLine,
   ArrowUpFromLine,
   Ban,
+  Building2,
   Check,
   CircleCheck,
   CircleHelp,
@@ -84,6 +85,12 @@ export default function GateConsole() {
     requestAnimationFrame(() => inputRef.current?.focus())
   }, [])
 
+  // University property is held on the way out and clear on the way in, so a
+  // result fetched under one direction is wrong under the other. Showing a
+  // stale PASS after the guard flips the toggle is the dangerous half of that,
+  // so the lookup is re-run rather than left alone.
+  const lookedUpQuery = useRef(null)
+
   const runLookup = useCallback(
     async (raw) => {
       const value = (raw ?? '').trim()
@@ -93,7 +100,8 @@ export default function GateConsole() {
       setSearching(true)
       setError(null)
       try {
-        setResult(await checkpoint.lookup(value))
+        setResult(await checkpoint.lookup(value, direction))
+        lookedUpQuery.current = value
       } catch (err) {
         setError(err)
         setResult(null)
@@ -101,8 +109,17 @@ export default function GateConsole() {
         setSearching(false)
       }
     },
-    [],
+    // The verdict for university property depends on which way it is going,
+    // so a lookup made under "Leaving" must not be reused under "Entering".
+    [direction],
   )
+
+  // Re-run whatever is on screen when the direction changes, so the verdict
+  // always matches the toggle the guard is looking at.
+  useEffect(() => {
+    if (lookedUpQuery.current) runLookup(lookedUpQuery.current)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [direction])
 
   // One flat list so the arrow keys can walk students and computers together.
   const suggestions = [
@@ -228,9 +245,8 @@ export default function GateConsole() {
       >
         <span className="connection-badge" data-online={online}>
           {online ? <Wifi size={14} aria-hidden="true" /> : <WifiOff size={14} aria-hidden="true" />}
-          <span className="hide-sm">
-            {online ? 'Online' : 'Offline - saving locally'}
-          </span>
+          <span>{online ? 'Online' : 'Offline'}</span>
+          <span className="hide-sm">{online ? '' : ' - saving locally'}</span>
         </span>
         {queued > 0 && (
           <button
@@ -456,14 +472,16 @@ export default function GateConsole() {
                 <div className="recent-list">
                   {recent.map((scan) => (
                     <div className="recent-item" key={scan.id}>
-                      <div style={{ minWidth: 0 }}>
-                        <strong>{scan.device_label || scan.claimed_serial || ' - '}</strong>
-                        <span className="muted">
-                          {scan.student_name || 'Unknown'} · {formatTime(scan.happened_at)}
-                          {scan.pending && ' · not yet synced'}
-                        </span>
-                      </div>
+                      {/* Flat children on purpose: the card is a grid, so the
+                          verdict can hold the top-right corner while the name
+                          and the time each get the card's full width instead
+                          of wrapping around the pill. */}
+                      <strong>{scan.device_label || scan.claimed_serial || ' - '}</strong>
                       <StatusPill status={scan.verdict} />
+                      <span className="muted">
+                        {scan.student_name || 'Unknown'} · {formatTime(scan.happened_at)}
+                        {scan.pending && ' · not yet synced'}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -586,6 +604,19 @@ function DeviceDecisionCard({ device, direction, highlighted, onAllow, onDeny, o
             {device.colour && <span>{device.colour}</span>}
             {device.distinguishing_marks && <span>&ldquo;{device.distinguishing_marks}&rdquo;</span>}
           </div>
+          {/* University property has no student card above it, so the guard
+              would otherwise be told to hold something with no indication of
+              whose it is or who to call about it. */}
+          {device.ownership === 'UNIVERSITY' && (
+            <div className="device-custody">
+              <Building2 size={14} aria-hidden="true" />
+              <span>
+                University property
+                {device.department_name ? ` · ${device.department_name}` : ''}
+                {device.custodian_name ? ` · ${device.custodian_name}` : ''}
+              </span>
+            </div>
+          )}
         </div>
         <StatusPill status={device.status}>{device.status_display}</StatusPill>
       </div>

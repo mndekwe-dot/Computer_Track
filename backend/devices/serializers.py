@@ -8,6 +8,7 @@ from students.serializers import StudentBriefSerializer
 from .models import (
     Device,
     DeviceFlag,
+    Ownership,
     OwnershipTransfer,
     TemporaryPermit,
     normalise_serial,
@@ -18,8 +19,12 @@ class DeviceFlagSerializer(serializers.ModelSerializer):
     reason_display = serializers.CharField(source="get_reason_display", read_only=True)
     raised_by_name = serializers.CharField(source="raised_by.get_full_name", read_only=True)
     device_serial = serializers.CharField(source="device.serial_number", read_only=True)
-    owner_reg_number = serializers.CharField(source="device.owner.reg_number", read_only=True)
-    owner_name = serializers.CharField(source="device.owner.full_name", read_only=True)
+    owner_reg_number = serializers.CharField(
+        source="device.owner.reg_number", read_only=True, allow_null=True, default=None
+    )
+    owner_name = serializers.CharField(
+        source="device.owner.full_name", read_only=True, allow_null=True, default=None
+    )
 
     class Meta:
         model = DeviceFlag
@@ -46,7 +51,9 @@ class DeviceFlagSerializer(serializers.ModelSerializer):
 class TemporaryPermitSerializer(serializers.ModelSerializer):
     is_valid_now = serializers.BooleanField(read_only=True)
     device_serial = serializers.CharField(source="device.serial_number", read_only=True)
-    owner_name = serializers.CharField(source="device.owner.full_name", read_only=True)
+    owner_name = serializers.CharField(
+        source="device.owner.full_name", read_only=True, allow_null=True, default=None
+    )
     issued_by_name = serializers.CharField(source="issued_by.get_full_name", read_only=True)
 
     class Meta:
@@ -116,6 +123,10 @@ class DeviceSerializer(serializers.ModelSerializer):
     blocking_reasons = serializers.SerializerMethodField()
     active_flag_count = serializers.SerializerMethodField()
     photo = SignedImageField(required=False, allow_null=True)
+    ownership_display = serializers.CharField(source="get_ownership_display", read_only=True)
+    department_name = serializers.CharField(
+        source="department.name", read_only=True, allow_null=True, default=None
+    )
 
     class Meta:
         model = Device
@@ -131,8 +142,13 @@ class DeviceSerializer(serializers.ModelSerializer):
             "label",
             "colour",
             "distinguishing_marks",
+            "ownership",
+            "ownership_display",
             "owner",
             "owner_detail",
+            "department",
+            "department_name",
+            "custodian_name",
             "photo",
             "status",
             "status_display",
@@ -151,6 +167,40 @@ class DeviceSerializer(serializers.ModelSerializer):
     def get_blocking_reasons(self, obj):
         return obj.blocking_reasons()
 
+    def get_exit_restrictions(self, obj):
+        return obj.exit_restrictions()
+
+    def validate(self, attrs):
+        """Each kind of ownership needs a different thing filled in.
+
+        A student laptop without an owner is unattributable, and university
+        property without a department or a custodian gives a guard nobody to
+        call when it turns up at a gate at night.
+        """
+        instance = self.instance
+        ownership = attrs.get("ownership", getattr(instance, "ownership", Ownership.STUDENT))
+        owner = attrs.get("owner", getattr(instance, "owner", None))
+        department = attrs.get("department", getattr(instance, "department", None))
+        custodian = attrs.get("custodian_name", getattr(instance, "custodian_name", "")) or ""
+
+        if ownership == Ownership.STUDENT and not owner:
+            raise serializers.ValidationError(
+                {"owner": "Choose the student this computer belongs to."}
+            )
+        if ownership == Ownership.UNIVERSITY:
+            if owner:
+                raise serializers.ValidationError(
+                    {"owner": "University property belongs to a department, not to a student."}
+                )
+            if not department and not custodian.strip():
+                raise serializers.ValidationError(
+                    {
+                        "department": "Give the department that owns this, or the member of "
+                        "staff answerable for it."
+                    }
+                )
+        return attrs
+
     def get_active_flag_count(self, obj):
         return obj.flags.filter(is_active=True).count()
 
@@ -163,9 +213,14 @@ class DeviceSerializer(serializers.ModelSerializer):
             clash = clash.exclude(pk=self.instance.pk)
         if clash.exists():
             existing = clash.first()
+            if existing.owner:
+                raise serializers.ValidationError(
+                    f"This serial is already registered to {existing.owner.reg_number} "
+                    f"({existing.owner.full_name})."
+                )
             raise serializers.ValidationError(
-                f"This serial is already registered to {existing.owner.reg_number} "
-                f"({existing.owner.full_name})."
+                "This serial is already registered as university property"
+                + (f" to {existing.department.name}." if existing.department else ".")
             )
         return value.strip().upper()
 
@@ -174,13 +229,17 @@ class DeviceGateSerializer(DeviceSerializer):
     """Device shape used at the gate: adds the live permits the guard needs."""
 
     valid_permits = serializers.SerializerMethodField()
+    exit_restrictions = serializers.SerializerMethodField()
     active_flags = DeviceFlagSerializer(many=True, read_only=True)
     last_movement = serializers.SerializerMethodField()
-    owner_photo = SignedImageField(source="owner.photo", read_only=True)
+    owner_photo = SignedImageField(
+        source="owner.photo", read_only=True, allow_null=True, default=None
+    )
 
     class Meta(DeviceSerializer.Meta):
         fields = DeviceSerializer.Meta.fields + (
             "valid_permits",
+            "exit_restrictions",
             "active_flags",
             "last_movement",
             "owner_photo",
