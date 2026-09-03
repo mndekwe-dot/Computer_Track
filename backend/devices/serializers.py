@@ -1,15 +1,18 @@
 from django.utils import timezone
 from rest_framework import serializers
 
+from campus import equipment
 from config.media import SignedImageField
 from students.models import Student
 from students.serializers import StudentBriefSerializer
 
 from .models import (
+    AttemptOutcome,
     Device,
     DeviceFlag,
     Ownership,
     OwnershipTransfer,
+    RegistrationAttempt,
     TemporaryPermit,
     normalise_serial,
 )
@@ -115,7 +118,7 @@ class DeviceSerializer(serializers.ModelSerializer):
     owner_detail = StudentBriefSerializer(source="owner", read_only=True)
     label = serializers.CharField(read_only=True)
     status_display = serializers.CharField(source="get_status_display", read_only=True)
-    device_type_display = serializers.CharField(source="get_device_type_display", read_only=True)
+    device_type_display = serializers.CharField(source="device_type_label", read_only=True)
     registered_by_name = serializers.CharField(
         source="registered_by.get_full_name", read_only=True
     )
@@ -124,6 +127,10 @@ class DeviceSerializer(serializers.ModelSerializer):
     active_flag_count = serializers.SerializerMethodField()
     photo = SignedImageField(required=False, allow_null=True)
     ownership_display = serializers.CharField(source="get_ownership_display", read_only=True)
+    # No auto uniqueness validator: `validate_serial_number` below checks the
+    # normalised key, which catches spacing and case differences the field's
+    # own exact-match check would let through, and says who holds it.
+    serial_number = serializers.CharField(validators=[])
     department_name = serializers.CharField(
         source="department.name", read_only=True, allow_null=True, default=None
     )
@@ -202,7 +209,18 @@ class DeviceSerializer(serializers.ModelSerializer):
         return attrs
 
     def get_active_flag_count(self, obj):
-        return obj.flags.filter(is_active=True).count()
+        # `len` of the prefetch-aware list, not `.count()`: a COUNT query per
+        # row is exactly the N+1 that property exists to avoid.
+        return len(obj.active_flags)
+
+    def validate_device_type(self, value):
+        """Checked against the table the registration office keeps."""
+        if not equipment.is_valid(value):
+            raise serializers.ValidationError(
+                "Choose a type of equipment that is on the register. If the right one is "
+                "missing, add it under Equipment Types."
+            )
+        return value
 
     def validate_serial_number(self, value):
         key = normalise_serial(value)
@@ -249,6 +267,24 @@ class DeviceGateSerializer(DeviceSerializer):
         return TemporaryPermitSerializer(obj.valid_permits(), many=True).data
 
     def get_last_movement(self, obj):
+        """The most recent scan.
+
+        `obj.scan_events.order_by(...).first()` is one query per device, which
+        on a gate lookup showing a student's four computers is four queries for
+        four values. `devices.queries.with_last_movement` annotates them onto
+        the row instead; the fallback below is for callers that serialize a
+        device they built by hand.
+        """
+        if hasattr(obj, "last_scan_at"):
+            if not obj.last_scan_at:
+                return None
+            return {
+                "direction": obj.last_scan_direction,
+                "verdict": obj.last_scan_verdict,
+                "gate": obj.last_scan_gate,
+                "created_at": obj.last_scan_at,
+            }
+
         last = obj.scan_events.order_by("-created_at").first()
         if not last:
             return None
@@ -273,3 +309,47 @@ class DeviceTransferSerializer(serializers.Serializer):
         if not student:
             raise serializers.ValidationError("No student found with that registration number.")
         return student
+
+
+class RegistrationAttemptSerializer(serializers.ModelSerializer):
+    """A public-form submission, as an officer reviews it."""
+
+    outcome_display = serializers.CharField(source="get_outcome_display", read_only=True)
+    student_name = serializers.CharField(
+        source="student.full_name", read_only=True, allow_null=True, default=None
+    )
+    reviewed_by_name = serializers.CharField(
+        source="reviewed_by.get_full_name", read_only=True, allow_null=True, default=None
+    )
+    existing_device_serial = serializers.CharField(
+        source="existing_device.serial_number", read_only=True, allow_null=True, default=None
+    )
+    existing_device_status = serializers.CharField(
+        source="existing_device.status", read_only=True, allow_null=True, default=None
+    )
+    needs_review = serializers.BooleanField(read_only=True)
+
+    class Meta:
+        model = RegistrationAttempt
+        fields = (
+            "id",
+            "reg_number",
+            "student",
+            "student_name",
+            "serial_number",
+            "brand",
+            "outcome",
+            "outcome_display",
+            "detail",
+            "existing_device",
+            "existing_device_serial",
+            "existing_device_status",
+            "needs_review",
+            "ip_address",
+            "reviewed_at",
+            "reviewed_by",
+            "reviewed_by_name",
+            "review_note",
+            "created_at",
+        )
+        read_only_fields = fields

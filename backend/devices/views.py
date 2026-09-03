@@ -11,18 +11,23 @@ from rest_framework.response import Response
 
 from accounts import audit
 from accounts.permissions import CanManageRecords
+from campus.rules import rule
+from config.qr import build_qr_payload
 from notifications.service import (
     notify_registration_approved,
     notify_registration_rejected,
 )
 from search.indexer import filter_devices
 
+from . import queries
 from .models import (
+    AttemptOutcome,
     Device,
     DeviceFlag,
     DeviceStatus,
     FlagReason,
     OwnershipTransfer,
+    RegistrationAttempt,
     TemporaryPermit,
     normalise_serial,
 )
@@ -32,16 +37,9 @@ from .serializers import (
     DeviceSerializer,
     DeviceTransferSerializer,
     OwnershipTransferSerializer,
+    RegistrationAttemptSerializer,
     TemporaryPermitSerializer,
 )
-
-# Prefix written into every QR sticker so the scanner can tell our codes apart
-# from random barcodes on a laptop lid.
-QR_PREFIX = "CTRACK"
-
-
-def build_qr_payload(device):
-    return f"{QR_PREFIX}:{device.uid}"
 
 
 class DeviceViewSet(viewsets.ModelViewSet):
@@ -52,10 +50,10 @@ class DeviceViewSet(viewsets.ModelViewSet):
     # than DRF's SearchFilter, whose `icontains` cannot use an index.
 
     def get_queryset(self):
-        queryset = (
-            Device.objects.select_related("owner", "owner__department", "registered_by")
-            .prefetch_related("flags")
-        )
+        # `for_gate` on retrieve because that is the shape DeviceGateSerializer
+        # reads; the list shape skips the last-movement subqueries nothing on
+        # that screen displays.
+        queryset = queries.for_gate() if self.action == "retrieve" else queries.for_list()
 
         search = self.request.query_params.get("search")
         if search and search.strip():
@@ -142,8 +140,20 @@ class DeviceViewSet(viewsets.ModelViewSet):
                 "transfers": OwnershipTransferSerializer(
                     device.transfers.select_related("from_student", "to_student"), many=True
                 ).data,
-                "flags": DeviceFlagSerializer(device.flags.all(), many=True).data,
-                "permits": TemporaryPermitSerializer(device.permits.all(), many=True).data,
+                # Queried afresh rather than read off `device.flags`: the
+                # queryset prefetches only *active* flags, and a history that
+                # silently omitted every resolved hold would be worse than no
+                # history at all.
+                "flags": DeviceFlagSerializer(
+                    DeviceFlag.objects.filter(device=device).select_related(
+                        "raised_by", "resolved_by", "device", "device__owner"
+                    ),
+                    many=True,
+                ).data,
+                "permits": TemporaryPermitSerializer(
+                    device.permits.select_related("issued_by", "device", "device__owner"),
+                    many=True,
+                ).data,
             }
         )
 
@@ -336,4 +346,71 @@ class OwnershipTransferViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         return OwnershipTransfer.objects.select_related(
             "device", "from_student", "to_student", "transferred_by"
+        )
+
+
+class RegistrationAttemptViewSet(viewsets.ReadOnlyModelViewSet):
+    """Who tried to register what, including the refusals.
+
+    This is the screen that answers "is somebody working through a bag of
+    stolen laptops". Read-only apart from marking a row reviewed: the log is
+    evidence, and evidence that can be edited is not evidence.
+    """
+
+    serializer_class = RegistrationAttemptSerializer
+    permission_classes = (CanManageRecords,)
+    filterset_fields = ("outcome", "student")
+    search_fields = ("reg_number", "serial_number", "brand", "detail")
+    ordering_fields = ("created_at", "outcome")
+
+    def get_queryset(self):
+        queryset = RegistrationAttempt.objects.select_related(
+            "student", "existing_device", "reviewed_by"
+        )
+        # The default view is the subset worth an officer's time. An accepted
+        # registration and a mistyped serial are noise; a serial matching a
+        # computer somebody has reported stolen is not.
+        if self.request.query_params.get("needs_review") in {"1", "true", "True"}:
+            queryset = queryset.filter(
+                outcome__in=[
+                    AttemptOutcome.MATCHED_MISSING,
+                    AttemptOutcome.TOO_MANY_ATTEMPTS,
+                    AttemptOutcome.LIMIT_REACHED,
+                ],
+                reviewed_at__isnull=True,
+            )
+        return queryset
+
+    @action(detail=True, methods=["post"])
+    def review(self, request, pk=None):
+        """Mark one attempt as looked at, with a note on what was decided."""
+        attempt = self.get_object()
+        attempt.reviewed_at = timezone.now()
+        attempt.reviewed_by = request.user
+        attempt.review_note = (request.data.get("note") or "").strip()
+        attempt.save(update_fields=["reviewed_at", "reviewed_by", "review_note"])
+        return Response(RegistrationAttemptSerializer(attempt).data)
+
+    @action(detail=False, methods=["get"])
+    def summary(self, request):
+        since = timezone.now() - timezone.timedelta(days=30)
+        rows = (
+            RegistrationAttempt.objects.filter(created_at__gte=since)
+            .values("outcome")
+            .annotate(total=Count("id"))
+        )
+        counts = {row["outcome"]: row["total"] for row in rows}
+        return Response(
+            {
+                "window_days": 30,
+                "by_outcome": counts,
+                "awaiting_review": RegistrationAttempt.objects.filter(
+                    outcome__in=[
+                        AttemptOutcome.MATCHED_MISSING,
+                        AttemptOutcome.TOO_MANY_ATTEMPTS,
+                        AttemptOutcome.LIMIT_REACHED,
+                    ],
+                    reviewed_at__isnull=True,
+                ).count(),
+            }
         )
