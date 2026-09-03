@@ -84,9 +84,14 @@ Created by `seed_demo`, all with password `passw0rd!`. Each signs in at **its ow
 
 ### The landing page
 
-`/` is a public landing page. It puts the thing most visitors actually want, registering their
-own laptop, at the top, and points at the three staff portals underneath so nobody has to be
-told a URL. Anyone already signed in is sent straight to their own portal instead.
+`/` is a public landing page serving two audiences with opposite needs. A student arrives once,
+has never heard of any of this and needs telling what to do. A guard arrives every shift and
+needs to be past the page in one click.
+
+So it is ordered by importance rather than by explanation. Both actions, "Register my computer"
+and the staff portals, sit in the first screenful; everything that teaches (how it works, what a
+guard can see, what happens if a computer is stolen) sits below them, where it costs a returning
+user nothing. Anyone already signed in is sent straight to their own portal instead.
 
 The portals stay genuinely separate behind it: the landing page only links to their logins.
 
@@ -465,7 +470,7 @@ cd backend
 .venv\Scripts\python.exe manage.py test tests     # 202 tests
 
 cd frontend
-npm test                                          # 31 tests
+npm test                                          # 47 tests
 ```
 
 The frontend suite is Vitest and jsdom, covering the two pieces of behaviour that are hard to
@@ -527,6 +532,28 @@ soft fills, hover states and active navigation are `color-mix`ed from it, so add
 portal means picking one hex value rather than six. The status palette is exempt and unchanged:
 those values were checked for contrast and colour-blind separation, and a redesign is not a
 reason to re-open that.
+
+**Contrast is measured, not eyeballed.** Every foreground is checked against the background it
+actually renders on. That caught a tier of grey introduced during the redesign at 2.63:1 where it
+needed 4.5:1, and form-control borders at 1.42:1 where WCAG 1.4.11 wants 3:1. The palette now
+carries two border roles for that reason: `--border` draws decorative structure between surfaces
+and has no requirement, `--border-control` outlines a field and is measured at 3.41:1. There is
+deliberately no third, lighter text tier, because on backgrounds this pale any text colour that
+still passes lands within a hair of `--text-muted`, so the tier could only exist by failing.
+
+**Keyboard paths are part of the layout.** The mobile drawer used to slide off-screen with
+`translateX`, which left ten navigation links in the tab order pointing at an invisible menu; it
+now goes `visibility: hidden` as well. Every page carries a skip link and a `<main>` landmark,
+because otherwise reaching the table means tabbing the whole sidebar on every navigation. Dialogs
+trap Tab and hand focus back to whatever opened them.
+
+**Descriptions are not names.** A field's hint and error live outside its `<label>` and attach
+with `aria-describedby`, so a screen reader announces the label rather than the label plus the
+hint plus the error every time focus lands.
+
+**Errors always end in an instruction.** The API error fallback used to surface the raw message,
+so a 500 reached a gate terminal as "Request failed with 500". Every branch now names something
+the reader can do, which matters most for the person who cannot open a console.
 
 **Recharts is lazy-loaded.** It is only on the admin dashboard, so a guard on a phone downloads
 110 kB gzipped instead of 224 kB.
