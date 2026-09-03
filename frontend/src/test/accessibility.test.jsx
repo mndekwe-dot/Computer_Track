@@ -151,3 +151,39 @@ describe('ApiError copy', () => {
     expect(error.readable).toBe('serial number: This serial is already registered.')
   })
 })
+
+describe('effect cleanup', () => {
+  it('never returns a promise from an effect', async () => {
+    // React treats an effect's return value as its cleanup function, so a
+    // concise arrow body that returns a promise crashes the page on unmount
+    // with "destroy is not a function". Settings did exactly that and took
+    // the whole page into the error boundary. A source check rather than a
+    // render test, because it is the shape that is dangerous and this catches
+    // it across every page at once.
+    const { readdir, readFile } = await import('node:fs/promises')
+    const path = await import('node:path')
+    // vitest does not give this file a file: URL, so resolve from the project
+    // root, which is where the runner is invoked.
+    const dir = path.resolve(process.cwd(), 'src/pages')
+    const files = await readdir(dir)
+    const offenders = []
+
+    for (const file of files.filter((name) => name.endsWith('.jsx'))) {
+      const raw = await readFile(path.join(dir, file), 'utf8')
+      // Strip comments first, or a comment explaining the hazard trips
+      // the check that guards against it.
+      const source = raw.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '')
+      for (const match of source.matchAll(/useEffect\((\w+),/g)) {
+        const name = match[1]
+        // Passing a named function straight to useEffect is only safe when
+        // that function has a block body, which returns undefined.
+        const safe =
+          source.includes(`const ${name} = useCallback(() => {`) ||
+          source.includes(`const ${name} = () => {`)
+        if (!safe) offenders.push(`${file}: useEffect(${name}, ...)`)
+      }
+    }
+
+    expect(offenders).toEqual([])
+  })
+})

@@ -1,0 +1,23 @@
+{
+  "name": "computer_track",
+  "version": "1.0.0",
+  "description": "A system for university security guards to verify, at any gate, that the computer a student is carrying actually belongs to them.",
+  "main": "index.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mndekwe-dot/Computer_Track.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/mndekwe-dot/Computer_Track/issues"
+  },
+  "homepage": "https://github.com/mndekwe-dot/Computer_Track#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.62.1",
+    "@types/node": "^26.4.1"
+  }
+}

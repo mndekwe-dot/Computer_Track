@@ -185,7 +185,17 @@ function TwoFactorPanel({ onToast }) {
   const [busy, setBusy] = useState(false)
 
   const load = () => auth.twoFactorStatus().then(setStatus).catch(() => {})
-  useEffect(load, [])
+
+  // Not `useEffect(load, [])`. That arrow has a concise body, so it returns
+  // the promise, and React takes an effect's return value to be its cleanup
+  // function. On unmount it called destroy() on a Promise, which threw
+  // "destroy is not a function" and dropped the whole settings page into the
+  // error boundary. Every other page's loader has a block body and returns
+  // undefined, which is why this was the only one that crashed.
+  useEffect(() => {
+    load()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const begin = async () => {
     setBusy(true)
