@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { LogIn, TriangleAlert } from 'lucide-react'
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
-import { REASON_TEXT, takeSignedOutReason } from '../auth/session'
+import { reasonText, takeSignedOutReason } from '../auth/session'
 import { Brand } from '../components/Brand'
 import { ErrorNote, Field } from '../components/ui'
 import { canEnter, homePortalFor } from '../portals'
@@ -105,9 +105,9 @@ export default function PortalLogin({ portal }) {
           </div>
         )}
 
-        {signedOutReason && REASON_TEXT[signedOutReason] && !error && (
+        {signedOutReason && reasonText(signedOutReason) && !error && (
           <div className="note note-info" role="status">
-            <span>{REASON_TEXT[signedOutReason]}</span>
+            <span>{reasonText(signedOutReason)}</span>
           </div>
         )}
 

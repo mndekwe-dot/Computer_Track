@@ -7,6 +7,11 @@ import { AuthProvider } from './auth/AuthContext'
 // typeface rather than silently falling back to whatever the OS ships.
 import '@fontsource-variable/inter'
 import './styles.css'
+import { registerServiceWorker } from './offline/register'
+
+// The gate console runs on a phone at the edge of campus. Without this, a
+// refresh with no network is a blank page and a queue of people.
+registerServiceWorker()
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

@@ -8,12 +8,14 @@ import {
   useState,
 } from 'react'
 import { tokens } from '../api/client'
-import { auth } from '../api/endpoints'
+import { clearLookupCache } from '../hooks/useLookupCache'
+import { auth, publicApi } from '../api/endpoints'
 import {
   ACTIVITY_EVENTS,
   REASONS,
-  WARN_SECONDS,
+  warnSeconds,
   clearActivity,
+  configureSession,
   isExpired,
   markActivity,
   secondsRemaining,
@@ -32,9 +34,33 @@ export function AuthProvider({ children }) {
   const endSession = useCallback((reason) => {
     tokens.clear()
     clearActivity()
+    // A gate terminal is handed from one guard to the next. Whatever the last
+    // shift looked up must not still be on the screen, or in storage, for the
+    // next one.
+    clearLookupCache()
     setSignedOutReason(reason)
     setIdleWarning(null)
     setUser(null)
+  }, [])
+
+  useEffect(() => {
+    // How long a terminal may sit idle is policy the registration office
+    // sets, not a build-time constant. Fetched once on boot; until it
+    // arrives the built-in default applies, which is the safer direction to
+    // be wrong in.
+    publicApi
+      .choices()
+      .then((data) => {
+        const settings = data?.settings || {}
+        configureSession({
+          idleMinutes: settings['session.idle_minutes'],
+          warnSeconds: settings['session.idle_warning_seconds'],
+        })
+      })
+      .catch(() => {
+        // Keep the default. A settings request that fails must not leave a
+        // shared terminal signed in indefinitely.
+      })
   }, [])
 
   useEffect(() => {
@@ -93,7 +119,7 @@ export function AuthProvider({ children }) {
       const left = secondsRemaining()
       if (left <= 0) {
         endSession(REASONS.IDLE)
-      } else if (left <= WARN_SECONDS) {
+      } else if (left <= warnSeconds()) {
         setIdleWarning(left)
       }
     }, 5000)
