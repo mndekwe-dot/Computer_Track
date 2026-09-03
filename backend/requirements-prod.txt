@@ -1,0 +1,11 @@
+# Installed on a deployed instance on top of requirements.txt.
+# The Docker image installs both; a development machine needs neither.
+
+-r requirements.txt
+
+# WSGI server. Django's runserver is single threaded and not for production.
+gunicorn>=23.0
+
+# PostgreSQL. SQLite allows one writer at a time, which several gates
+# recording simultaneously will hit.
+psycopg[binary]>=3.2
