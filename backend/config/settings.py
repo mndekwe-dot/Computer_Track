@@ -252,6 +252,12 @@ REST_FRAMEWORK = {
         # server; the default is the number that matters and should not be
         # raised on anything a student can reach.
         "public-form": config("PUBLIC_FORM_RATE", default="12/hour"),
+        # Reading the branding and the equipment list is not a submission and
+        # must not share that ceiling. Every page load fetches it, signed in or
+        # not, so a 12/hour limit meant the application stopped being able to
+        # render itself after a dozen visits from one address - which is one
+        # lecture theatre behind a single NAT.
+        "public-read": config("PUBLIC_READ_RATE", default="120/min"),
         # Per-account ceilings on the endpoints that can read the whole
         # register. See accounts/throttles.py for why there are two windows.
         "lookup-burst": config("LOOKUP_BURST_RATE", default="120/min"),

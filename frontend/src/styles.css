@@ -290,13 +290,18 @@ h4 {
 }
 
 /* Wrapping means the logo should sit against the top of the text, not float
-   in the middle of a two-line block. */
-.brand {
+   in the middle of a two-line block.
+
+   Scoped to the row layout on purpose. As a bare `.brand` this came later in
+   the file than `.brand-stacked`, matched the same specificity and so won -
+   which silently left-aligned the logo above a centred title on every login
+   screen and on the not-found page. */
+.brand:not(.brand-stacked) {
   align-items: flex-start;
 }
 
-.brand .logo-placeholder,
-.brand .logo-img {
+.brand:not(.brand-stacked) .logo-placeholder,
+.brand:not(.brand-stacked) .logo-img {
   margin-top: 1px;
 }
 
@@ -2519,33 +2524,83 @@ tbody tr:last-child td {
   outline: none;
 }
 
-/* Always in the DOM so repeated announcements are reliable, but with no box
-   of its own: the toast inside is fixed and positions against the viewport. */
+/* ---------- Toasts ---------- */
+
+/* Both live regions stay in the DOM whether or not anything is in them: a
+   region inserted at the same moment as its text is announced unreliably.
+   The wrapper is `pointer-events: none` so an empty one cannot sit over the
+   page swallowing clicks; each toast turns them back on for itself. */
 .toast-region {
   position: fixed;
-  inset-block-end: 0;
-  inset-inline-end: 0;
-  width: 0;
-  height: 0;
+  inset-block-end: 22px;
+  inset-inline-end: 22px;
   z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-end;
+  pointer-events: none;
+  max-width: min(420px, calc(100vw - 44px));
+}
+
+.toast-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-end;
+  width: 100%;
 }
 
 .toast {
-  position: fixed;
-  bottom: 22px;
-  inset-inline-end: 22px;
-  inset-inline-start: auto;
-  padding: 13px 18px;
+  pointer-events: auto;
+  width: 100%;
+  padding: 12px 14px;
   border-radius: var(--radius-sm);
   color: #fff;
   font-size: 14px;
   font-weight: 600;
-  box-shadow: var(--shadow);
+  line-height: 1.45;
+  box-shadow: 0 10px 30px rgb(15 23 42 / 0.22);
   display: flex;
-  align-items: center;
-  gap: 14px;
-  z-index: 60;
-  max-width: 420px;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+/* The icon carries the same meaning as the colour, so the message still
+   reads as a success or a failure in greyscale and to anyone who cannot
+   separate the two greens. */
+.toast-icon {
+  flex: none;
+  margin-block-start: 1px;
+}
+
+.toast-message {
+  flex: 1;
+  min-width: 0;
+  /* Messages quote serial numbers and registration numbers, which have no
+     spaces to break at. */
+  overflow-wrap: anywhere;
+}
+
+/* An infrequent, one-shot arrival, so a keyframe rather than a transition:
+   there is no state to retarget mid-flight. Opt-in, so anyone who asked for
+   reduced motion gets the toast without the movement rather than relying on
+   the global override further down to catch it. */
+@media (prefers-reduced-motion: no-preference) {
+  .toast {
+    animation: toast-in 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 .toast-success {
@@ -2560,22 +2615,336 @@ tbody tr:last-child td {
   background: var(--warn);
 }
 
-/* The other three sit on a saturated status colour and take white ink from
-   the base rule. This one used the page's dark background token, which is now
-   a pale grey, so it has to set its own dark ink or it would be white on
-   near-white and effectively invisible. */
+/* The others sit on a saturated status colour and take white ink from the
+   base rule. This one used the page background token, which is a pale grey,
+   so it sets its own or it would be white on near-white. */
 .toast-info {
   background: #253044;
   color: #fff;
 }
 
+.toast-action {
+  flex: none;
+  color: inherit;
+  border-color: rgb(255 255 255 / 0.45);
+  background: rgb(255 255 255 / 0.12);
+}
+
 .toast-close {
+  flex: none;
   background: transparent;
   border: none;
   color: inherit;
   cursor: pointer;
+  opacity: 0.75;
+  padding: 2px;
+  margin: -2px -2px 0 0;
+  border-radius: 6px;
+  display: grid;
+  place-items: center;
+  /* 24px is below the 44px target guidance, so the hit area is grown with
+     padding on the pseudo-element rather than by making the glyph bigger. */
+  position: relative;
+}
+
+.toast-close::after {
+  content: '';
+  position: absolute;
+  inset: -10px;
+}
+
+.toast-close:hover,
+.toast-close:focus-visible {
+  opacity: 1;
+}
+
+.toast-close:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 1px;
+}
+
+/* ---------- Rules, equipment types and attempts ---------- */
+
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.rule-group + .rule-group {
+  margin-top: 16px;
+}
+
+.rule-group h2 {
+  font-size: 16px;
+}
+
+.rule-group-blurb {
+  margin: 4px 0 4px;
+  max-width: 60ch;
+  text-wrap: pretty;
+}
+
+.rule-list {
+  display: grid;
+}
+
+.rule-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(180px, auto);
+  gap: 16px 24px;
+  align-items: start;
+  padding: 16px 0;
+  border-top: 1px solid var(--border);
+}
+
+/* An edited row is marked with a rule down the side as well as a background
+   tint, so the change is visible without relying on colour alone. */
+.rule-row[data-dirty='true'] {
+  box-shadow: inset 3px 0 0 var(--brand);
+  padding-inline-start: 12px;
+  margin-inline-start: -12px;
+  background: color-mix(in srgb, var(--brand) 4%, transparent);
+}
+
+.rule-label {
+  font-weight: 600;
+  display: block;
+  margin-bottom: 3px;
+}
+
+.rule-help {
+  color: var(--text-muted);
   font-size: 13px;
-  opacity: 0.8;
+  max-width: 62ch;
+  text-wrap: pretty;
+}
+
+.rule-control {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.rule-control textarea {
+  min-width: 260px;
+  width: 100%;
+  font-size: 13px;
+}
+
+.rule-number {
+  width: 7.5rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* A row that needs somebody's attention. The pill beside it already says so
+   in words; this is what makes it findable while scanning. */
+tr[data-attention='true'] td:first-child {
+  box-shadow: inset 3px 0 0 var(--hold);
+}
+
+@media (max-width: 720px) {
+  .rule-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .rule-control {
+    justify-content: flex-start;
+  }
+
+  .rule-control textarea {
+    min-width: 0;
+  }
+}
+
+/* ---------- Message editor ---------- */
+
+.message-card + .message-card {
+  margin-top: 16px;
+}
+
+.message-head {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.message-head h2 {
+  font-size: 16px;
+}
+
+.placeholder-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 14px;
+  font-size: 13px;
+}
+
+.placeholder-chip {
+  font-family: var(--mono);
+  font-size: 12px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--border-control);
+  background: var(--bg);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background-color 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+}
+
+.placeholder-chip:hover {
+  background: var(--surface);
+  color: var(--text);
+  border-color: var(--brand);
+}
+
+.message-preview {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  padding: 14px 16px;
+  margin-bottom: 14px;
+}
+
+.message-preview h3 {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+/* The message is sent as plain text, so its line breaks are meaningful and
+   the preview has to keep them. `pre-wrap` rather than `pre` so a long line
+   still wraps to the card instead of scrolling sideways. */
+.message-preview pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.row-actions {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+/* ---------- Not found ---------- */
+
+.notfound-page {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 32px 20px;
+  background: var(--bg);
+}
+
+.notfound-card {
+  width: 100%;
+  max-width: 30rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: clamp(24px, 5vw, 40px);
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+
+/* Decorative and aria-hidden: the heading below already says what happened,
+   and "404" read aloud tells nobody anything. Sized large because it is the
+   thing that makes the page recognisable at a glance. */
+.notfound-code {
+  font-size: clamp(48px, 12vw, 68px);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--border-control);
+  margin: 20px 0 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+.notfound-card h1 {
+  font-size: clamp(20px, 3.4vw, 25px);
+  margin-bottom: 10px;
+}
+
+.notfound-body {
+  color: var(--text-muted);
+  margin-bottom: 18px;
+  text-wrap: pretty;
+}
+
+.notfound-path {
+  margin-bottom: 22px;
+}
+
+.notfound-path code {
+  display: inline-block;
+  max-width: 100%;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  font-size: 13px;
+  color: var(--text-muted);
+  /* A portal path has no spaces to break at, so it would otherwise push the
+     card wider than the screen. */
+  overflow-wrap: anywhere;
+}
+
+.notfound-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.notfound-links {
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+  text-align: start;
+}
+
+.notfound-links h2 {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+
+.notfound-links ul {
+  list-style: none;
+  display: grid;
+  gap: 8px;
+}
+
+.notfound-links a {
+  color: var(--brand);
+  text-underline-offset: 2px;
+}
+
+.notfound-support {
+  margin-top: 20px;
+  font-size: 13px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
 }
 
 /* ---------- QR sticker printing ---------- */
@@ -2826,10 +3195,9 @@ tbody tr:last-child td {
     order: 3;
   }
 
-  .toast {
-    right: 12px;
-    left: 12px;
-    bottom: 12px;
+  .toast-region {
+    inset-inline: 12px;
+    inset-block-end: 12px;
     max-width: none;
   }
 
