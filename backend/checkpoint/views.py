@@ -1,8 +1,6 @@
 import csv
 import logging
-from datetime import timedelta
 
-from django.db.models import Count, Max, Q
 from django.http import HttpResponse
 from django.utils import timezone
 from rest_framework import status, viewsets
@@ -12,13 +10,13 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from accounts import audit
-from config.exports import csv_safe_row
 from accounts.throttles import LookupBurstThrottle, LookupDailyThrottle
-from campus.models import Gate
+from config.exports import csv_safe_row
+from config.throttles import WriteThrottle
+from notifications.service import notify_owner_of_exit
 from students.serializers import StudentSerializer
 
-from notifications.service import notify_owner_of_exit
-
+from . import stats
 from .lookup import resolve_query, suggest
 from .models import Direction, ScanEvent, Verdict
 from .serializers import (
@@ -144,13 +142,29 @@ class ScanEventViewSet(viewsets.ModelViewSet):
         """Flush a guard's offline queue. Duplicates are ignored by reference."""
         serializer = BulkScanSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        scans = serializer.validated_data["scans"]
+
+        # One query for the whole batch. This was an `.exists()` per scan,
+        # which is the wrong shape for the one endpoint whose entire purpose
+        # is arriving with fifty of them after a gate has been offline.
+        references = {item.get("client_reference") for item in scans if item.get("client_reference")}
+        already_have = set(
+            ScanEvent.objects.filter(client_reference__in=references).values_list(
+                "client_reference", flat=True
+            )
+        )
+
         created = []
-        for item in serializer.validated_data["scans"]:
-            gate = item.get("gate") or request.user.default_gate
+        for item in scans:
             reference = item.get("client_reference")
-            if reference and ScanEvent.objects.filter(client_reference=reference).exists():
+            if reference and reference in already_have:
                 continue
+            gate = item.get("gate") or request.user.default_gate
             created.append(ScanEvent(**{**item, "guard": request.user, "gate": gate}))
+
+        # Saved one at a time rather than bulk_create: ScanEvent.save() takes
+        # the register snapshot that makes the log readable years later, and
+        # bulk_create does not call it.
         for scan in created:
             scan.save()
         return Response(
@@ -216,94 +230,13 @@ class ScanEventViewSet(viewsets.ModelViewSet):
 
 
 class DashboardView(APIView):
-    """Numbers for the security office wall screen."""
+    """Numbers for the security office wall screen.
+
+    The work is in checkpoint/stats.py, and the result is cached: this is the
+    most expensive read in the system and the least urgent one.
+    """
 
     permission_classes = (IsAuthenticated,)
 
     def get(self, request):
-        now = timezone.now()
-        today = timezone.localdate()
-        week_ago = today - timedelta(days=6)
-
-        today_scans = ScanEvent.objects.filter(created_at__date=today)
-        verdicts = {
-            row["verdict"]: row["total"]
-            for row in today_scans.values("verdict").annotate(total=Count("id"))
-        }
-
-        # A device is "on campus" when its most recent successful scan was an entry.
-        latest_ids = (
-            ScanEvent.objects.filter(device__isnull=False)
-            .values("device")
-            .annotate(last_id=Max("id"))
-            .values_list("last_id", flat=True)
-        )
-        on_campus = ScanEvent.objects.filter(
-            id__in=list(latest_ids),
-            direction=Direction.IN,
-            verdict__in=[Verdict.ALLOWED, Verdict.OVERRIDE],
-        ).count()
-
-        by_gate = list(
-            Gate.objects.filter(is_active=True)
-            .annotate(
-                scans_today=Count("scan_events", filter=Q(scan_events__created_at__date=today)),
-                denials_today=Count(
-                    "scan_events",
-                    filter=Q(
-                        scan_events__created_at__date=today,
-                        scan_events__verdict=Verdict.DENIED,
-                    ),
-                ),
-            )
-            .values("id", "name", "code", "scans_today", "denials_today")
-        )
-
-        # Entries and exits are charted as two series, so they are counted
-        # per day here rather than derived in the browser.
-        trend_rows = (
-            ScanEvent.objects.filter(created_at__date__gte=week_ago)
-            .values("created_at__date")
-            .annotate(
-                total=Count("id"),
-                entries=Count("id", filter=Q(direction=Direction.IN)),
-                exits=Count("id", filter=Q(direction=Direction.OUT)),
-            )
-        )
-        trend_map = {row["created_at__date"]: row for row in trend_rows}
-        trend = []
-        for offset in range(7):
-            day = week_ago + timedelta(days=offset)
-            row = trend_map.get(day)
-            trend.append(
-                {
-                    "date": day.isoformat(),
-                    "label": day.strftime("%a"),
-                    "total": row["total"] if row else 0,
-                    "entries": row["entries"] if row else 0,
-                    "exits": row["exits"] if row else 0,
-                }
-            )
-
-        recent_problems = ScanEvent.objects.filter(
-            verdict__in=[Verdict.DENIED, Verdict.OVERRIDE, Verdict.UNREGISTERED]
-        ).select_related("gate", "guard")[:10]
-
-        return Response(
-            {
-                "generated_at": now,
-                "today": {
-                    "total": today_scans.count(),
-                    "entries": today_scans.filter(direction=Direction.IN).count(),
-                    "exits": today_scans.filter(direction=Direction.OUT).count(),
-                    "allowed": verdicts.get(Verdict.ALLOWED, 0),
-                    "denied": verdicts.get(Verdict.DENIED, 0),
-                    "overrides": verdicts.get(Verdict.OVERRIDE, 0),
-                    "unregistered": verdicts.get(Verdict.UNREGISTERED, 0),
-                },
-                "devices_on_campus": on_campus,
-                "by_gate": by_gate,
-                "trend": trend,
-                "recent_problems": ScanEventSerializer(recent_problems, many=True).data,
-            }
-        )
+        return Response(stats.dashboard())
