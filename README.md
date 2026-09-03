@@ -8,27 +8,63 @@ student's photo, their details and every computer registered in their name - eac
 **CLEAR** or **HOLD** recommendation and the registered photo to compare against. The guard
 matches the machine in front of them and records the decision.
 
-**Stack:** Django 5.2 + DRF (JWT auth) · React 19 + Vite · SQLite by default, PostgreSQL via one
-environment variable.
+**Stack:** Django 5.2 + DRF (JWT auth) · React 19 + Vite · PostgreSQL and Redis in production,
+SQLite and in-process caching with no setup at all · Celery for background work · Resend and
+Africa's Talking for email and SMS · Docker Compose for the lot.
+
+Almost nothing here is fixed in code. The equipment types, the gate rules, the wording a guard
+reads and the messages students receive are all edited by the registration office - see
+[Rules and wording](#rules-and-wording).
 
 ---
 
 ## Contents
 
-- [Running it](#running-it) · [Demo accounts](#demo-accounts)
+- [Running it](#running-it) - [with Docker](#with-docker) or [from source](#from-source) · [Demo accounts](#demo-accounts)
 - [Who uses what](#who-uses-what) - three staff portals and one public student page
 - [What it does](#what-it-does)
+- [Rules and wording](#rules-and-wording) - what a registrar can change without a developer
 - [Search](#search) - the inverted index and why it is fast
-- [Notifications](#notifications) - the outbox
+- [Notifications](#notifications) - the outbox, Resend and Africa's Talking
+- [Working offline](#working-offline)
 - [Read audit log](#read-audit-log)
 - [API](#api) · [Project layout](#project-layout) · [Commands](#management-commands)
-- [Tests](#tests) · [Design decisions](#notes-on-some-design-decisions) · [Deployment](#deployment)
+- [Tests](#tests) · [Deployment](#deployment)
+- [ARCHITECTURE.md](ARCHITECTURE.md) - how it is put together, and why
+- [CHANGELOG.md](CHANGELOG.md) - what changed when
 
 ---
 
 ## Running it
 
-### Backend
+### With Docker
+
+Everything - database, cache, API, worker, scheduler and frontend - in one command.
+
+```bash
+cp .env.docker.example .env
+# fill in DJANGO_SECRET_KEY and DB_PASSWORD; compose refuses to start without them
+docker compose up --build
+
+docker compose exec api python manage.py migrate
+docker compose exec api python manage.py seed_demo
+```
+
+App on `http://localhost:8080`, API on `http://localhost:8000`.
+
+Five services, each there for a reason. `db` is PostgreSQL, because SQLite allows one writer at
+a time and several gates recording simultaneously will hit that. `redis` is the cache and the
+Celery broker; without it four gunicorn workers keep four separate copies of the rules. `api` is
+Django under gunicorn. `worker` drains the notification outbox, separately so a slow provider
+cannot occupy a request thread. `beat` is the clock - without it nothing sweeps up messages
+queued while the broker was down.
+
+### From source
+
+Neither PostgreSQL nor Redis is required. Without them it uses SQLite, caches in process memory
+and runs background tasks inline, which is the right shape for a laptop.
+
+#### Backend
 
 ```bash
 cd backend
@@ -46,7 +82,7 @@ python manage.py runserver
 
 API on `http://127.0.0.1:8000`, Django admin on `/admin/`.
 
-### Frontend
+#### Frontend
 
 ```bash
 cd frontend
@@ -186,6 +222,77 @@ asset tag) or rejects with a written reason. Either way the student is emailed t
 
 ---
 
+## Rules and wording
+
+Most of what a university would want to change about this system is not in the code.
+
+`config/settings.py` holds *deployment* configuration - database credentials, an API key, where
+Redis lives. It changes when the software moves between machines.
+
+Policy is different, and it lives in the database, edited under **Rules & Wording** in the
+Registration Office portal:
+
+| Group | What a registrar can set |
+| --- | --- |
+| Names and contact details | The university's name, the registration office's name, the support and security telephone numbers. These appear in every message a student receives. |
+| Gate decisions | Whether a pending computer is held, whether a suspended student's equipment is held, whether university property needs a gate pass, whether an override needs a written reason and how long it must be, and **the exact sentence a guard reads** in each case. |
+| Student registration | Whether the public form is open at all, the most computers one student may register, whether a photograph is required, whether to ask where the computer was bought, and how many repeat submissions trigger a review. |
+| Gate passes | The longest pass that may be issued. |
+| Sessions | How long a terminal may sit idle, and how much warning it gives first. |
+
+Alongside them, **Equipment Types** is a table too. A campus that checks lab equipment or
+musical instruments at the gate adds them itself; retiring a type leaves the computers already
+registered under it alone.
+
+Three things make handing this over safe:
+
+- **A rule outside the registry cannot be stored.** `campus/rules.py` declares every key with
+  its type, bounds, help text and default. The registry is code; only the values are data.
+- **A bad stored value falls back to its default.** Nothing should be able to write one, but a
+  hand edit in the Django admin can, and a gate lookup that raises is a queue that stops moving.
+- **A wording rule with a mistyped placeholder leaves it visible** rather than blowing up the
+  lookup, so the mistake gets reported rather than silently swallowing text.
+
+Saving takes effect at every gate immediately. There is no deployment step and no cache to wait
+for.
+
+---
+
+## Working offline
+
+Gates are at the perimeter of campus, often outdoors, on wifi that drops. Three separate
+mechanisms, because they fail differently.
+
+**The application itself** is cached by a service worker, so a refresh with no network starts the
+console rather than showing a blank page. Before this, a locked screen at a busy gate meant a
+guard with nothing but a white screen and a queue.
+
+**Scans** queue in the browser with an idempotency key and flush when the network returns. The
+key is what makes retrying safe: the server answers a replayed reference with the original scan
+rather than writing a second one, so a sync that half-succeeded can simply be repeated. Each
+carries the time the guard actually decided, not the time the network came back.
+
+If the server refuses a queued scan outright, it is set aside for review rather than deleted.
+Discarding them destroyed a record of decisions a guard really made, and told nobody.
+
+**Lookups** the guard has already performed are kept for a few minutes so the same person coming
+back through the same gate can still be checked. They live in the tab's own session storage, are
+cleared on sign-out, and are always shown with the time they were taken.
+
+### What is deliberately not cached
+
+The obvious way to make a gate console work offline is to download the register to the device.
+That is the one thing this does not do. The register is every student's name, photograph,
+telephone number and equipment, and a gate tablet - shared, left on a desk, occasionally stolen
+- is the least physically secure device in the system.
+
+So only what has actually been looked up is kept, and only briefly. The device never holds a
+record of somebody who has not walked past it. And a cached answer is labelled as one, because a
+computer reported stolen since the lookup would still read as clear, and that is exactly where
+being confidently wrong matters most.
+
+---
+
 ## Search
 
 Search is the thing a guard touches most, so it gets its own data structure: an **inverted
@@ -235,8 +342,22 @@ instant. Measured over HTTP: **26 ms average.**
 ## Notifications
 
 Messages are never sent during a request. Each is written to an **outbox table**
-(`notifications.Notification`) inside the same transaction as the thing it describes, and a
-worker drains it afterwards:
+(`notifications.Notification`) inside the same transaction as the thing it describes, and drained
+afterwards.
+
+Three reasons for an outbox rather than sending inline:
+
+- **The gate stays fast.** A provider round trip has no business on the critical path of
+  recording a scan. Measured: approve 195 ms, scan 99 ms, with nothing sent in-request.
+- **Nothing is lost.** A mail server having a bad afternoon used to mean the message vanished.
+  It stays `PENDING`, backs off, and is retried until it succeeds or is marked `FAILED`.
+- **A rollback sends nothing.** Dispatch hangs off `transaction.on_commit`, so a scan that fails
+  to save cannot email anybody about it.
+
+`NOTIFY_DISPATCH` picks how it drains: `celery` (production), `inline` (development and tests),
+`thread` (a single-process deployment with no broker), or `worker` (cron). Every one of them
+writes the outbox row first, so the choice affects latency and never durability - a broker that
+loses a message and a committed row are different guarantees.
 
 ```bash
 python manage.py process_notifications            # one pass - run from cron
@@ -244,22 +365,59 @@ python manage.py process_notifications --loop     # stay running under systemd
 python manage.py process_notifications --retry-failed
 ```
 
-Three reasons for an outbox rather than sending inline:
+### Email: Resend
 
-- **The gate stays fast.** An SMTP round trip has no business on the critical path of recording
-  a scan. Measured: approve 195 ms, scan 99 ms, with no mail sent in-request.
-- **Nothing is lost.** A mail server having a bad afternoon used to mean the message vanished.
-  Now it stays `PENDING` and is retried up to five times, then marked `FAILED` for a human.
-- **A rollback sends nothing.** Dispatch hangs off `transaction.on_commit`, so a scan that fails
-  to save cannot email anybody about it.
+```env
+EMAIL_PROVIDER=resend
+RESEND_API_KEY=re_...
+DEFAULT_FROM_EMAIL=Computer Track <no-reply@your-university.edu>
+```
 
-`NOTIFY_DISPATCH` picks how the outbox drains - `inline` (development and tests), `thread`
-(single-process deployments) or `worker` (production). Swapping in Celery or django-q later means
-changing one function, `_schedule_dispatch`; the outbox stays either way, because a broker that
-loses a message and a database row that does not are different guarantees.
+The sending domain has to be verified in the Resend dashboard first, or every message is
+refused. It is a Django email backend rather than something the outbox calls directly, so
+anything else that sends mail goes through it without knowing.
 
-SMS ships as an interface with a console implementation - point `SMS_BACKEND` at a class with
-`send(to, message)` to go live.
+`EMAIL_PROVIDER=console` prints to the terminal and is the default in development.
+
+### SMS: Africa's Talking
+
+```env
+SMS_PROVIDER=africastalking
+AFRICASTALKING_USERNAME=your_username     # "sandbox" selects the test environment
+AFRICASTALKING_API_KEY=atsk_...
+AFRICASTALKING_SENDER_ID=YOURUNI          # blank uses the shared sender pool
+SMS_DEFAULT_COUNTRY_CODE=+250
+```
+
+`SMS_PROVIDER=console` logs instead of sending, and is the default, so nothing silently costs
+money.
+
+Two details that matter, both handled once in
+`notifications/providers/africastalking.py`:
+
+- **Numbers.** Student records hold them as people write them - `0788123456`, `788123456`,
+  `+250788123456`, `250 788 123 456`. The API accepts E.164 only and does nothing useful with
+  anything else. All four are normalised to the same number.
+- **Length.** A segment is 160 characters and every segment is charged, so a long message is
+  truncated on a word boundary rather than quietly costing four times as much per student.
+
+There is a trap in this API worth knowing about: it answers HTTP 200 and reports the real
+outcome *per recipient*, so an invalid number or an empty account looks like success at the
+transport layer. The recipient status is what is actually checked.
+
+### Failures that will never succeed
+
+An unverified sending domain, a number that is not a number, an empty SMS account: none of those
+improve on the fifth attempt, and retrying them costs money on SMS and sender reputation on
+email. Providers mark those failures permanent and the outbox stops immediately, rather than
+burning five attempts. Everything else backs off and retries.
+
+### The wording
+
+Every message is a template a registrar edits under **Messages**, with a preview. A missing
+placeholder renders empty rather than raising, an unknown one is left visible so a typo gets
+reported rather than vanishing, and a blank template falls back to what shipped - the system
+cannot be left unable to warn somebody that their laptop has gone.
 
 ---
 
@@ -467,16 +625,20 @@ The brand mark is a **slot**, not a fixed asset. Drop your file at `frontend/src
 
 ```bash
 cd backend
-.venv\Scripts\python.exe manage.py test tests     # 230 tests
+.venv\Scripts\python.exe manage.py test           # 300 tests
 
 cd frontend
-npm test                                          # 48 tests
+npm test                                          # 51 tests
+
+npx playwright test                               # 42 end-to-end, needs both running
 ```
 
-The frontend suite is Vitest and jsdom, covering the two pieces of behaviour that are hard to
-check by hand: the offline scan queue and live-search cancellation.
+The frontend suite is Vitest and jsdom, covering the behaviour that is hard to check by hand:
+the offline scan queue, live-search cancellation, session expiry and the accessibility contracts
+of the shared components - each of which is invisible on screen and so survives a redesign only
+if something checks it.
 
-**230 backend tests.** Notable areas:
+**300 backend tests.** Notable areas:
 
 | Area | Covers |
 |------|--------|
@@ -489,6 +651,17 @@ check by hand: the offline scan queue and live-search cancellation.
 | `test_audit` | What is logged, who can read it, append-only enforcement |
 | `test_retention_2fa` | Prune safety rails, baseline alerting, the whole 2FA flow |
 | `test_auth` | Login, token use, self-service limits |
+| `test_rules` | The policy registry, its bounds, and that a saved rule changes the gate's answer |
+| `test_registration_defences` | Every check against registering another student's computer, and that being caught tells the submitter nothing |
+| `test_providers` | Resend and Africa's Talking without a network: number formats, truncation, and which failures are worth retrying |
+| `test_performance` | That a page of thirty rows costs the same number of queries as three |
+| `test_university_property` | Direction-dependent gate passes |
+
+The performance tests deserve a note. They assert that the query count does not change between a
+small result set and a larger one, rather than asserting a fixed number. An N+1 is not a slow
+query - it is a count that grows with the data, invisible in development where the table has
+nine rows. A fixed number would fail on any unrelated change and be relaxed until it meant
+nothing.
 
 ---
 
@@ -751,8 +924,12 @@ size in a new tab" at the gate, which guards actually use.
 
 ## Not built yet
 
-- **Messaging system** - requested, spec pending from you. Nothing has been designed or stubbed
-  for it, deliberately.
+- **Recovery codes for two-factor, and a password reset.** Account recovery is the weakest
+  operational surface here.
+- **A backup and restore drill.** There is no `pg_dump` schedule in this repository and nothing
+  covering `media/`.
+- **Student lifecycle.** Nothing archives a graduate's computers or reclaims their asset tags.
+- **Two-factor for guards.** Currently administrator accounts only.
 
 ## If you take this further
 
@@ -767,9 +944,13 @@ size in a new tab" at the gate, which guards actually use.
 4. **A backup and, more importantly, a restore drill.** The scan log is described above as
    something that may end up being evidence. There is no `pg_dump` schedule in this repository and
    nothing covering `media/`. A register nobody has ever restored from is a guess.
-5. **Continuous integration.** 230 backend, 48 frontend and 42 end-to-end tests. The
+5. **Continuous integration.** 300 backend, 51 frontend and 42 end-to-end tests. The
    Playwright workflow in `.github/workflows` still needs the API and seed data brought up
-   before it will pass.
+   before it will pass - the container images now make that straightforward.
+6. **A real sending domain.** `EMAIL_PROVIDER` and `SMS_PROVIDER` default to `console`, so a
+   fresh deployment sends nothing at all until somebody sets them. That is the safe direction to
+   be wrong in, but it does mean the exit notification - the most useful thing this system does
+   about a theft - is inert until it is configured.
    Cheapest useful addition in this list.
 6. **A student lifecycle.** Nothing here handles graduation, withdrawal or suspension, so a
    registration is currently permanent and the gate will keep confirming ownership for somebody
