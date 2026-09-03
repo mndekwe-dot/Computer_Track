@@ -44,10 +44,11 @@ describe('Landing', () => {
     const register = screen.getByRole('link', { name: /register my computer/i })
     expect(register.getAttribute('href')).toBe('/register')
     // And the staff route, which must be a real in-page link rather than a
-    // control that has to be discovered.
-    expect(screen.getByRole('link', { name: /staff portals/i }).getAttribute('href')).toBe(
-      '#staff-sign-in',
-    )
+    // control that has to be discovered. There are two, one in the top bar
+    // and one beside the student action; both must land on the same section.
+    const staffLinks = screen.getAllByRole('link', { name: /staff sign in/i })
+    expect(staffLinks.length).toBeGreaterThan(0)
+    staffLinks.forEach((link) => expect(link.getAttribute('href')).toBe('#staff-sign-in'))
   })
 
   it('links every portal to its own login', () => {
