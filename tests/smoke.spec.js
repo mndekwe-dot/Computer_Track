@@ -25,11 +25,21 @@ const SCREENS = [
   { user: 'registrar', path: '/registry/devices', heading: /computers/i },
   { user: 'registrar', path: '/registry/flags', heading: /holds/i },
   { user: 'registrar', path: '/registry/permits', heading: /permits/i },
+  { user: 'registrar', path: '/registry/gates', heading: /gates/i },
+  { user: 'registrar', path: '/registry/rules', heading: /rules and wording/i },
+  { user: 'registrar', path: '/registry/equipment-types', heading: /equipment types/i },
+  { user: 'registrar', path: '/registry/messages', heading: /messages/i },
+  { user: 'registrar', path: '/registry/attempts', heading: /registration attempts/i },
 
   { user: 'admin', path: '/admin/dashboard', heading: /dashboard/i },
   { user: 'admin', path: '/admin/gates', heading: /gates/i },
   { user: 'admin', path: '/admin/staff', heading: /staff/i },
   { user: 'admin', path: '/admin/audit', heading: /audit/i },
+  { user: 'admin', path: '/admin/rules', heading: /rules and wording/i },
+
+  // A wrong address used to redirect to the landing page, which reads as the
+  // application losing your place and hides the broken link that caused it.
+  { user: null, path: '/no/such/page', heading: /does not exist/i },
 ]
 
 for (const screen of SCREENS) {
