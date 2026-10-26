@@ -1,107 +1,89 @@
 <mxfile host="app.diagrams.net" type="device">
   <diagram name="UML Class Diagram" id="class_diagram">
-    <mxGraphModel dx="1850" dy="1250" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1850" pageHeight="1220" math="0" shadow="0">
+    <mxGraphModel dx="1850" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="960" defaultFontFamily="Segoe UI" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-
-        <!-- Title & Subtitle -->
-        <mxCell id="title" value="Computer Track — UML 2.5 Class Diagram (Domain Model &amp; Core Operations)" style="text;html=1;fontFamily=Segoe UI;fontSize=20;fontStyle=1;fontColor=#0F172A;align=left;" vertex="1" parent="1">
-          <mxGeometry x="40" y="16" width="900" height="30" as="geometry" />
-        </mxCell>
-        <mxCell id="subtitle" value="Structural View: 13 Domain Classes, 5 Enumerations, Multiplicities, Composition (◆), Aggregation (◇), Directed Association (───▶), and Dependency (- - -▷)" style="text;html=1;fontFamily=Segoe UI;fontSize=12;fontStyle=0;fontColor=#475569;align=left;" vertex="1" parent="1">
-          <mxGeometry x="40" y="44" width="1100" height="22" as="geometry" />
-        </mxCell>
 
         <!-- ==================== ROW 1: CORE REGISTRY & GATE OPERATIONS ==================== -->
 
         <!-- Department -->
         <mxCell id="cls_dept" value="&lt;b&gt;Department&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;+ id: Integer&lt;br/&gt;+ code: String {unique}&lt;br/&gt;+ name: String&lt;br/&gt;+ faculty: String" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fontFamily=Segoe UI;fontSize=11;fillColor=#F3E8FF;strokeColor=#7E22CE;strokeWidth=1.5;fontColor=#0F172A;" vertex="1" parent="1">
-          <mxGeometry x="40" y="120" width="210" height="120" as="geometry" />
+          <mxGeometry x="40" y="90" width="210" height="120" as="geometry" />
         </mxCell>
 
         <!-- Student -->
         <mxCell id="cls_student" value="&lt;b&gt;Student&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;+ id: Integer&lt;br/&gt;+ reg_number: String {unique}&lt;br/&gt;- reg_number_key: String&lt;br/&gt;+ first_name: String&lt;br/&gt;+ last_name: String&lt;br/&gt;+ email: String&lt;br/&gt;+ phone: String&lt;br/&gt;+ national_id: String&lt;br/&gt;+ programme: String&lt;br/&gt;+ year_of_study: Integer&lt;br/&gt;+ photo: Image&lt;br/&gt;+ status: StudentStatus&lt;hr size=&quot;1&quot;/&gt;+ get_full_name(): String&lt;br/&gt;+ is_clear_to_pass(): Boolean" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fontFamily=Segoe UI;fontSize=11;fillColor=#DBEAFE;strokeColor=#1D4ED8;strokeWidth=1.5;fontColor=#0F172A;" vertex="1" parent="1">
-          <mxGeometry x="340" y="120" width="240" height="290" as="geometry" />
+          <mxGeometry x="340" y="90" width="240" height="290" as="geometry" />
         </mxCell>
 
         <!-- Device -->
         <mxCell id="cls_device" value="&lt;b&gt;Device&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;+ uid: UUID {PK}&lt;br/&gt;+ serial_number: String {unique}&lt;br/&gt;- serial_key: String&lt;br/&gt;+ asset_tag: String&lt;br/&gt;+ device_type: String&lt;br/&gt;+ brand: String&lt;br/&gt;+ model_name: String&lt;br/&gt;+ colour: String&lt;br/&gt;+ distinguishing_marks: String&lt;br/&gt;+ ownership: Ownership&lt;br/&gt;+ status: DeviceStatus&lt;br/&gt;+ purchase_details: String&lt;br/&gt;+ photo: Image&lt;br/&gt;+ is_archived: Boolean&lt;hr size=&quot;1&quot;/&gt;+ label(): String&lt;br/&gt;+ active_flags(): List&amp;lt;DeviceFlag&amp;gt;&lt;br/&gt;+ valid_permits(): List&amp;lt;TemporaryPermit&amp;gt;&lt;br/&gt;+ blocking_reasons(): List&amp;lt;String&amp;gt;&lt;br/&gt;+ exit_restrictions(): List&amp;lt;String&amp;gt;&lt;br/&gt;+ is_blocked(): Boolean" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fontFamily=Segoe UI;fontSize=11;fillColor=#DBEAFE;strokeColor=#1D4ED8;strokeWidth=2;fontColor=#0F172A;" vertex="1" parent="1">
-          <mxGeometry x="690" y="120" width="270" height="380" as="geometry" />
+          <mxGeometry x="690" y="90" width="270" height="380" as="geometry" />
         </mxCell>
 
         <!-- ScanEvent -->
         <mxCell id="cls_scan" value="&amp;laquo;append-only&amp;raquo;&lt;br/&gt;&lt;b&gt;ScanEvent&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;+ id: Integer&lt;br/&gt;+ direction: Direction&lt;br/&gt;+ verdict: Verdict&lt;br/&gt;+ method: LookupMethod&lt;br/&gt;+ claimed_serial: String&lt;br/&gt;+ claimed_reg_number: String&lt;br/&gt;+ device_label: String&lt;br/&gt;+ student_name: String&lt;br/&gt;+ bearer_name: String&lt;br/&gt;+ override_reason: String&lt;br/&gt;+ client_reference: UUID {unique}&lt;br/&gt;+ created_at: DateTime" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fontFamily=Segoe UI;fontSize=11;fillColor=#FEF3C7;strokeColor=#B45309;strokeWidth=1.5;fontColor=#0F172A;" vertex="1" parent="1">
-          <mxGeometry x="1090" y="120" width="250" height="280" as="geometry" />
+          <mxGeometry x="1090" y="90" width="250" height="280" as="geometry" />
         </mxCell>
 
         <!-- Gate -->
         <mxCell id="cls_gate" value="&lt;b&gt;Gate&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;+ id: Integer&lt;br/&gt;+ code: String {unique}&lt;br/&gt;+ name: String&lt;br/&gt;+ location: String&lt;br/&gt;+ allows_entry: Boolean&lt;br/&gt;+ allows_exit: Boolean&lt;br/&gt;+ opens_at: Time&lt;br/&gt;+ closes_at: Time&lt;br/&gt;+ contact_phone: String&lt;br/&gt;+ is_active: Boolean&lt;hr size=&quot;1&quot;/&gt;+ allows(direction: Direction): Boolean&lt;br/&gt;+ is_open_at(moment: DateTime): Boolean" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fontFamily=Segoe UI;fontSize=11;fillColor=#F3E8FF;strokeColor=#7E22CE;strokeWidth=1.5;fontColor=#0F172A;" vertex="1" parent="1">
-          <mxGeometry x="1470" y="120" width="250" height="250" as="geometry" />
+          <mxGeometry x="1470" y="90" width="250" height="250" as="geometry" />
         </mxCell>
 
         <!-- ==================== ROW 2: POLICY, LIFECYCLE, STAFF & PERMITS ==================== -->
 
         <!-- Rule -->
         <mxCell id="cls_rule" value="&amp;laquo;policy&amp;raquo;&lt;br/&gt;&lt;b&gt;Rule&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;+ key: String {PK}&lt;br/&gt;+ value: JSON&lt;hr size=&quot;1&quot;/&gt;+ get(key: String): Any&lt;br/&gt;+ evaluate(): Boolean" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fontFamily=Segoe UI;fontSize=11;fillColor=#FEF3C7;strokeColor=#B45309;strokeWidth=1.5;fontColor=#0F172A;" vertex="1" parent="1">
-          <mxGeometry x="40" y="310" width="210" height="130" as="geometry" />
+          <mxGeometry x="40" y="280" width="210" height="130" as="geometry" />
         </mxCell>
 
         <!-- EquipmentType -->
         <mxCell id="cls_equip" value="&amp;laquo;catalog&amp;raquo;&lt;br/&gt;&lt;b&gt;EquipmentType&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;+ code: String {PK}&lt;br/&gt;+ label: String&lt;br/&gt;+ description: String&lt;br/&gt;+ offered_to_students: Boolean&lt;br/&gt;+ is_active: Boolean&lt;br/&gt;+ sort_order: Integer" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fontFamily=Segoe UI;fontSize=11;fillColor=#F3E8FF;strokeColor=#7E22CE;strokeWidth=1.5;fontColor=#0F172A;" vertex="1" parent="1">
-          <mxGeometry x="40" y="500" width="210" height="160" as="geometry" />
+          <mxGeometry x="40" y="470" width="210" height="160" as="geometry" />
         </mxCell>
 
         <!-- RegistrationAttempt -->
         <mxCell id="cls_attempt" value="&lt;b&gt;RegistrationAttempt&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;+ id: Integer&lt;br/&gt;+ submitted_reg_number: String&lt;br/&gt;+ submitted_serial: String&lt;br/&gt;+ outcome: AttemptOutcome&lt;br/&gt;+ failure_reason: String&lt;br/&gt;+ ip_address: IPAddress&lt;br/&gt;+ created_at: DateTime" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fontFamily=Segoe UI;fontSize=11;fillColor=#FEE2E2;strokeColor=#B91C1C;strokeWidth=1.5;fontColor=#0F172A;" vertex="1" parent="1">
-          <mxGeometry x="340" y="490" width="240" height="170" as="geometry" />
+          <mxGeometry x="340" y="460" width="240" height="170" as="geometry" />
         </mxCell>
 
         <!-- DeviceFlag -->
         <mxCell id="cls_flag" value="&lt;b&gt;DeviceFlag&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;+ id: Integer&lt;br/&gt;+ reason: FlagReason&lt;br/&gt;+ details: String&lt;br/&gt;+ is_active: Boolean&lt;br/&gt;+ created_at: DateTime" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fontFamily=Segoe UI;fontSize=11;fillColor=#FEE2E2;strokeColor=#B91C1C;strokeWidth=1.5;fontColor=#0F172A;" vertex="1" parent="1">
-          <mxGeometry x="690" y="580" width="230" height="140" as="geometry" />
+          <mxGeometry x="690" y="550" width="230" height="140" as="geometry" />
         </mxCell>
 
         <!-- TemporaryPermit -->
         <mxCell id="cls_permit" value="&lt;b&gt;TemporaryPermit&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;+ id: Integer&lt;br/&gt;+ bearer_name: String&lt;br/&gt;+ bearer_id_number: String&lt;br/&gt;+ relationship: String&lt;br/&gt;+ reason: String&lt;br/&gt;+ valid_from: DateTime&lt;br/&gt;+ valid_to: DateTime&lt;br/&gt;+ is_revoked: Boolean&lt;hr size=&quot;1&quot;/&gt;+ is_valid_now(): Boolean" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fontFamily=Segoe UI;fontSize=11;fillColor=#DCFCE7;strokeColor=#15803D;strokeWidth=1.5;fontColor=#0F172A;" vertex="1" parent="1">
-          <mxGeometry x="1000" y="490" width="230" height="195" as="geometry" />
+          <mxGeometry x="1000" y="460" width="230" height="195" as="geometry" />
         </mxCell>
 
         <!-- User -->
         <mxCell id="cls_user" value="&amp;laquo;staff&amp;raquo;&lt;br/&gt;&lt;b&gt;User&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;+ id: Integer&lt;br/&gt;+ username: String {unique}&lt;br/&gt;+ role: Role&lt;br/&gt;+ staff_number: String&lt;br/&gt;+ phone: String&lt;br/&gt;+ is_active: Boolean" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fontFamily=Segoe UI;fontSize=11;fillColor=#DCFCE7;strokeColor=#15803D;strokeWidth=1.5;fontColor=#0F172A;" vertex="1" parent="1">
-          <mxGeometry x="1470" y="450" width="230" height="160" as="geometry" />
+          <mxGeometry x="1470" y="420" width="230" height="160" as="geometry" />
         </mxCell>
 
-        <!-- ==================== ROW 3: TRANSFERS, OUTBOX, AUDIT, ENUMS & LEGEND ==================== -->
+        <!-- ==================== ROW 3: TRANSFERS, OUTBOX, AUDIT & ENUMS ==================== -->
 
         <!-- OwnershipTransfer -->
         <mxCell id="cls_transfer" value="&lt;b&gt;OwnershipTransfer&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;+ id: Integer&lt;br/&gt;+ reason: String&lt;br/&gt;+ transferred_at: DateTime" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fontFamily=Segoe UI;fontSize=11;fillColor=#DBEAFE;strokeColor=#1D4ED8;strokeWidth=1.5;fontColor=#0F172A;" vertex="1" parent="1">
-          <mxGeometry x="690" y="790" width="230" height="105" as="geometry" />
+          <mxGeometry x="690" y="760" width="230" height="105" as="geometry" />
         </mxCell>
 
         <!-- Notification -->
         <mxCell id="cls_notif" value="&amp;laquo;outbox&amp;raquo;&lt;br/&gt;&lt;b&gt;Notification&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;+ id: Integer&lt;br/&gt;+ kind: String&lt;br/&gt;+ channel: String&lt;br/&gt;+ recipient: String&lt;br/&gt;+ subject: String&lt;br/&gt;+ status: String&lt;br/&gt;+ attempts: Integer&lt;br/&gt;+ next_attempt_at: DateTime" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fontFamily=Segoe UI;fontSize=11;fillColor=#E0F2FE;strokeColor=#0369A1;strokeWidth=1.5;fontColor=#0F172A;" vertex="1" parent="1">
-          <mxGeometry x="1090" y="760" width="240" height="180" as="geometry" />
+          <mxGeometry x="1090" y="730" width="240" height="180" as="geometry" />
         </mxCell>
 
         <!-- ReadAuditLog -->
         <mxCell id="cls_audit" value="&amp;laquo;audit&amp;raquo;&lt;br/&gt;&lt;b&gt;ReadAuditLog&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;+ id: Integer&lt;br/&gt;+ endpoint: String&lt;br/&gt;+ target_model: String&lt;br/&gt;+ target_id: String&lt;br/&gt;+ ip_address: IPAddress&lt;br/&gt;+ created_at: DateTime" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fontFamily=Segoe UI;fontSize=11;fillColor=#FFEDD5;strokeColor=#C2410C;strokeWidth=1.5;fontColor=#0F172A;" vertex="1" parent="1">
-          <mxGeometry x="1470" y="700" width="230" height="160" as="geometry" />
+          <mxGeometry x="1470" y="670" width="230" height="160" as="geometry" />
         </mxCell>
 
-        <!-- Enumerations -->
+        <!-- Enumerations (Standard UML «enumeration» Classifiers) -->
         <mxCell id="enums" value="&lt;b&gt;&amp;laquo;enumeration&amp;raquo; StudentStatus&lt;/b&gt;&lt;br/&gt;ACTIVE | SUSPENDED | GRADUATED | WITHDRAWN&lt;hr size=&quot;1&quot;/&gt;&lt;b&gt;&amp;laquo;enumeration&amp;raquo; DeviceStatus&lt;/b&gt;&lt;br/&gt;PENDING | ACTIVE | LOST | STOLEN | RETIRED&lt;hr size=&quot;1&quot;/&gt;&lt;b&gt;&amp;laquo;enumeration&amp;raquo; Ownership&lt;/b&gt;&lt;br/&gt;STUDENT | UNIVERSITY&lt;hr size=&quot;1&quot;/&gt;&lt;b&gt;&amp;laquo;enumeration&amp;raquo; Verdict&lt;/b&gt;&lt;br/&gt;ALLOWED | DENIED | OVERRIDE | UNREGISTERED&lt;hr size=&quot;1&quot;/&gt;&lt;b&gt;&amp;laquo;enumeration&amp;raquo; Role&lt;/b&gt;&lt;br/&gt;ADMIN | REGISTRAR | GUARD" style="rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=top;spacing=6;fontFamily=Segoe UI;fontSize=10;fillColor=#F8FAFC;strokeColor=#475569;strokeWidth=1.5;fontColor=#0F172A;" vertex="1" parent="1">
-          <mxGeometry x="40" y="720" width="250" height="230" as="geometry" />
-        </mxCell>
-
-        <!-- Design Notes -->
-        <mxCell id="note" value="&lt;b&gt;Domain Architectural Invariants&lt;/b&gt;&lt;br/&gt;1. &lt;b&gt;Student&lt;/b&gt; is an identity record, not a user account (zero student credentials).&lt;br/&gt;2. &lt;b&gt;Device.blocking_reasons()&lt;/b&gt; aggregates all active holds + policy rules in a single pass.&lt;br/&gt;3. &lt;b&gt;ScanEvent&lt;/b&gt; snapshots &lt;i&gt;device_label&lt;/i&gt; and &lt;i&gt;student_name&lt;/i&gt; for immutable history.&lt;br/&gt;4. Offline replays deduplicate on &lt;i&gt;client_reference&lt;/i&gt; UUID." style="shape=note;whiteSpace=wrap;html=1;size=16;fillColor=#FFFBEB;strokeColor=#D97706;strokeWidth=1.5;align=left;verticalAlign=top;spacingLeft=10;spacingTop=6;fontFamily=Segoe UI;fontSize=10.5;fontColor=#0F172A;" vertex="1" parent="1">
-          <mxGeometry x="340" y="730" width="290" height="150" as="geometry" />
-        </mxCell>
-
-        <!-- UML 2.5 Relationship Legend Box -->
-        <mxCell id="legend" value="&lt;b&gt;UML 2.5 Class Relationship Notation Legend&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;b&gt;◆──────&lt;/b&gt; &lt;b&gt;Composition (Strong Lifecycle Ownership):&lt;/b&gt; Child objects (&lt;i&gt;DeviceFlag, TemporaryPermit, OwnershipTransfer&lt;/i&gt;) cannot exist without their parent &lt;i&gt;Device&lt;/i&gt;.&lt;br/&gt;&lt;b&gt;◇──────&lt;/b&gt; &lt;b&gt;Aggregation (Shared Whole-Part Grouping):&lt;/b&gt; &lt;i&gt;Department&lt;/i&gt; groups &lt;i&gt;Student&lt;/i&gt; and institutional &lt;i&gt;Device&lt;/i&gt; records that can be reassigned independently.&lt;br/&gt;&lt;b&gt;──────▶&lt;/b&gt; &lt;b&gt;Directed Association (Navigable Foreign Key Reference):&lt;/b&gt; Source class maintains a persistent reference to target class with explicit multiplicities (&lt;i&gt;1, 0..1, 0..*&lt;/i&gt;).&lt;br/&gt;&lt;b&gt;- - - - -▷&lt;/b&gt; &lt;b&gt;Dependency (&amp;laquo;evaluates&amp;raquo; / &amp;laquo;validates&amp;raquo; / &amp;laquo;enqueues&amp;raquo;):&lt;/b&gt; Behavioral or transactional dependency without a hard foreign-key ownership constraint." style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=10;fontFamily=Segoe UI;fontSize=11;fillColor=#F8FAFC;strokeColor=#334155;strokeWidth=1.5;fontColor=#0F172A;" vertex="1" parent="1">
-          <mxGeometry x="340" y="970" width="1360" height="125" as="geometry" />
+          <mxGeometry x="40" y="680" width="250" height="230" as="geometry" />
         </mxCell>
 
         <!-- ==================== UML 2.5 RELATIONSHIPS (ALL VISIBLE, NO OVERLAPS) ==================== -->
@@ -111,12 +93,12 @@
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
 
-        <!-- 2. Department ◇──▶ Device (Aggregation: 1 owns 0..*) routed cleanly along top corridor y=85 -->
+        <!-- 2. Department ◇──▶ Device (Aggregation: 0..1 owns 0..*) -->
         <mxCell id="rel_dept_dev" value="0..1   owns (institutional)   0..*" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7E22CE;strokeWidth=1.8;fontFamily=Segoe UI;fontSize=10;fontStyle=1;startArrow=diamondThin;startFill=0;startSize=12;endArrow=open;endFill=0;endSize=10;labelBackgroundColor=#FFFFFF;exitX=0.5;exitY=0;entryX=0.25;entryY=0;" edge="1" parent="1" source="cls_dept" target="cls_device">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
-              <mxPoint x="145" y="88" />
-              <mxPoint x="758" y="88" />
+              <mxPoint x="145" y="58" />
+              <mxPoint x="758" y="58" />
             </Array>
           </mxGeometry>
         </mxCell>
@@ -140,7 +122,7 @@
         <mxCell id="rel_dev_perm" value="1   authorises   0..*" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#15803D;strokeWidth=1.8;fontFamily=Segoe UI;fontSize=10;fontStyle=1;startArrow=diamondThin;startFill=1;startSize=12;endArrow=open;endFill=0;endSize=10;labelBackgroundColor=#FFFFFF;exitX=1;exitY=0.78;entryX=0.25;entryY=0;" edge="1" parent="1" source="cls_device" target="cls_permit">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
-              <mxPoint x="1058" y="416" />
+              <mxPoint x="1058" y="386" />
             </Array>
           </mxGeometry>
         </mxCell>
@@ -149,9 +131,9 @@
         <mxCell id="rel_dev_trans" value="1   logs history   0..*" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#1D4ED8;strokeWidth=1.8;fontFamily=Segoe UI;fontSize=10;fontStyle=1;startArrow=diamondThin;startFill=1;startSize=12;endArrow=open;endFill=0;endSize=10;labelBackgroundColor=#FFFFFF;exitX=0.12;exitY=1;entryX=0;entryY=0.5;" edge="1" parent="1" source="cls_device" target="cls_transfer">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
-              <mxPoint x="722" y="535" />
-              <mxPoint x="650" y="535" />
-              <mxPoint x="650" y="842" />
+              <mxPoint x="722" y="505" />
+              <mxPoint x="650" y="505" />
+              <mxPoint x="650" y="812" />
             </Array>
           </mxGeometry>
         </mxCell>
@@ -160,9 +142,9 @@
         <mxCell id="rel_stu_trans" value="1   from / to   0..*" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#1D4ED8;strokeWidth=1.6;fontFamily=Segoe UI;fontSize=10;fontStyle=1;startArrow=none;endArrow=open;endFill=0;endSize=10;labelBackgroundColor=#FFFFFF;exitX=0.85;exitY=1;entryX=0;entryY=0.25;" edge="1" parent="1" source="cls_student" target="cls_transfer">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
-              <mxPoint x="544" y="445" />
-              <mxPoint x="615" y="445" />
-              <mxPoint x="615" y="816" />
+              <mxPoint x="544" y="415" />
+              <mxPoint x="615" y="415" />
+              <mxPoint x="615" y="786" />
             </Array>
           </mxGeometry>
         </mxCell>
@@ -172,12 +154,12 @@
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
 
-        <!-- 10. Student ───▶ ScanEvent (Directed Association: 0..1 bearer in 0..*) routed along top y=68 -->
+        <!-- 10. Student ───▶ ScanEvent (Directed Association: 0..1 bearer in 0..*) -->
         <mxCell id="rel_stu_scan" value="0..1   bearer in   0..*" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#B45309;strokeWidth=1.8;fontFamily=Segoe UI;fontSize=10;fontStyle=1;startArrow=none;endArrow=open;endFill=0;endSize=10;labelBackgroundColor=#FFFFFF;exitX=0.5;exitY=0;entryX=0.35;entryY=0;" edge="1" parent="1" source="cls_student" target="cls_scan">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
-              <mxPoint x="460" y="68" />
-              <mxPoint x="1178" y="68" />
+              <mxPoint x="460" y="38" />
+              <mxPoint x="1178" y="38" />
             </Array>
           </mxGeometry>
         </mxCell>
@@ -191,7 +173,7 @@
         <mxCell id="rel_user_scan" value="1   decides   0..*" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#15803D;strokeWidth=1.8;fontFamily=Segoe UI;fontSize=10;fontStyle=1;startArrow=none;endArrow=open;endFill=0;endSize=10;labelBackgroundColor=#FFFFFF;exitX=0;exitY=0.35;entryX=0.82;entryY=1;" edge="1" parent="1" source="cls_user" target="cls_scan">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
-              <mxPoint x="1295" y="506" />
+              <mxPoint x="1295" y="476" />
             </Array>
           </mxGeometry>
         </mxCell>
@@ -210,10 +192,10 @@
         <mxCell id="rel_dev_rule" value="&amp;laquo;evaluates&amp;raquo;" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;dashed=1;dashPattern=6 4;strokeColor=#B45309;strokeWidth=1.8;fontFamily=Segoe UI;fontSize=10;fontStyle=2;startArrow=none;endArrow=open;endFill=0;endSize=10;labelBackgroundColor=#FFFFFF;exitX=0;exitY=0.82;entryX=1;entryY=0.5;" edge="1" parent="1" source="cls_device" target="cls_rule">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
-              <mxPoint x="640" y="432" />
-              <mxPoint x="640" y="425" />
-              <mxPoint x="295" y="425" />
-              <mxPoint x="295" y="375" />
+              <mxPoint x="640" y="402" />
+              <mxPoint x="640" y="395" />
+              <mxPoint x="295" y="395" />
+              <mxPoint x="295" y="345" />
             </Array>
           </mxGeometry>
         </mxCell>
@@ -222,9 +204,9 @@
         <mxCell id="rel_dev_equip" value="&amp;laquo;typed by&amp;raquo;" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;dashed=1;dashPattern=6 4;strokeColor=#7E22CE;strokeWidth=1.8;fontFamily=Segoe UI;fontSize=10;fontStyle=2;startArrow=none;endArrow=open;endFill=0;endSize=10;labelBackgroundColor=#FFFFFF;exitX=0;exitY=0.92;entryX=1;entryY=0.5;" edge="1" parent="1" source="cls_device" target="cls_equip">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
-              <mxPoint x="665" y="470" />
-              <mxPoint x="295" y="470" />
-              <mxPoint x="295" y="580" />
+              <mxPoint x="665" y="440" />
+              <mxPoint x="295" y="440" />
+              <mxPoint x="295" y="550" />
             </Array>
           </mxGeometry>
         </mxCell>
@@ -238,8 +220,8 @@
         <mxCell id="rel_flag_notif" value="&amp;laquo;enqueues alert&amp;raquo;" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;dashed=1;dashPattern=6 4;strokeColor=#0369A1;strokeWidth=1.8;fontFamily=Segoe UI;fontSize=10;fontStyle=2;startArrow=none;endArrow=open;endFill=0;endSize=10;labelBackgroundColor=#FFFFFF;exitX=1;exitY=0.75;entryX=0;entryY=0.35;" edge="1" parent="1" source="cls_flag" target="cls_notif">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
-              <mxPoint x="965" y="685" />
-              <mxPoint x="965" y="823" />
+              <mxPoint x="965" y="655" />
+              <mxPoint x="965" y="793" />
             </Array>
           </mxGeometry>
         </mxCell>
