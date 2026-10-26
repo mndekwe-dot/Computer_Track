@@ -1,0 +1,114 @@
+<mxfile host="app.diagrams.net" modified="2026-09-28T00:00:00.000Z" agent="Computer Track" version="24.0.0" type="device">
+  <diagram name="System architecture" id="architecture">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="826" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="title" value="Computer Track — System architecture" style="text;html=1;fontSize=18;fontStyle=1;align=left;" vertex="1" parent="1">
+          <mxGeometry x="40" y="20" width="480" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="gUsers" value="Users" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#999999;dashed=1;verticalAlign=top;fontSize=11;fontColor=#666666;align=left;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="40" y="80" width="200" height="330" as="geometry" />
+        </mxCell>
+        <mxCell id="uStudent" value="Students&#10;no account" style="shape=umlActor;verticalLabelPosition=bottom;html=1;verticalAlign=top;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="75" y="110" width="30" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uGuard" value="Guards" style="shape=umlActor;verticalLabelPosition=bottom;html=1;verticalAlign=top;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="75" y="200" width="30" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uReg" value="Registrars" style="shape=umlActor;verticalLabelPosition=bottom;html=1;verticalAlign=top;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="75" y="280" width="30" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uAdmin" value="Administrators" style="shape=umlActor;verticalLabelPosition=bottom;html=1;verticalAlign=top;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="75" y="355" width="30" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="gClient" value="Client — React 19, Vite" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#6c8ebf;dashed=1;verticalAlign=top;fontSize=11;fontColor=#6c8ebf;align=left;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="270" y="80" width="260" height="400" as="geometry" />
+        </mxCell>
+        <mxCell id="pub" value="Public form&#10;register · report missing&#10;check my computers" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="295" y="110" width="210" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="spa" value="Three portals&#10;Security Gate · Registration Office&#10;Administration" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="295" y="200" width="210" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="sw" value="Service worker&#10;app shell cache" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="295" y="300" width="210" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="queue" value="Offline scan queue&#10;localStorage · idempotency keys" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="295" y="375" width="210" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="gApi" value="Application — Django 5, DRF, JWT" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#82b366;dashed=1;verticalAlign=top;fontSize=11;fontColor=#82b366;align=left;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="570" y="80" width="280" height="400" as="geometry" />
+        </mxCell>
+        <mxCell id="api" value="REST API" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="595" y="110" width="230" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="apps" value="accounts · campus · students&#10;devices · checkpoint · search · notifications" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="595" y="165" width="230" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="rules" value="Policy rule store&#10;registry in code, values in the database" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="595" y="235" width="230" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="celery" value="Celery worker and beat&#10;outbox · audit sweep · dashboard" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="595" y="305" width="230" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="audit" value="Read audit log&#10;every register read, with alerting" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="595" y="375" width="230" height="55" as="geometry" />
+        </mxCell>
+
+        <mxCell id="gData" value="Data" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#b85450;dashed=1;verticalAlign=top;fontSize=11;fontColor=#b85450;align=left;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="890" y="80" width="240" height="230" as="geometry" />
+        </mxCell>
+        <mxCell id="db" value="PostgreSQL&#10;register · scans · audit log" style="shape=cylinder3;boundedLbl=1;backgroundOutline=1;size=12;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="915" y="110" width="190" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="redis" value="Redis&#10;cache and Celery broker" style="shape=cylinder3;boundedLbl=1;backgroundOutline=1;size=12;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="915" y="200" width="190" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="gExt" value="External services" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#d79b00;dashed=1;verticalAlign=top;fontSize=11;fontColor=#d79b00;align=left;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="890" y="340" width="240" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="outbox" value="Outbox table&#10;written in the same transaction" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="915" y="370" width="190" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="resend" value="Resend — email" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="915" y="425" width="90" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="at" value="Africa's Talking — SMS" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1015" y="425" width="90" height="35" as="geometry" />
+        </mxCell>
+
+        <mxCell id="note" value="Why the outbox: a notification row is written inside the same transaction as the event it describes, then a worker sends it. Sending inline would put a mail server round trip on the critical path of the action that must never be slow, and a mail server having a bad afternoon would lose the message. Why the queue: gates sit on the perimeter on wifi that drops. Decisions are stored locally and replayed with idempotency keys, and every rule is enforced again on arrival." style="shape=note;whiteSpace=wrap;html=1;size=14;fillColor=#ffffff;strokeColor=#999999;align=left;fontSize=11;verticalAlign=top;spacingLeft=8;spacingTop=4;" vertex="1" parent="1">
+          <mxGeometry x="40" y="520" width="540" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="note2" value="Scale: 7 Django apps · ~15,500 lines of Python · ~10,300 lines of JavaScript · 300 backend tests · 51 frontend tests · 56 end to end tests." style="shape=note;whiteSpace=wrap;html=1;size=14;fillColor=#ffffff;strokeColor=#999999;align=left;fontSize=11;verticalAlign=top;spacingLeft=8;spacingTop=4;" vertex="1" parent="1">
+          <mxGeometry x="610" y="520" width="520" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="a1" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=0;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="uStudent" target="pub"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="a2" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=0;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="uGuard" target="spa"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="a3" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=0;exitX=1;exitY=0.5;entryX=0;entryY=0.8;" edge="1" parent="1" source="uReg" target="spa"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="a4" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=0;exitX=1;exitY=0.5;entryX=0;entryY=1;" edge="1" parent="1" source="uAdmin" target="spa"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+        <mxCell id="b1" value="HTTPS / JSON" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=0;fontSize=10;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="pub" target="api"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="b2" value="JWT" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=0;fontSize=10;exitX=1;exitY=0.5;entryX=0;entryY=1;" edge="1" parent="1" source="spa" target="api"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="b3" value="sync on reconnect" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=0;dashed=1;fontSize=10;exitX=1;exitY=0.5;entryX=0;entryY=1;" edge="1" parent="1" source="queue" target="api"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="550" y="405" /><mxPoint x="550" y="150" /></Array></mxGeometry></mxCell>
+        <mxCell id="b4" value="caches the shell" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=0;dashed=1;fontSize=10;exitX=0.3;exitY=1;entryX=0.3;entryY=0;endArrow=open;endFill=0;" edge="1" parent="1" source="spa" target="sw"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="b5" value="stores decisions" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=0;dashed=1;fontSize=10;exitX=0;exitY=0.8;entryX=0;entryY=0.2;endArrow=open;endFill=0;" edge="1" parent="1" source="spa" target="queue"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="278" y="256" /><mxPoint x="278" y="387" /></Array></mxGeometry></mxCell>
+        <mxCell id="c6" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=0;exitX=1;exitY=0.5;entryX=0;entryY=1;" edge="1" parent="1" source="audit" target="db"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="870" y="403" /><mxPoint x="870" y="165" /></Array></mxGeometry></mxCell>
+
+        <mxCell id="c1" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=0;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="apps" target="db"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="c2" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=0;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="rules" target="redis"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="c3" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=0;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="celery" target="outbox"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="c4" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=0;exitX=0.3;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="outbox" target="resend"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="c5" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=0;exitX=0.8;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="outbox" target="at"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
