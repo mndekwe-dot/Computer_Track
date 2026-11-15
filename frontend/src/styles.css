@@ -350,8 +350,19 @@ h4 {
   min-height: 0;
 }
 
+.nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.nav-section + .nav-section {
+  margin-top: 16px;
+}
+
 .nav-group {
-  margin-top: 14px;
   padding: 0 10px 6px;
   font-size: 12.5px;
   font-weight: 650;
@@ -444,9 +455,16 @@ h4 {
   color: var(--sidebar-text-strong);
 }
 
-.sidebar-user span {
+.sidebar-user span span {
+  display: block;
   color: var(--text-muted);
   font-size: 12px;
+}
+
+.sidebar-user .sidebar-user-link {
+  margin-top: 3px;
+  color: var(--brand);
+  font-weight: 600;
 }
 
 .main {
