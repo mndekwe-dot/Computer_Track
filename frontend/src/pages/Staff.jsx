@@ -44,7 +44,7 @@ export default function Staff() {
 
   return (
     <>
-      <PageHeader title="Staff Accounts" subtitle="Who can sign in, and which portal they use">
+      <PageHeader title="Staff accounts" subtitle="Who can sign in, and which portal they use">
         <button type="button" className="btn btn-primary" onClick={() => setEditing({})}>
           <Plus size={16} aria-hidden="true" />
           Add staff member
@@ -107,7 +107,7 @@ export default function Staff() {
                       <td className="hide-md">{formatDateTime(person.last_login)}</td>
                       <td>
                         <StatusPill status={person.is_active ? 'ACTIVE' : 'RETIRED'}>
-                          {person.is_active ? 'ACTIVE' : 'DISABLED'}
+                          {person.is_active ? 'Active' : 'Disabled'}
                         </StatusPill>
                       </td>
                       <td>

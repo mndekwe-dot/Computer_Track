@@ -224,9 +224,9 @@ export default function DeviceDetail() {
                 flag.reason_display,
                 flag.details || ' - ',
                 flag.is_active ? (
-                  <StatusPill status="HOLD">ACTIVE</StatusPill>
+                  <StatusPill status="HOLD">Active</StatusPill>
                 ) : (
-                  <StatusPill status="ACTIVE">RESOLVED</StatusPill>
+                  <StatusPill status="ACTIVE">Resolved</StatusPill>
                 ),
               ]}
             />
@@ -273,11 +273,11 @@ export default function DeviceDetail() {
                 formatDateTime(permit.valid_from),
                 formatDateTime(permit.valid_to),
                 permit.is_revoked ? (
-                  <StatusPill status="DENIED">REVOKED</StatusPill>
+                  <StatusPill status="DENIED">Revoked</StatusPill>
                 ) : permit.is_valid_now ? (
-                  <StatusPill status="ACTIVE">LIVE</StatusPill>
+                  <StatusPill status="ACTIVE">Live</StatusPill>
                 ) : (
-                  <StatusPill status="RETIRED">EXPIRED</StatusPill>
+                  <StatusPill status="RETIRED">Expired</StatusPill>
                 ),
               ]}
             />

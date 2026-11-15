@@ -3,7 +3,9 @@ import { ChevronLeft, ChevronRight, X } from 'lucide-react'
 
 export function StatusPill({ status, children }) {
   const tone = String(status || '').toUpperCase()
-  return <span className={`pill pill-${tone}`}>{children || tone.replace(/_/g, ' ')}</span>
+  // The API sends codes like DENIED or IN_USE; people read "Denied".
+  const label = tone.replace(/_/g, ' ').toLowerCase().replace(/^./, (c) => c.toUpperCase())
+  return <span className={`pill pill-${tone}`}>{children || label}</span>
 }
 
 export function ErrorNote({ error, onRetry }) {

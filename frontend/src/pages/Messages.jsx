@@ -130,7 +130,7 @@ function TemplateCard({ template, onSaved, toast }) {
           <p className="muted">Last changed {formatDateTime(template.updated_at)}</p>
         </div>
         <StatusPill status={template.is_active ? 'ACTIVE' : 'RETIRED'}>
-          {template.is_active ? 'IN USE' : 'BUILT-IN'}
+          {template.is_active ? 'In use' : 'Built-in'}
         </StatusPill>
       </header>
 

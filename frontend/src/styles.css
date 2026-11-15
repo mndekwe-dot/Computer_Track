@@ -129,6 +129,11 @@ body {
   line-height: 1.5;
 }
 
+a {
+  color: var(--brand);
+  text-underline-offset: 2px;
+}
+
 h1,
 h2,
 h3,
@@ -1002,6 +1007,11 @@ tbody tr:last-child td {
   min-width: 140px;
 }
 
+.toolbar input[type='checkbox'] {
+  min-width: 0;
+  width: 16px;
+}
+
 .toolbar .grow {
   flex: 1;
   min-width: 200px;
@@ -1589,6 +1599,15 @@ tbody tr:last-child td {
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 16px;
   align-items: start;
+  margin-bottom: 16px;
+}
+
+/* `.card + .card` spaces cards stacked in a column. Inside a grid the gap
+   already does that, and the extra margin pushed the second card 16px lower
+   than its neighbour. */
+.two-col > .card + .card,
+.stat-grid > .card + .card {
+  margin-top: 0;
 }
 
 /* Recharts needs a sized parent; ResponsiveContainer fills this box. */
@@ -2776,11 +2795,16 @@ tbody tr:last-child td {
   margin-top: 16px;
 }
 
-.rule-group h2 {
-  font-size: 16px;
+.rule-group h2,
+.message-head h2 {
+  font-family: var(--font);
+  font-size: 17px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
 }
 
 .rule-group-blurb {
+  font-size: 14px;
   margin: 4px 0 4px;
   max-width: 60ch;
   text-wrap: pretty;
@@ -2874,8 +2898,15 @@ tr[data-attention='true'] td:first-child {
   margin-bottom: 14px;
 }
 
-.message-head h2 {
-  font-size: 16px;
+.message-head p {
+  margin: 4px 0 0;
+  font-size: 13.5px;
+}
+
+/* Settings that are a single line of text. The general textarea minimum
+   made a university name look like an essay box. */
+.rule-control textarea {
+  min-height: 0;
 }
 
 .placeholder-list {
@@ -3307,4 +3338,19 @@ tr[data-attention='true'] td:first-child {
   .form-actions .btn {
     flex: 1;
   }
+}
+
+/* On a phone a register table cannot fit, and squeezing it wrapped dates
+   over four lines and cut status tags in half. It keeps a readable width and
+   the wrapper (already overflow-x: auto) scrolls it sideways. */
+@media (max-width: 760px) {
+  .table-wrap table {
+    min-width: 680px;
+  }
+}
+
+/* Dates and times in the register stay on one line. */
+td.nowrap,
+.nowrap {
+  white-space: nowrap;
 }
