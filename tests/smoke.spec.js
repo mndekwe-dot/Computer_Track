@@ -13,7 +13,7 @@ import { signIn, watchForErrors, expectNoRealErrors } from './helpers.js'
 const SCREENS = [
   { user: null, path: '/', heading: /matched to the student/i },
   { user: null, path: '/register', heading: /computer registration/i },
-  { user: null, path: '/guard/login', heading: /security gate/i },
+  { user: null, path: '/login', heading: /sign in/i },
 
   { user: 'guard1', path: '/guard/console', heading: /gate console/i },
   { user: 'guard1', path: '/guard/log', heading: /gate log/i },

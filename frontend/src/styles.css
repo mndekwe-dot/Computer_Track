@@ -403,40 +403,29 @@ h4 {
   font-size: 13px;
 }
 
-.portal-switch {
-  margin-bottom: 12px;
-}
-
-.portal-switch-btn {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  width: 100%;
-  padding: 8px 10px;
-  border: none;
-  background: transparent;
-  color: var(--sidebar-text);
-  font-family: inherit;
-  font-size: 13px;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  text-align: start;
-}
-
-.portal-switch-btn:hover {
-  background: var(--sidebar-hover);
-  color: var(--sidebar-text-strong);
-}
-
-.portal-dot {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
 
 .sidebar-user {
-  padding: 0 8px 10px;
+  display: flex;
+  gap: 11px;
+  align-items: flex-start;
+  margin-bottom: 8px;
+  padding: 9px 10px;
+  border-radius: var(--radius-sm);
+  color: var(--sidebar-text);
+  text-decoration: none;
+}
+
+.sidebar-user .nav-icon {
+  margin-top: 2px;
+}
+
+.sidebar-user:hover {
+  background: var(--sidebar-hover);
+}
+
+.sidebar-user.active {
+  background: var(--surface);
+  box-shadow: 0 0 0 1px var(--border-strong);
 }
 
 .sidebar-user strong {
@@ -1709,6 +1698,25 @@ tbody tr:last-child td {
   overflow: hidden;
 }
 
+.login-wordmark {
+  margin: 0;
+  /* The lockup is 5.7:1, so on a narrow panel its height has to come down
+     with the width or it runs off the side. */
+  max-width: 100%;
+}
+
+.login-wordmark .wordmark-img {
+  height: clamp(34px, 7.2vw, 64px) !important;
+}
+
+.login-system {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 650;
+  color: rgb(255 255 255 / 0.92);
+}
+
 .login-side .brand {
   color: #fff;
   padding: 0;
@@ -2162,46 +2170,6 @@ tbody tr:last-child td {
   max-width: 52ch;
 }
 
-/* ----- Staff portals ----- */
-
-.landing-portals {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: 10px;
-}
-
-.landing-portal {
-  display: grid;
-  gap: 3px;
-  padding: 16px 20px;
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius);
-  background: var(--surface);
-  color: var(--text);
-  text-decoration: none;
-  transition: border-color 0.12s ease, background-color 0.12s ease;
-}
-
-.landing-portal strong {
-  font-family: var(--font-display);
-  font-size: 24px;
-  font-weight: 700;
-  line-height: 1.1;
-}
-
-.landing-portal span {
-  color: var(--text-muted);
-  font-size: 14px;
-}
-
-@media (hover: hover) {
-  .landing-portal:hover {
-    background: var(--surface-muted);
-    border-color: var(--portal-accent);
-  }
-}
 
 .landing-hint {
   display: flex;
@@ -3241,7 +3209,6 @@ tr[data-attention='true'] td {
   }
 
   .landing-primary:hover,
-  .landing-portal:hover,
   .btn:active:not(:disabled) {
     transform: none;
   }

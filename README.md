@@ -95,14 +95,17 @@ App on `http://localhost:5173`.
 
 ### Demo accounts
 
-Created by `seed_demo`, all with password `passw0rd!`. Each signs in at **its own portal**:
+Created by `seed_demo`, all with password `passw0rd!`. Everyone signs in at the same
+page, **`/login`**, and the account decides which portal opens:
 
-| Username | Role | Sign in at |
-|----------|------|-----------|
-| `guard1` | Security guard, Main Gate | `/guard/login` |
-| `guard2` | Security guard, West Gate | `/guard/login` |
-| `registrar` | Registration officer | `/registry/login` |
-| `admin` | Administrator (also a Django superuser) | `/admin/login` |
+| Username | Role | Lands on |
+|----------|------|----------|
+| `guard1` | Security guard, Main Gate | Gate Console |
+| `guard2` | Security guard, West Gate | Gate Console |
+| `registrar` | Registration officer | Pending Approvals |
+| `admin` | Administrator (also a Django superuser) | Dashboard |
+
+`guard3` exists too, on Hostel Gate, though `seed_demo` does not print it.
 
 **Try this, in order - it exercises the whole system:**
 
@@ -129,22 +132,27 @@ and the staff portals, sit in the first screenful; everything that teaches (how 
 guard can see, what happens if a computer is stolen) sits below them, where it costs a returning
 user nothing. Anyone already signed in is sent straight to their own portal instead.
 
-The portals stay genuinely separate behind it: the landing page only links to their logins.
+The landing page links to one staff sign-in page, and names no portal.
 
-### Three staff portals
+### Three staff portals, one front door
 
-Each user type has its **own front door** - a separate login URL, its own navigation and its own
-accent colour. A guard and a registrar never see the same application.
+A guard and a registrar never see the same application: separate addresses, separate
+navigation, separate accent colour. What they share is the way in.
 
-| Portal | URL | Who signs in | What is in it |
-|--------|-----|--------------|---------------|
-| **Security Gate** | `/guard/login` | Security guards | Gate Console, Gate Log |
-| **Registration Office** | `/registry/login` | Registration officers | Pending Approvals, Students, Import, Computers, Holds & Theft, Permits |
-| **Administration** | `/admin/login` | Administrators | Everything above, plus Dashboard, Gates, Staff Accounts, Read Audit Log |
+| Portal | Base | Who works there | What is in it |
+|--------|------|-----------------|---------------|
+| **Security Gate** | `/guard` | Security guards | Gate Console, Gate Log |
+| **Registration Office** | `/registry` | Registration officers | Pending Approvals, Students, Import, Computers, Holds & Theft, Permits |
+| **Administration** | `/admin` | Administrators | Everything above, plus Dashboard, Gates, Staff Accounts, Read Audit Log |
 
-Sign in at the wrong door and the system says so plainly and links you to yours, rather than
-just refusing. Administrators are admitted to every portal and get a **portal switcher** in the
-sidebar, so they can stand at a gate and see exactly what the guard sees.
+Everyone signs in at **`/login`**. The page names no portal and lists no roles, because an
+unauthenticated visitor should not be able to read the shape of the organisation off a login
+screen, and nobody should have to know which door is theirs. Credentials decide: sign in and
+you arrive where you work. The old per-portal addresses still redirect there, so a bookmark on
+a gate terminal keeps working.
+
+Typing another portal's address while signed in simply returns you to your own. Administrators
+are admitted everywhere, so they can stand at a gate and see exactly what the guard sees.
 
 Guards deliberately **cannot** change ownership. That is the whole integrity of the system - if
 the person checking computers could also reassign them, the register would be worthless.
