@@ -110,4 +110,5 @@ Next meeting date agreed. Meeting closed by the chair.
 
 ## Next meeting
 
-Sunday, 22 November 2026, 6:00pm (CAT), on Google Meet.
+Sunday, 15 November 2026, 6:00pm (CAT), on Google Meet. See
+[pld4-standup2-meeting-log.md](pld4-standup2-meeting-log.md).
