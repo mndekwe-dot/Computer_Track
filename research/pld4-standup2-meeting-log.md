@@ -12,7 +12,7 @@
 | --- | --- | --- |
 | Ishimwe Axcel | Gaia | Present |
 | INEZA Henry Jayz | Skill Gap Analyzer | Present |
-| NDEKWE Dieu Merci | Computer Track | Present |
+| NDEKWE Dieu Merci | etracker (formerly Computer Track) | Present |
 | Alvin Mutangana | PanaLink | Present |
 | Bol Dau | Metlink | Present |
 
@@ -37,7 +37,7 @@ taken out of this release because medical terms must not be mistranslated.
 SQLite backend, profile form, a gap engine that ranks missing skills by market demand, a roadmap
 with free and paid resource tags, and a readiness score. The seed data is still small.
 
-**Computer Track, NDEKWE Dieu Merci.** The interface was redesigned around the campus gate, all 16
+**etracker, NDEKWE Dieu Merci.** The project formerly called Computer Track was renamed etracker, with a new logo. The interface was redesigned around the campus gate, all 16
 staff pages were reviewed and fixed, one staff sign-in page replaced the three portal logins, and
 the UML class and activity diagrams were updated. The security items planned at stand-up 1
 (evidence at approval, one-time verification codes, masked serial numbers) were moved to the next
@@ -56,8 +56,8 @@ integration remain.
 
 - **Resource needs:** pilot users for every project, a Kinyarwanda reviewer for medical terms, and
   Africa's Talking sandbox access.
-- **Dependencies:** MTN MoMo and Airtel Money (PanaLink), Africa's Talking (Metlink and Computer
-  Track), Gasabo facility data (Gaia), partly estimated demand data (Skill Gap Analyzer).
+- **Dependencies:** MTN MoMo and Airtel Money (PanaLink), Africa's Talking (Metlink and
+  etracker), Gasabo facility data (Gaia), partly estimated demand data (Skill Gap Analyzer).
 - **Roadblocks:** no project has been tested by its real users, most are not deployed, and
   Kinyarwanda translation affects Gaia, Metlink and PanaLink.
 
