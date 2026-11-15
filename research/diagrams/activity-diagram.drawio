@@ -1,67 +1,207 @@
 <mxfile host="app.diagrams.net" type="device">
   <diagram name="UML Activity Diagram" id="activity_diagram">
-    <mxGraphModel dx="1680" dy="1400" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1640" pageHeight="1400" defaultFontFamily="Segoe UI" math="0" shadow="0">
+    <mxGraphModel dx="1680" dy="1520" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1640" pageHeight="1520" defaultFontFamily="Segoe UI" math="0" shadow="0">
       <root>
-        <mxCell id="0" /><mxCell id="1" parent="0" />
-        <mxCell id="lane1" value="Security Guard (Checkpoint Actor)" style="shape=swimlane;startSize=38;horizontal=1;whiteSpace=wrap;html=1;fillColor=#E2E8F0;swimlaneFillColor=#F8FAFC;strokeColor=#CBD5E1;strokeWidth=1.5;fontFamily=Segoe UI;fontStyle=1;fontSize=13;fontColor=#0F172A;align=center;collapsible=0;" vertex="1" parent="1"><mxGeometry x="40" y="30" width="380" height="1330" as="geometry"/></mxCell>
-        <mxCell id="lane2" value="Gate Console (React 19 PWA Client)" style="shape=swimlane;startSize=38;horizontal=1;whiteSpace=wrap;html=1;fillColor=#DBEAFE;swimlaneFillColor=#FFFFFF;strokeColor=#CBD5E1;strokeWidth=1.5;fontFamily=Segoe UI;fontStyle=1;fontSize=13;fontColor=#1E3A8A;align=center;collapsible=0;" vertex="1" parent="1"><mxGeometry x="420" y="30" width="380" height="1330" as="geometry"/></mxCell>
-        <mxCell id="lane3" value="Backend API &amp; Registry (Django REST)" style="shape=swimlane;startSize=38;horizontal=1;whiteSpace=wrap;html=1;fillColor=#DCFCE7;swimlaneFillColor=#F8FAFC;strokeColor=#CBD5E1;strokeWidth=1.5;fontFamily=Segoe UI;fontStyle=1;fontSize=13;fontColor=#14532D;align=center;collapsible=0;" vertex="1" parent="1"><mxGeometry x="800" y="30" width="380" height="1330" as="geometry"/></mxCell>
-        <mxCell id="lane4" value="Audit Log &amp; Sync (Outbox &amp; SMS)" style="shape=swimlane;startSize=38;horizontal=1;whiteSpace=wrap;html=1;fillColor=#F3E8FF;swimlaneFillColor=#FFFFFF;strokeColor=#CBD5E1;strokeWidth=1.5;fontFamily=Segoe UI;fontStyle=1;fontSize=13;fontColor=#581C87;align=center;collapsible=0;" vertex="1" parent="1"><mxGeometry x="1180" y="30" width="380" height="1330" as="geometry"/></mxCell>
-        <mxCell id="start" value="" style="ellipse;fillColor=#0F172A;strokeColor=none;" vertex="1" parent="1"><mxGeometry x="216" y="80" width="28" height="28" as="geometry"/></mxCell>
-        <mxCell id="a_scan" value="Scan QR code or type&#xa;serial / reg number" style="rounded=1;arcSize=28;whiteSpace=wrap;html=1;fillColor=#FEF3C7;strokeColor=#D97706;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=11;fontStyle=1;fontColor=#1E293B;align=center;" vertex="1" parent="1"><mxGeometry x="120" y="135" width="220" height="54" as="geometry"/></mxCell>
-        <mxCell id="d_net_lookup" value="Network&#xa;online?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#E0F2FE;strokeColor=#0284C7;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=11;fontStyle=1;fontColor=#0C4A6E;align=center;" vertex="1" parent="1"><mxGeometry x="540" y="125" width="140" height="74" as="geometry"/></mxCell>
-        <mxCell id="a_cache" value="Read sessionStorage cache&#xa;or manual permit check" style="rounded=1;arcSize=28;whiteSpace=wrap;html=1;fillColor=#FEF3C7;strokeColor=#D97706;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=11;fontStyle=1;fontColor=#1E293B;align=center;" vertex="1" parent="1"><mxGeometry x="435" y="240" width="168" height="52" as="geometry"/></mxCell>
-        <mxCell id="a_call_api" value="Call verification API&#xa;(GET /checkpoint/lookup/)" style="rounded=1;arcSize=28;whiteSpace=wrap;html=1;fillColor=#FEF3C7;strokeColor=#D97706;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=11;fontStyle=1;fontColor=#1E293B;align=center;" vertex="1" parent="1"><mxGeometry x="617" y="240" width="168" height="52" as="geometry"/></mxCell>
-        <mxCell id="a_lookup" value="Look up device &amp; student&#xa;in inverted index &amp; registry" style="rounded=1;arcSize=28;whiteSpace=wrap;html=1;fillColor=#FEF3C7;strokeColor=#D97706;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=11;fontStyle=1;fontColor=#1E293B;align=center;" vertex="1" parent="1"><mxGeometry x="885" y="240" width="210" height="52" as="geometry"/></mxCell>
-        <mxCell id="d_hold" value="Unregistered, stolen, lost,&#xa;pending or flagged hold?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#E0F2FE;strokeColor=#0284C7;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=11;fontStyle=1;fontColor=#0C4A6E;align=center;" vertex="1" parent="1"><mxGeometry x="885" y="325" width="210" height="86" as="geometry"/></mxCell>
-        <mxCell id="a_ret_clear" value="Return CLEAR +&#xa;signed owner photo" style="rounded=1;arcSize=28;whiteSpace=wrap;html=1;fillColor=#FEF3C7;strokeColor=#D97706;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=11;fontStyle=1;fontColor=#1E293B;align=center;" vertex="1" parent="1"><mxGeometry x="815" y="445" width="165" height="52" as="geometry"/></mxCell>
-        <mxCell id="a_ret_hold" value="Return HOLD / UNREG&#xa;+ reason + owner photo" style="rounded=1;arcSize=28;whiteSpace=wrap;html=1;fillColor=#FEF3C7;strokeColor=#D97706;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=11;fontStyle=1;fontColor=#1E293B;align=center;" vertex="1" parent="1"><mxGeometry x="1000" y="445" width="165" height="52" as="geometry"/></mxCell>
-        <mxCell id="a_display" value="Display owner photo +&#xa;CLEAR / HOLD / UNREG banner" style="rounded=1;arcSize=28;whiteSpace=wrap;html=1;fillColor=#FEF3C7;strokeColor=#D97706;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=11;fontStyle=1;fontColor=#1E293B;align=center;" vertex="1" parent="1"><mxGeometry x="500" y="525" width="220" height="54" as="geometry"/></mxCell>
-        <mxCell id="a_verify" value="Visually check bearer&#xa;against owner photo" style="rounded=1;arcSize=28;whiteSpace=wrap;html=1;fillColor=#FEF3C7;strokeColor=#D97706;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=11;fontStyle=1;fontColor=#1E293B;align=center;" vertex="1" parent="1"><mxGeometry x="120" y="525" width="220" height="54" as="geometry"/></mxCell>
-        <mxCell id="d_match" value="Clean status and&#xa;bearer matches photo?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#E0F2FE;strokeColor=#0284C7;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=11;fontStyle=1;fontColor=#0C4A6E;align=center;" vertex="1" parent="1"><mxGeometry x="130" y="610" width="200" height="78" as="geometry"/></mxCell>
-        <mxCell id="d_override" value="Guard to&#xa;override?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#E0F2FE;strokeColor=#0284C7;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=11;fontStyle=1;fontColor=#0C4A6E;align=center;" vertex="1" parent="1"><mxGeometry x="245" y="705" width="145" height="76" as="geometry"/></mxCell>
-        <mxCell id="a_reason" value="Prompt mandatory written&#xa;override justification" style="rounded=1;arcSize=28;whiteSpace=wrap;html=1;fillColor=#FEF3C7;strokeColor=#D97706;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=11;fontStyle=1;fontColor=#1E293B;align=center;" vertex="1" parent="1"><mxGeometry x="505" y="717" width="210" height="52" as="geometry"/></mxCell>
-        <mxCell id="v_allowed" value="Verdict: ALLOWED" style="rounded=1;arcSize=28;whiteSpace=wrap;html=1;fillColor=#DCFCE7;strokeColor=#15803D;strokeWidth=2;fontFamily=Segoe UI;fontSize=12;fontStyle=1;fontColor=#14532D;align=center;" vertex="1" parent="1"><mxGeometry x="65" y="810" width="150" height="46" as="geometry"/></mxCell>
-        <mxCell id="v_denied" value="Verdict: DENIED" style="rounded=1;arcSize=28;whiteSpace=wrap;html=1;fillColor=#FFEDD5;strokeColor=#C2410C;strokeWidth=2;fontFamily=Segoe UI;fontSize=12;fontStyle=1;fontColor=#7C2D12;align=center;" vertex="1" parent="1"><mxGeometry x="242" y="810" width="150" height="46" as="geometry"/></mxCell>
-        <mxCell id="v_override" value="Verdict: OVERRIDE" style="rounded=1;arcSize=28;whiteSpace=wrap;html=1;fillColor=#CCFBF1;strokeColor=#0F766E;strokeWidth=2;fontFamily=Segoe UI;fontSize=12;fontStyle=1;fontColor=#134E4A;align=center;" vertex="1" parent="1"><mxGeometry x="535" y="810" width="150" height="46" as="geometry"/></mxCell>
-        <mxCell id="d_verdict_merge" value="" style="rhombus;fillColor=#E0F2FE;strokeColor=#0284C7;strokeWidth=1.5;" vertex="1" parent="1"><mxGeometry x="595" y="880" width="30" height="30" as="geometry"/></mxCell>
-        <mxCell id="d_sync_net" value="Network&#xa;online?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#E0F2FE;strokeColor=#0284C7;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=11;fontStyle=1;fontColor=#0C4A6E;align=center;" vertex="1" parent="1"><mxGeometry x="540" y="935" width="140" height="68" as="geometry"/></mxCell>
-        <mxCell id="a_queue" value="Queue scan locally&#xa;(UUID key in IndexedDB)" style="rounded=1;arcSize=28;whiteSpace=wrap;html=1;fillColor=#FEF3C7;strokeColor=#D97706;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=11;fontStyle=1;fontColor=#1E293B;align=center;" vertex="1" parent="1"><mxGeometry x="435" y="1035" width="168" height="52" as="geometry"/></mxCell>
-        <mxCell id="a_submit_scan" value="Submit scan via API&#xa;(POST /checkpoint/scans/)" style="rounded=1;arcSize=28;whiteSpace=wrap;html=1;fillColor=#FEF3C7;strokeColor=#D97706;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=11;fontStyle=1;fontColor=#1E293B;align=center;" vertex="1" parent="1"><mxGeometry x="617" y="1035" width="168" height="52" as="geometry"/></mxCell>
-        <mxCell id="a_log" value="Commit to append-only&#xa;ScanEvent audit log" style="rounded=1;arcSize=28;whiteSpace=wrap;html=1;fillColor=#FEF3C7;strokeColor=#D97706;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=11;fontStyle=1;fontColor=#1E293B;align=center;" vertex="1" parent="1"><mxGeometry x="1265" y="1035" width="210" height="52" as="geometry"/></mxCell>
-        <mxCell id="d_sms" value="Exit direction &amp;&#xa;ALLOWED / OVERRIDE?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#E0F2FE;strokeColor=#0284C7;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=11;fontStyle=1;fontColor=#0C4A6E;align=center;" vertex="1" parent="1"><mxGeometry x="1270" y="1115" width="200" height="78" as="geometry"/></mxCell>
-        <mxCell id="a_sms" value="Send departure SMS alert&#xa;to owner phone (outbox)" style="rounded=1;arcSize=28;whiteSpace=wrap;html=1;fillColor=#FEF3C7;strokeColor=#D97706;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=11;fontStyle=1;fontColor=#1E293B;align=center;" vertex="1" parent="1"><mxGeometry x="1265" y="1220" width="210" height="52" as="geometry"/></mxCell>
-        <mxCell id="end" value="" style="shape=doubleEllipse;fillColor=#0F172A;strokeColor=#0F172A;strokeWidth=2;" vertex="1" parent="1"><mxGeometry x="1356" y="1302" width="28" height="28" as="geometry"/></mxCell>
-        <mxCell id="e0" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;arcSize=8;jumpStyle=arc;jumpSize=6;html=1;strokeColor=#334155;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=10;fontStyle=1;fontColor=#0F172A;exitX=0.5;exitY=1;entryX=0.5;entryY=0;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="start" target="a_scan"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
-        <mxCell id="e1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;arcSize=8;jumpStyle=arc;jumpSize=6;html=1;strokeColor=#334155;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=10;fontStyle=1;fontColor=#0F172A;exitX=1;exitY=0.5;entryX=0;entryY=0.5;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="a_scan" target="d_net_lookup"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
-        <mxCell id="e2" value="[Offline: Cache]" style="edgeStyle=orthogonalEdgeStyle;rounded=1;arcSize=8;jumpStyle=arc;jumpSize=6;html=1;strokeColor=#334155;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=10;fontStyle=1;fontColor=#0F172A;exitX=0.25;exitY=1;entryX=0.5;entryY=0;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="d_net_lookup" target="a_cache"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
-        <mxCell id="e3" value="[Online]" style="edgeStyle=orthogonalEdgeStyle;rounded=1;arcSize=8;jumpStyle=arc;jumpSize=6;html=1;strokeColor=#334155;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=10;fontStyle=1;fontColor=#0F172A;exitX=0.75;exitY=1;entryX=0.5;entryY=0;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="d_net_lookup" target="a_call_api"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
-        <mxCell id="e4" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;arcSize=8;jumpStyle=arc;jumpSize=6;html=1;strokeColor=#334155;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=10;fontStyle=1;fontColor=#0F172A;exitX=1;exitY=0.5;entryX=0;entryY=0.5;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="a_call_api" target="a_lookup"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
-        <mxCell id="e5" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;arcSize=8;jumpStyle=arc;jumpSize=6;html=1;strokeColor=#334155;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=10;fontStyle=1;fontColor=#0F172A;exitX=0.5;exitY=1;entryX=0.25;entryY=0;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="a_cache" target="a_display"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="519" y="380" /><mxPoint x="555" y="380" /></Array></mxGeometry></mxCell>
-        <mxCell id="e6" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;arcSize=8;jumpStyle=arc;jumpSize=6;html=1;strokeColor=#334155;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=10;fontStyle=1;fontColor=#0F172A;exitX=0.5;exitY=1;entryX=0.5;entryY=0;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="a_lookup" target="d_hold"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
-        <mxCell id="e7" value="[No: Clear]" style="edgeStyle=orthogonalEdgeStyle;rounded=1;arcSize=8;jumpStyle=arc;jumpSize=6;html=1;strokeColor=#334155;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=10;fontStyle=1;fontColor=#0F172A;exitX=0.25;exitY=1;entryX=0.5;entryY=0;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="d_hold" target="a_ret_clear"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
-        <mxCell id="e8" value="[Yes: Hold / Unreg]" style="edgeStyle=orthogonalEdgeStyle;rounded=1;arcSize=8;jumpStyle=arc;jumpSize=6;html=1;strokeColor=#334155;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=10;fontStyle=1;fontColor=#0F172A;exitX=0.75;exitY=1;entryX=0.5;entryY=0;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="d_hold" target="a_ret_hold"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
-        <mxCell id="e9" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;arcSize=8;jumpStyle=arc;jumpSize=6;html=1;strokeColor=#334155;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=10;fontStyle=1;fontColor=#0F172A;exitX=0.5;exitY=1;entryX=1;entryY=0.3;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="a_ret_clear" target="a_display"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="897" y="541" /></Array></mxGeometry></mxCell>
-        <mxCell id="e10" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;arcSize=8;jumpStyle=arc;jumpSize=6;html=1;strokeColor=#334155;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=10;fontStyle=1;fontColor=#0F172A;exitX=0.5;exitY=1;entryX=1;entryY=0.7;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="a_ret_hold" target="a_display"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1082" y="563" /></Array></mxGeometry></mxCell>
-        <mxCell id="e11" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;arcSize=8;jumpStyle=arc;jumpSize=6;html=1;strokeColor=#334155;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=10;fontStyle=1;fontColor=#0F172A;exitX=0;exitY=0.5;entryX=1;entryY=0.5;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="a_display" target="a_verify"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
-        <mxCell id="e12" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;arcSize=8;jumpStyle=arc;jumpSize=6;html=1;strokeColor=#334155;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=10;fontStyle=1;fontColor=#0F172A;exitX=0.5;exitY=1;entryX=0.5;entryY=0;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="a_verify" target="d_match"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
-        <mxCell id="e13" value="[Yes: Match &amp;amp; Clear]" style="edgeStyle=orthogonalEdgeStyle;rounded=1;arcSize=8;jumpStyle=arc;jumpSize=6;html=1;strokeColor=#334155;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=10;fontStyle=1;fontColor=#0F172A;exitX=0.2;exitY=1;entryX=0.5;entryY=0;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="d_match" target="v_allowed"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="170" y="695" /><mxPoint x="140" y="695" /></Array></mxGeometry></mxCell>
-        <mxCell id="e14" value="[No: Hold / Mismatch]" style="edgeStyle=orthogonalEdgeStyle;rounded=1;arcSize=8;jumpStyle=arc;jumpSize=6;html=1;strokeColor=#334155;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=10;fontStyle=1;fontColor=#0F172A;exitX=0.8;exitY=1;entryX=0.5;entryY=0;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="d_match" target="d_override"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="290" y="692" /><mxPoint x="317" y="692" /></Array></mxGeometry></mxCell>
-        <mxCell id="e15" value="[Yes: Override]" style="edgeStyle=orthogonalEdgeStyle;rounded=1;arcSize=8;jumpStyle=arc;jumpSize=6;html=1;strokeColor=#334155;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=10;fontStyle=1;fontColor=#0F172A;exitX=1;exitY=0.5;entryX=0;entryY=0.5;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="d_override" target="a_reason"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
-        <mxCell id="e16" value="[No: Enforce Deny]" style="edgeStyle=orthogonalEdgeStyle;rounded=1;arcSize=8;jumpStyle=arc;jumpSize=6;html=1;strokeColor=#334155;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=10;fontStyle=1;fontColor=#0F172A;exitX=0.5;exitY=1;entryX=0.5;entryY=0;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="d_override" target="v_denied"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
-        <mxCell id="e17" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;arcSize=8;jumpStyle=arc;jumpSize=6;html=1;strokeColor=#334155;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=10;fontStyle=1;fontColor=#0F172A;exitX=0.5;exitY=1;entryX=0.5;entryY=0;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="a_reason" target="v_override"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
-        <mxCell id="e18" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;arcSize=8;jumpStyle=arc;jumpSize=6;html=1;strokeColor=#334155;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=10;fontStyle=1;fontColor=#0F172A;exitX=0.5;exitY=1;entryX=0;entryY=0.5;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="v_allowed" target="d_verdict_merge"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="140" y="895" /></Array></mxGeometry></mxCell>
-        <mxCell id="e19" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;arcSize=8;jumpStyle=arc;jumpSize=6;html=1;strokeColor=#334155;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=10;fontStyle=1;fontColor=#0F172A;exitX=0.5;exitY=1;entryX=0;entryY=0.5;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="v_denied" target="d_verdict_merge"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="317" y="895" /></Array></mxGeometry></mxCell>
-        <mxCell id="e20" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;arcSize=8;jumpStyle=arc;jumpSize=6;html=1;strokeColor=#334155;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=10;fontStyle=1;fontColor=#0F172A;exitX=0.5;exitY=1;entryX=0.5;entryY=0;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="v_override" target="d_verdict_merge"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
-        <mxCell id="e21" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;arcSize=8;jumpStyle=arc;jumpSize=6;html=1;strokeColor=#334155;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=10;fontStyle=1;fontColor=#0F172A;exitX=0.5;exitY=1;entryX=0.5;entryY=0;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="d_verdict_merge" target="d_sync_net"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
-        <mxCell id="e22" value="[Offline]" style="edgeStyle=orthogonalEdgeStyle;rounded=1;arcSize=8;jumpStyle=arc;jumpSize=6;html=1;strokeColor=#334155;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=10;fontStyle=1;fontColor=#0F172A;exitX=0.25;exitY=1;entryX=0.5;entryY=0;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="d_sync_net" target="a_queue"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
-        <mxCell id="e23" value="[Online]" style="edgeStyle=orthogonalEdgeStyle;rounded=1;arcSize=8;jumpStyle=arc;jumpSize=6;html=1;strokeColor=#334155;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=10;fontStyle=1;fontColor=#0F172A;exitX=0.75;exitY=1;entryX=0.5;entryY=0;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="d_sync_net" target="a_submit_scan"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
-        <mxCell id="e24" value="Sync on reconnect" style="edgeStyle=orthogonalEdgeStyle;rounded=1;arcSize=8;jumpStyle=arc;jumpSize=6;html=1;strokeColor=#334155;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=10;fontStyle=1;fontColor=#0F172A;exitX=1;exitY=0.5;entryX=0;entryY=0.5;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;" edge="1" parent="1" source="a_queue" target="a_submit_scan"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
-        <mxCell id="e25" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;arcSize=8;jumpStyle=arc;jumpSize=6;html=1;strokeColor=#334155;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=10;fontStyle=1;fontColor=#0F172A;exitX=1;exitY=0.5;entryX=0;entryY=0.5;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="a_submit_scan" target="a_log"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
-        <mxCell id="e26" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;arcSize=8;jumpStyle=arc;jumpSize=6;html=1;strokeColor=#334155;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=10;fontStyle=1;fontColor=#0F172A;exitX=0.5;exitY=1;entryX=0.5;entryY=0;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="a_log" target="d_sms"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
-        <mxCell id="e27" value="[Yes: Permitted Exit]" style="edgeStyle=orthogonalEdgeStyle;rounded=1;arcSize=8;jumpStyle=arc;jumpSize=6;html=1;strokeColor=#334155;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=10;fontStyle=1;fontColor=#0F172A;exitX=0.5;exitY=1;entryX=0.5;entryY=0;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="d_sms" target="a_sms"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
-        <mxCell id="e28" value="[No: Denied or Entry]" style="edgeStyle=orthogonalEdgeStyle;rounded=1;arcSize=8;jumpStyle=arc;jumpSize=6;html=1;strokeColor=#334155;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=10;fontStyle=1;fontColor=#0F172A;exitX=1;exitY=0.5;entryX=1;entryY=0.5;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="d_sms" target="end"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1525" y="1154" /><mxPoint x="1525" y="1316" /></Array></mxGeometry></mxCell>
-        <mxCell id="e29" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;arcSize=8;jumpStyle=arc;jumpSize=6;html=1;strokeColor=#334155;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=10;fontStyle=1;fontColor=#0F172A;exitX=0.5;exitY=1;entryX=0.5;entryY=0;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="a_sms" target="end"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- ==================== 4 SWIMLANES (SAGE GREEN TEXTBOOK HEADER) ==================== -->
+        <mxCell id="lane1" value="Security Guard" style="shape=swimlane;startSize=36;horizontal=1;whiteSpace=wrap;html=1;fillColor=#D5E8D4;swimlaneFillColor=#FFFFFF;strokeColor=#333333;strokeWidth=1.5;fontFamily=Segoe UI;fontStyle=1;fontSize=13;fontColor=#000000;align=center;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="40" y="30" width="380" height="1450" as="geometry" />
+        </mxCell>
+        <mxCell id="lane2" value="Gate Console (Client App)" style="shape=swimlane;startSize=36;horizontal=1;whiteSpace=wrap;html=1;fillColor=#D5E8D4;swimlaneFillColor=#FFFFFF;strokeColor=#333333;strokeWidth=1.5;fontFamily=Segoe UI;fontStyle=1;fontSize=13;fontColor=#000000;align=center;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="420" y="30" width="380" height="1450" as="geometry" />
+        </mxCell>
+        <mxCell id="lane3" value="Backend API &amp; Registry" style="shape=swimlane;startSize=36;horizontal=1;whiteSpace=wrap;html=1;fillColor=#D5E8D4;swimlaneFillColor=#FFFFFF;strokeColor=#333333;strokeWidth=1.5;fontFamily=Segoe UI;fontStyle=1;fontSize=13;fontColor=#000000;align=center;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="800" y="30" width="380" height="1450" as="geometry" />
+        </mxCell>
+        <mxCell id="lane4" value="Audit Log &amp; Sync" style="shape=swimlane;startSize=36;horizontal=1;whiteSpace=wrap;html=1;fillColor=#D5E8D4;swimlaneFillColor=#FFFFFF;strokeColor=#333333;strokeWidth=1.5;fontFamily=Segoe UI;fontStyle=1;fontSize=13;fontColor=#000000;align=center;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="1180" y="30" width="380" height="1450" as="geometry" />
+        </mxCell>
+
+        <!-- 1. INITIAL STATE -->
+        <mxCell id="start" value="" style="ellipse;fillColor=#D5E8D4;strokeColor=#333333;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="214" y="80" width="32" height="32" as="geometry" />
+        </mxCell>
+
+        <!-- 2. ACTIVITY STATE: Scan QR -->
+        <mxCell id="a_scan" value="Scan QR code or type&#xa;serial / reg number" style="rounded=1;arcSize=24;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#333333;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=11;fontStyle=1;fontColor=#000000;align=center;" vertex="1" parent="1">
+          <mxGeometry x="125" y="140" width="210" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- 3. DECISION NODE + GUARD: Network online? -->
+        <mxCell id="d_net_lookup" value="" style="rhombus;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#333333;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="590" y="143" width="44" height="44" as="geometry" />
+        </mxCell>
+
+        <mxCell id="a_cache" value="Read sessionStorage cache&#xa;or manual permit check" style="rounded=1;arcSize=24;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#333333;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=11;fontStyle=1;fontColor=#000000;align=center;" vertex="1" parent="1">
+          <mxGeometry x="435" y="230" width="165" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="a_call_api" value="Call verification API&#xa;(GET /checkpoint/lookup/)" style="rounded=1;arcSize=24;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#333333;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=11;fontStyle=1;fontColor=#000000;align=center;" vertex="1" parent="1">
+          <mxGeometry x="620" y="230" width="165" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="a_lookup" value="Look up device &amp; student&#xa;in registry status" style="rounded=1;arcSize=24;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#333333;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=11;fontStyle=1;fontColor=#000000;align=center;" vertex="1" parent="1">
+          <mxGeometry x="885" y="230" width="210" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- DECISION NODE: Hold check -->
+        <mxCell id="d_hold" value="" style="rhombus;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#333333;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="968" y="315" width="44" height="44" as="geometry" />
+        </mxCell>
+
+        <mxCell id="a_ret_clear" value="Return CLEAR +&#xa;owner photo" style="rounded=1;arcSize=24;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#333333;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=11;fontStyle=1;fontColor=#000000;align=center;" vertex="1" parent="1">
+          <mxGeometry x="815" y="400" width="160" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="a_ret_hold" value="Return HOLD + reason&#xa;+ owner photo" style="rounded=1;arcSize=24;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#333333;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=11;fontStyle=1;fontColor=#000000;align=center;" vertex="1" parent="1">
+          <mxGeometry x="1005" y="400" width="160" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- 4. MERGE NODE (Lookup Merge Diamond) -->
+        <mxCell id="m_lookup" value="" style="rhombus;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#333333;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="592" y="475" width="36" height="36" as="geometry" />
+        </mxCell>
+
+        <mxCell id="a_display" value="Display owner photo +&#xa;CLEAR / HOLD verdict" style="rounded=1;arcSize=24;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#333333;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=11;fontStyle=1;fontColor=#000000;align=center;" vertex="1" parent="1">
+          <mxGeometry x="505" y="535" width="210" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="a_verify" value="Visually check bearer&#xa;against owner photo" style="rounded=1;arcSize=24;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#333333;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=11;fontStyle=1;fontColor=#000000;align=center;" vertex="1" parent="1">
+          <mxGeometry x="125" y="535" width="210" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- DECISION NODE: Bearer Match? -->
+        <mxCell id="d_match" value="" style="rhombus;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#333333;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="208" y="615" width="44" height="44" as="geometry" />
+        </mxCell>
+
+        <!-- DECISION NODE: Override? -->
+        <mxCell id="d_override" value="" style="rhombus;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#333333;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="295" y="700" width="44" height="44" as="geometry" />
+        </mxCell>
+
+        <mxCell id="a_reason" value="Prompt mandatory written&#xa;override reason" style="rounded=1;arcSize=24;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#333333;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=11;fontStyle=1;fontColor=#000000;align=center;" vertex="1" parent="1">
+          <mxGeometry x="505" y="697" width="210" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- VERDICT ACTIVITY STATES -->
+        <mxCell id="v_allowed" value="Verdict: ALLOWED" style="rounded=1;arcSize=24;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#333333;strokeWidth=1.8;fontFamily=Segoe UI;fontSize=11;fontStyle=1;fontColor=#000000;align=center;" vertex="1" parent="1">
+          <mxGeometry x="65" y="790" width="150" height="44" as="geometry" />
+        </mxCell>
+
+        <mxCell id="v_denied" value="Verdict: DENIED" style="rounded=1;arcSize=24;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#333333;strokeWidth=1.8;fontFamily=Segoe UI;fontSize=11;fontStyle=1;fontColor=#000000;align=center;" vertex="1" parent="1">
+          <mxGeometry x="242" y="790" width="150" height="44" as="geometry" />
+        </mxCell>
+
+        <mxCell id="v_override" value="Verdict: OVERRIDE" style="rounded=1;arcSize=24;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#333333;strokeWidth=1.8;fontFamily=Segoe UI;fontSize=11;fontStyle=1;fontColor=#000000;align=center;" vertex="1" parent="1">
+          <mxGeometry x="535" y="790" width="150" height="44" as="geometry" />
+        </mxCell>
+
+        <!-- MERGE NODE (Verdict Merge Diamond) -->
+        <mxCell id="d_verdict_merge" value="" style="rhombus;fillColor=#D5E8D4;strokeColor=#333333;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="592" y="860" width="36" height="36" as="geometry" />
+        </mxCell>
+
+        <!-- DECISION NODE: Network online for sync? -->
+        <mxCell id="d_sync_net" value="" style="rhombus;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#333333;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="588" y="920" width="44" height="44" as="geometry" />
+        </mxCell>
+
+        <mxCell id="a_queue" value="Queue scan locally&#xa;(UUID idempotency)" style="rounded=1;arcSize=24;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#333333;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=11;fontStyle=1;fontColor=#000000;align=center;" vertex="1" parent="1">
+          <mxGeometry x="435" y="995" width="160" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- 5. TIME EVENT (Hourglass Notation: Reconnect Poll Timer) -->
+        <mxCell id="t_reconnect" value="Reconnect&#xa;Timer" style="shape=collate;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#333333;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=10;fontStyle=1;labelPosition=left;verticalLabelPosition=middle;align=right;verticalAlign=middle;spacingRight=6;" vertex="1" parent="1">
+          <mxGeometry x="497" y="1075" width="36" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="a_submit_scan" value="Submit scan to API&#xa;(POST /checkpoint/scans/)" style="rounded=1;arcSize=24;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#333333;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=11;fontStyle=1;fontColor=#000000;align=center;" vertex="1" parent="1">
+          <mxGeometry x="615" y="1070" width="170" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- 6. FORK BAR (Thick Horizontal Synchronization Bar in Swimlane 4) -->
+        <mxCell id="fork_bar" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#111111;strokeColor=#111111;" vertex="1" parent="1">
+          <mxGeometry x="1220" y="1092" width="300" height="6" as="geometry" />
+        </mxCell>
+
+        <!-- Parallel Branch 1: Append-Only Audit Log -->
+        <mxCell id="a_log" value="Commit to append-only&#xa;ScanEvent log" style="rounded=1;arcSize=24;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#333333;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=11;fontStyle=1;fontColor=#000000;align=center;" vertex="1" parent="1">
+          <mxGeometry x="1195" y="1165" width="155" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Parallel Branch 2: Conditional Departure SMS Alert -->
+        <mxCell id="d_sms" value="" style="rhombus;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#333333;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="1438" y="1140" width="44" height="44" as="geometry" />
+        </mxCell>
+
+        <mxCell id="a_sms" value="Send departure SMS&#xa;alert to owner phone" style="rounded=1;arcSize=24;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#333333;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=11;fontStyle=1;fontColor=#000000;align=center;" vertex="1" parent="1">
+          <mxGeometry x="1382" y="1225" width="155" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Merge for SMS Decision before Join -->
+        <mxCell id="m_sms" value="" style="rhombus;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#333333;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="1442" y="1305" width="36" height="36" as="geometry" />
+        </mxCell>
+
+        <!-- 7. JOIN BAR (Thick Horizontal Synchronization Bar in Swimlane 4) -->
+        <mxCell id="join_bar" value="" style="html=1;points=[];perimeter=orthogonalPerimeter;fillColor=#111111;strokeColor=#111111;" vertex="1" parent="1">
+          <mxGeometry x="1220" y="1370" width="300" height="6" as="geometry" />
+        </mxCell>
+
+        <!-- 8. FINAL STATE (Bullseye) -->
+        <mxCell id="end" value="" style="shape=sumEllipse;perimeter=ellipsePerimeter;whiteSpace=wrap;html=1;backgroundOutline=1;fillColor=#15803D;strokeColor=#333333;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="1354" y="1415" width="32" height="32" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== CONTROL FLOWS & GUARD CONDITIONS ==================== -->
+        <mxCell id="e0" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#111111;strokeWidth=1.6;endArrow=block;endFill=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="start" target="a_scan"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#111111;strokeWidth=1.6;endArrow=block;endFill=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="a_scan" target="d_net_lookup"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e2" value="[Offline]" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#111111;strokeWidth=1.6;endArrow=block;endFill=1;fontFamily=Segoe UI;fontSize=10;fontStyle=1;labelBackgroundColor=#FFFFFF;exitX=0;exitY=0.5;entryX=0.5;entryY=0;" edge="1" parent="1" source="d_net_lookup" target="a_cache"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e3" value="[Online]" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#111111;strokeWidth=1.6;endArrow=block;endFill=1;fontFamily=Segoe UI;fontSize=10;fontStyle=1;labelBackgroundColor=#FFFFFF;exitX=1;exitY=0.5;entryX=0.5;entryY=0;" edge="1" parent="1" source="d_net_lookup" target="a_call_api"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e4" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#111111;strokeWidth=1.6;endArrow=block;endFill=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="a_call_api" target="a_lookup"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e5" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#111111;strokeWidth=1.6;endArrow=block;endFill=1;exitX=0.5;exitY=1;entryX=0;entryY=0.5;" edge="1" parent="1" source="a_cache" target="m_lookup"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="517" y="493" /></Array></mxGeometry></mxCell>
+        <mxCell id="e6" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#111111;strokeWidth=1.6;endArrow=block;endFill=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="a_lookup" target="d_hold"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e7" value="[Clear]" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#111111;strokeWidth=1.6;endArrow=block;endFill=1;fontFamily=Segoe UI;fontSize=10;fontStyle=1;labelBackgroundColor=#FFFFFF;exitX=0;exitY=0.5;entryX=0.5;entryY=0;" edge="1" parent="1" source="d_hold" target="a_ret_clear"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e8" value="[Hold / Unreg]" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#111111;strokeWidth=1.6;endArrow=block;endFill=1;fontFamily=Segoe UI;fontSize=10;fontStyle=1;labelBackgroundColor=#FFFFFF;exitX=1;exitY=0.5;entryX=0.5;entryY=0;" edge="1" parent="1" source="d_hold" target="a_ret_hold"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e9" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#111111;strokeWidth=1.6;endArrow=block;endFill=1;exitX=0.5;exitY=1;entryX=1;entryY=0.5;" edge="1" parent="1" source="a_ret_clear" target="m_lookup"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="895" y="493" /></Array></mxGeometry></mxCell>
+        <mxCell id="e10" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#111111;strokeWidth=1.6;endArrow=block;endFill=1;exitX=0.5;exitY=1;entryX=1;entryY=0.5;" edge="1" parent="1" source="a_ret_hold" target="m_lookup"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1085" y="493" /></Array></mxGeometry></mxCell>
+        <mxCell id="e10b" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#111111;strokeWidth=1.6;endArrow=block;endFill=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="m_lookup" target="a_display"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e11" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#111111;strokeWidth=1.6;endArrow=block;endFill=1;exitX=0;exitY=0.5;entryX=1;entryY=0.5;" edge="1" parent="1" source="a_display" target="a_verify"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e12" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#111111;strokeWidth=1.6;endArrow=block;endFill=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="a_verify" target="d_match"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e13" value="[Match &amp; Clear]" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#111111;strokeWidth=1.6;endArrow=block;endFill=1;fontFamily=Segoe UI;fontSize=10;fontStyle=1;labelBackgroundColor=#FFFFFF;exitX=0;exitY=0.5;entryX=0.5;entryY=0;" edge="1" parent="1" source="d_match" target="v_allowed"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="140" y="637" /></Array></mxGeometry></mxCell>
+        <mxCell id="e14" value="[Hold / Mismatch]" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#111111;strokeWidth=1.6;endArrow=block;endFill=1;fontFamily=Segoe UI;fontSize=10;fontStyle=1;labelBackgroundColor=#FFFFFF;exitX=1;exitY=0.5;entryX=0.5;entryY=0;" edge="1" parent="1" source="d_match" target="d_override"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="317" y="637" /></Array></mxGeometry></mxCell>
+        <mxCell id="e15" value="[Override]" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#111111;strokeWidth=1.6;endArrow=block;endFill=1;fontFamily=Segoe UI;fontSize=10;fontStyle=1;labelBackgroundColor=#FFFFFF;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="d_override" target="a_reason"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e16" value="[Deny]" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#111111;strokeWidth=1.6;endArrow=block;endFill=1;fontFamily=Segoe UI;fontSize=10;fontStyle=1;labelBackgroundColor=#FFFFFF;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="d_override" target="v_denied"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e17" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#111111;strokeWidth=1.6;endArrow=block;endFill=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="a_reason" target="v_override"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e18" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#111111;strokeWidth=1.6;endArrow=block;endFill=1;exitX=0.5;exitY=1;entryX=0;entryY=0.5;" edge="1" parent="1" source="v_allowed" target="d_verdict_merge"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="140" y="878" /></Array></mxGeometry></mxCell>
+        <mxCell id="e19" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#111111;strokeWidth=1.6;endArrow=block;endFill=1;exitX=0.5;exitY=1;entryX=0;entryY=0.5;" edge="1" parent="1" source="v_denied" target="d_verdict_merge"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="317" y="878" /></Array></mxGeometry></mxCell>
+        <mxCell id="e20" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#111111;strokeWidth=1.6;endArrow=block;endFill=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="v_override" target="d_verdict_merge"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e21" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#111111;strokeWidth=1.6;endArrow=block;endFill=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="d_verdict_merge" target="d_sync_net"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e22" value="[Offline]" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#111111;strokeWidth=1.6;endArrow=block;endFill=1;fontFamily=Segoe UI;fontSize=10;fontStyle=1;labelBackgroundColor=#FFFFFF;exitX=0;exitY=0.5;entryX=0.5;entryY=0;" edge="1" parent="1" source="d_sync_net" target="a_queue"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="515" y="942" /></Array></mxGeometry></mxCell>
+        <mxCell id="e23" value="[Online]" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#111111;strokeWidth=1.6;endArrow=block;endFill=1;fontFamily=Segoe UI;fontSize=10;fontStyle=1;labelBackgroundColor=#FFFFFF;exitX=1;exitY=0.5;entryX=0.5;entryY=0;" edge="1" parent="1" source="d_sync_net" target="a_submit_scan"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="700" y="942" /></Array></mxGeometry></mxCell>
+        <mxCell id="e24a" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#111111;strokeWidth=1.6;endArrow=block;endFill=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="a_queue" target="t_reconnect"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e24b" value="[Reconnected]" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#111111;strokeWidth=1.6;endArrow=block;endFill=1;fontFamily=Segoe UI;fontSize=9;fontStyle=1;labelBackgroundColor=#FFFFFF;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="t_reconnect" target="a_submit_scan"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+        <!-- Submit Scan -> FORK BAR -->
+        <mxCell id="e25" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#111111;strokeWidth=1.6;endArrow=block;endFill=1;exitX=1;exitY=0.5;entryX=0.5;entryY=0;" edge="1" parent="1" source="a_submit_scan" target="fork_bar"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1370" y="1095" /></Array></mxGeometry></mxCell>
+
+        <!-- FORK BAR -> Parallel Branch 1 (Audit Log) & Parallel Branch 2 (SMS Check) -->
+        <mxCell id="e26a" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#111111;strokeWidth=1.6;endArrow=block;endFill=1;exitX=0.18;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="fork_bar" target="a_log"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1272" y="1098" /></Array></mxGeometry></mxCell>
+        <mxCell id="e26b" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#111111;strokeWidth=1.6;endArrow=block;endFill=1;exitX=0.8;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="fork_bar" target="d_sms"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1460" y="1098" /></Array></mxGeometry></mxCell>
+
+        <!-- SMS Branch -->
+        <mxCell id="e27" value="[Exit Allowed]" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#111111;strokeWidth=1.6;endArrow=block;endFill=1;fontFamily=Segoe UI;fontSize=10;fontStyle=1;labelBackgroundColor=#FFFFFF;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="d_sms" target="a_sms"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e28" value="[Skip]" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#111111;strokeWidth=1.6;endArrow=block;endFill=1;fontFamily=Segoe UI;fontSize=10;fontStyle=1;labelBackgroundColor=#FFFFFF;exitX=1;exitY=0.5;entryX=1;entryY=0.5;" edge="1" parent="1" source="d_sms" target="m_sms"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1548" y="1162" /><mxPoint x="1548" y="1323" /></Array></mxGeometry></mxCell>
+        <mxCell id="e29a" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#111111;strokeWidth=1.6;endArrow=block;endFill=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="a_sms" target="m_sms"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+        <!-- Both Parallel Branches -> JOIN BAR -> FINAL STATE -->
+        <mxCell id="e30a" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#111111;strokeWidth=1.6;endArrow=block;endFill=1;exitX=0.5;exitY=1;entryX=0.18;entryY=0;" edge="1" parent="1" source="a_log" target="join_bar"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1272" y="1370" /></Array></mxGeometry></mxCell>
+        <mxCell id="e30b" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#111111;strokeWidth=1.6;endArrow=block;endFill=1;exitX=0.5;exitY=1;entryX=0.8;entryY=0;" edge="1" parent="1" source="m_sms" target="join_bar"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1460" y="1370" /></Array></mxGeometry></mxCell>
+        <mxCell id="e31" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#111111;strokeWidth=1.6;endArrow=block;endFill=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="join_bar" target="end"><mxGeometry relative="1" as="geometry" /></mxCell>
+
       </root>
     </mxGraphModel>
   </diagram>
