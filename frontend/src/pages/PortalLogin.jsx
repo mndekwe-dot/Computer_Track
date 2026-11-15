@@ -78,11 +78,17 @@ export default function PortalLogin({ portal }) {
 
   return (
     <div className="login-page" style={{ '--brand': portal.accent, '--brand-dark': portal.accentDark }}>
+      {/* The portal's own colour fills one side of the screen, so a guard at a
+          shared terminal knows which door they are at before reading a word. */}
+      <aside className="login-side">
+        <Brand title={portal.loginTitle} subtitle={portal.tagline} size="md" as="h1" />
+        <p>{portal.loginBlurb}</p>
+        <span className="login-stripe" aria-hidden="true" />
+      </aside>
+
+      <div className="login-main">
       <form className="login-card" onSubmit={submit}>
-        <div className="login-head">
-          <Brand title={portal.loginTitle} subtitle={portal.tagline} size="lg" stacked as="h1" />
-          <p>{portal.loginBlurb}</p>
-        </div>
+        <h2 className="login-title">Sign in</h2>
 
         {wrongPortal && (
           <div className="note note-warn" role="alert">
@@ -166,14 +172,15 @@ export default function PortalLogin({ portal }) {
         <div className="demo-hint">
           <strong>Demo accounts for this portal</strong> (password <code>passw0rd!</code>)
           <br />
-          {DEMO_ACCOUNTS[portal.key].join(' · ')}
+          {DEMO_ACCOUNTS[portal.key].join(', ')}
         </div>
       </form>
 
       <p className="login-aside">
-        A student registering your own computer?{' '}
+        Registering your own computer as a student?{' '}
         <Link to="/register">Use the student form</Link>. No account needed.
       </p>
+      </div>
     </div>
   )
 }

@@ -5,7 +5,11 @@ import App from './App'
 import { AuthProvider } from './auth/AuthContext'
 // Self-hosted, so a gate kiosk on a slow or filtered connection still gets the
 // typeface rather than silently falling back to whatever the OS ships.
-import '@fontsource-variable/inter'
+// Public Sans for reading, Barlow Condensed (drawn from highway signage) for
+// headings and the gate verdict, which has to read at arm's length.
+import '@fontsource-variable/public-sans'
+import '@fontsource/barlow-condensed/600.css'
+import '@fontsource/barlow-condensed/700.css'
 import './styles.css'
 import { registerServiceWorker } from './offline/register'
 

@@ -1,13 +1,4 @@
-import {
-  ArrowRight,
-  BadgeCheck,
-  CheckCircle2,
-  ClipboardCheck,
-  Eye,
-  ScanLine,
-  ShieldCheck,
-  Siren,
-} from 'lucide-react'
+import { ScanLine } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Brand } from '../components/Brand'
 import { PageMeta } from '../components/PageMeta'
@@ -25,17 +16,14 @@ const PORTAL_BLURB = {
 // and it appears in the one sentence telling a student where to go.
 const steps = (office) => [
   {
-    icon: ClipboardCheck,
     title: 'Register your computer',
     body: 'Give your registration number, the serial on the computer and a photo of it. About a minute, and no account needed.',
   },
   {
-    icon: BadgeCheck,
     title: 'Get it approved',
     body: `Bring the computer to ${office}. A registrar checks it against your record and fits its QR sticker.`,
   },
   {
-    icon: ScanLine,
     title: 'Walk through any gate',
     body: 'The guard scans the sticker or types your registration number, sees the computer is yours, and you carry on.',
   },
@@ -43,17 +31,14 @@ const steps = (office) => [
 
 const assurances = (office) => [
   {
-    icon: Eye,
     title: 'What a guard can see',
     body: 'Your name, your photo and the computers registered to you. Not your results, your fees or anything else on your record.',
   },
   {
-    icon: ShieldCheck,
     title: 'Every lookup is recorded',
     body: 'Each time a member of staff opens a student record the system logs who did it and when, and administrators review it.',
   },
   {
-    icon: Siren,
     title: 'If yours is lost or stolen',
     body: `Report it to ${office}. Every gate on campus refuses that computer from the moment the report is filed.`,
   },
@@ -72,34 +57,31 @@ const assurances = (office) => [
 function GateCheckPreview() {
   return (
     <figure className="hero-preview">
-      <div className="preview-card" aria-hidden="true">
-        <div className="preview-head">
-          <span className="preview-avatar" />
-          <span className="preview-identity">
+      <div className="slip" aria-hidden="true">
+        <div className="slip-query">
+          <span className="slip-label">Registration number</span>
+          <span className="slip-input">218001234</span>
+        </div>
+        <div className="slip-student">
+          <span className="slip-photo">AU</span>
+          <span>
             <strong>Aline Uwase</strong>
-            <span className="mono">218001234</span>
-          </span>
-          <span className="preview-verdict">
-            <CheckCircle2 size={15} />
-            Clear
+            <span>BSc Software Engineering, year 2</span>
           </span>
         </div>
-        <div className="preview-row">
-          <span className="preview-thumb" />
-          <span className="preview-device">
+        <div className="slip-device">
+          <span>
             <strong>HP EliteBook 840</strong>
             <span className="mono">HP12345678</span>
           </span>
+          <span className="slip-tag">Silver, sticker on lid</span>
         </div>
-        <div className="preview-row">
-          <span className="preview-thumb" />
-          <span className="preview-device">
-            <strong>Dell Latitude 5420</strong>
-            <span className="mono">DL98765432</span>
-          </span>
+        <div className="slip-verdict">
+          <span className="slip-word">CLEAR</span>
+          <span>Details match the register</span>
         </div>
       </div>
-      <figcaption>What a guard sees after typing a registration number.</figcaption>
+      <figcaption>What the guard sees after typing your registration number.</figcaption>
     </figure>
   )
 }
@@ -148,20 +130,15 @@ export default function Landing() {
         }}
       />
       <header className="landing-bar">
-        <Brand title={systemName} subtitle="Campus gate computer register" />
+        <Brand title={systemName} subtitle={university} />
         <a className="landing-bar-link" href="#staff-sign-in">
           Staff sign in
-          <ArrowRight size={15} aria-hidden="true" />
         </a>
       </header>
 
       <main id="main-content">
         <section className="hero">
           <div className="hero-inner">
-            <p className="hero-eyebrow">
-              <ShieldCheck size={14} aria-hidden="true" />
-              University computer register
-            </p>
             <h1>Every computer that leaves campus, matched to the student carrying it.</h1>
             <p className="hero-lede">
               Register your laptop once. After that, any guard at any gate can confirm in seconds
@@ -170,34 +147,29 @@ export default function Landing() {
             <div className="hero-actions">
               <Link to="/register" className="btn btn-primary btn-lg">
                 Register my computer
-                <ArrowRight size={18} aria-hidden="true" />
               </Link>
-              <a href="#staff-sign-in" className="btn btn-outline btn-lg">
-                Staff sign in
-              </a>
+              <Link to="/register?tab=status" className="hero-secondary">
+                Check a computer I already registered
+              </Link>
             </div>
-            <p className="hero-note">
-              No account needed. You can also check whether a computer you submitted has been
-              approved yet.
-            </p>
+            <p className="hero-note">No account needed.</p>
           </div>
 
           <GateCheckPreview />
         </section>
 
+        <div className="barrier" aria-hidden="true" />
+
         <section className="band" aria-labelledby="how-it-works">
           <div className="band-inner">
             <h2 id="how-it-works">How it works</h2>
-            <ol className="step-list">
+            <ol className="route">
               {steps(office).map((step, index) => (
-                <li key={step.title} className="step">
+                <li key={step.title} className="route-stop">
                   {/* The digit is decorative: the ordered list already tells
                       assistive technology this is step 2 of 3. */}
-                  <span className="step-number" aria-hidden="true">
+                  <span className="route-number" aria-hidden="true">
                     {index + 1}
-                  </span>
-                  <span className="step-icon" aria-hidden="true">
-                    <step.icon size={20} />
                   </span>
                   <h3>{step.title}</h3>
                   <p>{step.body}</p>
@@ -208,50 +180,51 @@ export default function Landing() {
         </section>
 
         <section className="band band-plain" aria-labelledby="what-to-expect">
-          <div className="band-inner">
+          <div className="band-inner band-split">
             <h2 id="what-to-expect">What to expect</h2>
-            <div className="assurance-grid">
+            <div className="assurance-list">
               {assurances(office).map((item) => (
-                <article key={item.title} className="assurance">
-                  <span className="assurance-icon" aria-hidden="true">
-                    <item.icon size={18} />
-                  </span>
+                <div key={item.title} className="assurance">
                   <h3>{item.title}</h3>
                   <p>{item.body}</p>
-                </article>
+                </div>
               ))}
             </div>
           </div>
         </section>
 
         <section className="band" id="staff-sign-in" aria-labelledby="staff-heading">
-          <div className="band-inner">
-            <h2 id="staff-heading">Staff sign in</h2>
-            <p className="band-lede">
-              Each portal is a separate door with its own login. Accounts are issued by {office}.
-            </p>
-            <div className="landing-portals">
-              {PORTAL_LIST.map((portal) => (
-                <Link
-                  key={portal.key}
-                  to={`${portal.base}/login`}
-                  className="landing-portal"
-                  style={{ '--portal-accent': portal.accent }}
-                >
-                  <span className="landing-portal-dot" aria-hidden="true" />
-                  <strong>{portal.name}</strong>
-                  <span className="muted">{PORTAL_BLURB[portal.key]}</span>
-                  <ArrowRight className="landing-portal-arrow" size={16} aria-hidden="true" />
-                </Link>
-              ))}
+          <div className="band-inner band-split">
+            <div>
+              <h2 id="staff-heading">Staff sign in</h2>
+              <p className="band-lede">
+                Each portal is a separate door with its own login. Accounts are issued by{' '}
+                {office}.
+              </p>
             </div>
-            <p className="landing-hint">
-              <ScanLine size={14} aria-hidden="true" />
-              <span>
-                Working a gate? Bookmark <code>/guard/login</code> on the terminal to skip this
-                page.
-              </span>
-            </p>
+            <div>
+              <ul className="landing-portals">
+                {PORTAL_LIST.map((portal) => (
+                  <li key={portal.key}>
+                    <Link
+                      to={`${portal.base}/login`}
+                      className="landing-portal"
+                      style={{ '--portal-accent': portal.accent }}
+                    >
+                      <strong>{portal.name}</strong>
+                      <span>{PORTAL_BLURB[portal.key]}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+              <p className="landing-hint">
+                <ScanLine size={15} aria-hidden="true" />
+                <span>
+                  Working a gate? Bookmark <code>/guard/login</code> on the terminal to skip this
+                  page.
+                </span>
+              </p>
+            </div>
           </div>
         </section>
       </main>
@@ -260,7 +233,7 @@ export default function Landing() {
         <div className="band-inner">
           <div className="footer-grid">
             <div className="footer-about">
-              <Brand title={systemName} subtitle="Campus gate computer register" />
+              <Brand title={systemName} subtitle={university} />
               <p>
                 Every computer carried through a campus gate is checked against the student it
                 belongs to.
@@ -302,9 +275,6 @@ export default function Landing() {
                 <li>
                   <a href="#how-it-works">How registration works</a>
                 </li>
-                <li>
-                  <a href="#staff-sign-in">Staff sign in</a>
-                </li>
                 {supportEmail && (
                   <li>
                     {/* Link text has to make sense read out of context, since
@@ -315,7 +285,7 @@ export default function Landing() {
                 )}
                 <li>
                   <span className="footer-note">
-                    Anything else: {office} handles stickers, transfers and holds.
+                    For stickers, transfers and holds, go to {office}.
                   </span>
                 </li>
               </ul>
@@ -323,7 +293,6 @@ export default function Landing() {
           </div>
 
           <div className="footer-base">
-            <p>{systemName}, campus gate computer register.</p>
             <p>Records opened by staff are logged and reviewed.</p>
           </div>
         </div>

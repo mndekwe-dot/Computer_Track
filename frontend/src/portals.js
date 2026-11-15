@@ -35,8 +35,8 @@ export const PORTALS = {
     tagline: 'Computer checks at the gate',
     loginTitle: 'Security Gate Access',
     loginBlurb: 'For guards on duty at a campus entrance.',
-    accent: '#1d4ed8',
-    accentDark: '#1e40af',
+    accent: '#1f3f7a',
+    accentDark: '#162e5a',
     roles: ['GUARD'],
     home: '/guard/console',
     nav: [
@@ -53,8 +53,8 @@ export const PORTALS = {
     tagline: 'The computer register',
     loginTitle: 'Registration Office',
     loginBlurb: 'For staff who register computers and manage student records.',
-    accent: '#0f766e',
-    accentDark: '#115e59',
+    accent: '#1d6a50',
+    accentDark: '#15503c',
     roles: ['REGISTRAR'],
     home: '/registry/approvals',
     nav: [
@@ -80,8 +80,8 @@ export const PORTALS = {
     tagline: 'Whole-campus oversight',
     loginTitle: 'System Administration',
     loginBlurb: 'For system administrators only.',
-    accent: '#4a3aa7',
-    accentDark: '#3c2f87',
+    accent: '#5a3779',
+    accentDark: '#45295d',
     roles: ['ADMIN'],
     home: '/admin/dashboard',
     nav: [

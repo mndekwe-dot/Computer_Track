@@ -35,7 +35,7 @@ export default function PublicRegister() {
     <div className="public-page">
       <div className="public-shell">
         <header className="public-head">
-          <Brand title="Computer Registration" subtitle="University gate register" size="lg" stacked as="h1" />
+          <Brand title="Computer Registration" subtitle="University gate register" size="md" as="h1" />
           <p>
             Register your laptop so security can confirm it is yours when you carry it through a
             gate. You do not need an account.
