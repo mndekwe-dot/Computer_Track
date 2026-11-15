@@ -1,229 +1,347 @@
 <mxfile host="app.diagrams.net" type="device">
   <diagram name="UML Class Diagram" id="class_diagram">
-    <mxGraphModel dx="1850" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="960" defaultFontFamily="Segoe UI" math="0" shadow="0">
+    <mxGraphModel dx="2000" dy="1200" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2050" pageHeight="1220" defaultFontFamily="Segoe UI" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
 
-        <!-- ==================== ROW 1: CORE REGISTRY & GATE OPERATIONS ==================== -->
+        <!-- ==================== LEFT COLUMN: DEPARTMENT, EQUIPMENT_TYPE, RULE ==================== -->
 
-        <!-- Department -->
-        <mxCell id="cls_dept" value="&lt;b&gt;Department&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;+ id: Integer&lt;br/&gt;+ code: String {unique}&lt;br/&gt;+ name: String&lt;br/&gt;+ faculty: String" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fontFamily=Segoe UI;fontSize=11;fillColor=#F3E8FF;strokeColor=#7E22CE;strokeWidth=1.5;fontColor=#0F172A;" vertex="1" parent="1">
-          <mxGeometry x="40" y="90" width="210" height="120" as="geometry" />
+        <!-- Department (Top Left) -->
+        <mxCell id="cls_dept" value="&lt;b&gt;Department&lt;/b&gt;" style="swimlane;fontStyle=1;align=center;verticalAlign=middle;childLayout=stackLayout;horizontal=1;startSize=32;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;fillColor=#D5E8D4;strokeColor=#333333;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=12;fontColor=#1E293B;" vertex="1" parent="1">
+          <mxGeometry x="60" y="60" width="230" height="148" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_dept_attr" value="+ id: Integer {PK}&#xa;+ code: String {unique}&#xa;+ name: String&#xa;+ faculty: String" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=10;spacingRight=6;spacingTop=6;spacingBottom=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontFamily=Segoe UI;fontSize=11;fontColor=#1E293B;" vertex="1" parent="cls_dept">
+          <mxGeometry y="32" width="230" height="84" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_dept_sep" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=#333333;" vertex="1" parent="cls_dept">
+          <mxGeometry y="116" width="230" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_dept_ops" value="+ active_devices(): List&lt;Device&gt;" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=10;spacingRight=6;spacingTop=2;spacingBottom=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontFamily=Segoe UI;fontSize=11;fontColor=#0F172A;" vertex="1" parent="cls_dept">
+          <mxGeometry y="124" width="230" height="24" as="geometry" />
         </mxCell>
 
-        <!-- Student -->
-        <mxCell id="cls_student" value="&lt;b&gt;Student&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;+ id: Integer&lt;br/&gt;+ reg_number: String {unique}&lt;br/&gt;- reg_number_key: String&lt;br/&gt;+ first_name: String&lt;br/&gt;+ last_name: String&lt;br/&gt;+ email: String&lt;br/&gt;+ phone: String&lt;br/&gt;+ national_id: String&lt;br/&gt;+ programme: String&lt;br/&gt;+ year_of_study: Integer&lt;br/&gt;+ photo: Image&lt;br/&gt;+ status: StudentStatus&lt;hr size=&quot;1&quot;/&gt;+ get_full_name(): String&lt;br/&gt;+ is_clear_to_pass(): Boolean" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fontFamily=Segoe UI;fontSize=11;fillColor=#DBEAFE;strokeColor=#1D4ED8;strokeWidth=1.5;fontColor=#0F172A;" vertex="1" parent="1">
-          <mxGeometry x="340" y="90" width="240" height="290" as="geometry" />
+        <!-- EquipmentType (Middle Left) -->
+        <mxCell id="cls_equip" value="&amp;laquo;catalog&amp;raquo; &lt;b&gt;EquipmentType&lt;/b&gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=middle;childLayout=stackLayout;horizontal=1;startSize=32;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;fillColor=#D5E8D4;strokeColor=#333333;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=12;fontColor=#1E293B;" vertex="1" parent="1">
+          <mxGeometry x="60" y="340" width="230" height="164" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_equip_attr" value="+ code: String {PK}&#xa;+ label: String&#xa;+ offered_to_students: Boolean&#xa;+ is_active: Boolean&#xa;+ sort_order: Integer" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=10;spacingRight=6;spacingTop=6;spacingBottom=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontFamily=Segoe UI;fontSize=11;fontColor=#1E293B;" vertex="1" parent="cls_equip">
+          <mxGeometry y="32" width="230" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_equip_sep" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=#333333;" vertex="1" parent="cls_equip">
+          <mxGeometry y="132" width="230" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_equip_ops" value="+ is_selectable(): Boolean" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=10;spacingRight=6;spacingTop=2;spacingBottom=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontFamily=Segoe UI;fontSize=11;fontColor=#0F172A;" vertex="1" parent="cls_equip">
+          <mxGeometry y="140" width="230" height="24" as="geometry" />
         </mxCell>
 
-        <!-- Device -->
-        <mxCell id="cls_device" value="&lt;b&gt;Device&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;+ uid: UUID {PK}&lt;br/&gt;+ serial_number: String {unique}&lt;br/&gt;- serial_key: String&lt;br/&gt;+ asset_tag: String&lt;br/&gt;+ device_type: String&lt;br/&gt;+ brand: String&lt;br/&gt;+ model_name: String&lt;br/&gt;+ colour: String&lt;br/&gt;+ distinguishing_marks: String&lt;br/&gt;+ ownership: Ownership&lt;br/&gt;+ status: DeviceStatus&lt;br/&gt;+ purchase_details: String&lt;br/&gt;+ photo: Image&lt;br/&gt;+ is_archived: Boolean&lt;hr size=&quot;1&quot;/&gt;+ label(): String&lt;br/&gt;+ active_flags(): List&amp;lt;DeviceFlag&amp;gt;&lt;br/&gt;+ valid_permits(): List&amp;lt;TemporaryPermit&amp;gt;&lt;br/&gt;+ blocking_reasons(): List&amp;lt;String&amp;gt;&lt;br/&gt;+ exit_restrictions(): List&amp;lt;String&amp;gt;&lt;br/&gt;+ is_blocked(): Boolean" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fontFamily=Segoe UI;fontSize=11;fillColor=#DBEAFE;strokeColor=#1D4ED8;strokeWidth=2;fontColor=#0F172A;" vertex="1" parent="1">
-          <mxGeometry x="690" y="90" width="270" height="380" as="geometry" />
+        <!-- Rule (Bottom Left) -->
+        <mxCell id="cls_rule" value="&amp;laquo;policy&amp;raquo; &lt;b&gt;Rule&lt;/b&gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=middle;childLayout=stackLayout;horizontal=1;startSize=32;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;fillColor=#D5E8D4;strokeColor=#333333;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=12;fontColor=#1E293B;" vertex="1" parent="1">
+          <mxGeometry x="60" y="610" width="230" height="136" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_rule_attr" value="+ key: String {PK}&#xa;+ value: JSON" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=10;spacingRight=6;spacingTop=6;spacingBottom=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontFamily=Segoe UI;fontSize=11;fontColor=#1E293B;" vertex="1" parent="cls_rule">
+          <mxGeometry y="32" width="230" height="52" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_rule_sep" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=#333333;" vertex="1" parent="cls_rule">
+          <mxGeometry y="84" width="230" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_rule_ops" value="+ get(key: String): Any&#xa;+ evaluate(): Boolean" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=10;spacingRight=6;spacingTop=2;spacingBottom=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontFamily=Segoe UI;fontSize=11;fontColor=#0F172A;" vertex="1" parent="cls_rule">
+          <mxGeometry y="92" width="230" height="44" as="geometry" />
         </mxCell>
 
-        <!-- ScanEvent -->
-        <mxCell id="cls_scan" value="&amp;laquo;append-only&amp;raquo;&lt;br/&gt;&lt;b&gt;ScanEvent&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;+ id: Integer&lt;br/&gt;+ direction: Direction&lt;br/&gt;+ verdict: Verdict&lt;br/&gt;+ method: LookupMethod&lt;br/&gt;+ claimed_serial: String&lt;br/&gt;+ claimed_reg_number: String&lt;br/&gt;+ device_label: String&lt;br/&gt;+ student_name: String&lt;br/&gt;+ bearer_name: String&lt;br/&gt;+ override_reason: String&lt;br/&gt;+ client_reference: UUID {unique}&lt;br/&gt;+ created_at: DateTime" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fontFamily=Segoe UI;fontSize=11;fillColor=#FEF3C7;strokeColor=#B45309;strokeWidth=1.5;fontColor=#0F172A;" vertex="1" parent="1">
-          <mxGeometry x="1090" y="90" width="250" height="280" as="geometry" />
+        <!-- ==================== COLUMN 2: STUDENT & REGISTRATION_ATTEMPT ==================== -->
+
+        <!-- Student (Middle-Left Hub) -->
+        <mxCell id="cls_student" value="&lt;b&gt;Student&lt;/b&gt;" style="swimlane;fontStyle=1;align=center;verticalAlign=middle;childLayout=stackLayout;horizontal=1;startSize=32;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;fillColor=#D5E8D4;strokeColor=#333333;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=12;fontColor=#1E293B;" vertex="1" parent="1">
+          <mxGeometry x="390" y="450" width="240" height="256" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_student_attr" value="+ id: Integer {PK}&#xa;+ reg_number: String {unique}&#xa;- reg_number_key: String&#xa;+ first_name: String&#xa;+ last_name: String&#xa;+ email: String&#xa;+ phone: String&#xa;+ national_id: String&#xa;+ status: StudentStatus&#xa;+ department_id: Integer {FK}" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=10;spacingRight=6;spacingTop=6;spacingBottom=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontFamily=Segoe UI;fontSize=11;fontColor=#1E293B;" vertex="1" parent="cls_student">
+          <mxGeometry y="32" width="240" height="172" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_student_sep" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=#333333;" vertex="1" parent="cls_student">
+          <mxGeometry y="204" width="240" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_student_ops" value="+ get_full_name(): String&#xa;+ is_clear_to_pass(): Boolean" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=10;spacingRight=6;spacingTop=2;spacingBottom=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontFamily=Segoe UI;fontSize=11;fontColor=#0F172A;" vertex="1" parent="cls_student">
+          <mxGeometry y="212" width="240" height="44" as="geometry" />
         </mxCell>
 
-        <!-- Gate -->
-        <mxCell id="cls_gate" value="&lt;b&gt;Gate&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;+ id: Integer&lt;br/&gt;+ code: String {unique}&lt;br/&gt;+ name: String&lt;br/&gt;+ location: String&lt;br/&gt;+ allows_entry: Boolean&lt;br/&gt;+ allows_exit: Boolean&lt;br/&gt;+ opens_at: Time&lt;br/&gt;+ closes_at: Time&lt;br/&gt;+ contact_phone: String&lt;br/&gt;+ is_active: Boolean&lt;hr size=&quot;1&quot;/&gt;+ allows(direction: Direction): Boolean&lt;br/&gt;+ is_open_at(moment: DateTime): Boolean" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fontFamily=Segoe UI;fontSize=11;fillColor=#F3E8FF;strokeColor=#7E22CE;strokeWidth=1.5;fontColor=#0F172A;" vertex="1" parent="1">
-          <mxGeometry x="1470" y="90" width="250" height="250" as="geometry" />
+        <!-- RegistrationAttempt (Bottom Left-Center) -->
+        <mxCell id="cls_attempt" value="&lt;b&gt;RegistrationAttempt&lt;/b&gt;" style="swimlane;fontStyle=1;align=center;verticalAlign=middle;childLayout=stackLayout;horizontal=1;startSize=32;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;fillColor=#D5E8D4;strokeColor=#333333;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=12;fontColor=#1E293B;" vertex="1" parent="1">
+          <mxGeometry x="390" y="860" width="240" height="196" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_attempt_attr" value="+ id: Integer {PK}&#xa;+ submitted_reg_number: String&#xa;+ submitted_serial: String&#xa;+ outcome: AttemptOutcome&#xa;+ ip_address: IPAddress&#xa;+ created_at: DateTime&#xa;+ student_id: Integer {FK}" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=10;spacingRight=6;spacingTop=6;spacingBottom=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontFamily=Segoe UI;fontSize=11;fontColor=#1E293B;" vertex="1" parent="cls_attempt">
+          <mxGeometry y="32" width="240" height="132" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_attempt_sep" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=#333333;" vertex="1" parent="cls_attempt">
+          <mxGeometry y="164" width="240" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_attempt_ops" value="+ is_throttled(): Boolean" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=10;spacingRight=6;spacingTop=2;spacingBottom=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontFamily=Segoe UI;fontSize=11;fontColor=#0F172A;" vertex="1" parent="cls_attempt">
+          <mxGeometry y="172" width="240" height="24" as="geometry" />
         </mxCell>
 
-        <!-- ==================== ROW 2: POLICY, LIFECYCLE, STAFF & PERMITS ==================== -->
+        <!-- ==================== COLUMN 3 (CENTER HUB): DEVICE, DEVICE_FLAG, OWNERSHIP_TRANSFER ==================== -->
 
-        <!-- Rule -->
-        <mxCell id="cls_rule" value="&amp;laquo;policy&amp;raquo;&lt;br/&gt;&lt;b&gt;Rule&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;+ key: String {PK}&lt;br/&gt;+ value: JSON&lt;hr size=&quot;1&quot;/&gt;+ get(key: String): Any&lt;br/&gt;+ evaluate(): Boolean" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fontFamily=Segoe UI;fontSize=11;fillColor=#FEF3C7;strokeColor=#B45309;strokeWidth=1.5;fontColor=#0F172A;" vertex="1" parent="1">
-          <mxGeometry x="40" y="280" width="210" height="130" as="geometry" />
+        <!-- Device (Central Hub) -->
+        <mxCell id="cls_device" value="&lt;b&gt;Device&lt;/b&gt;" style="swimlane;fontStyle=1;align=center;verticalAlign=middle;childLayout=stackLayout;horizontal=1;startSize=32;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;fillColor=#D5E8D4;strokeColor=#333333;strokeWidth=2;fontFamily=Segoe UI;fontSize=12;fontColor=#1E293B;" vertex="1" parent="1">
+          <mxGeometry x="740" y="130" width="270" height="352" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_device_attr" value="+ uid: UUID {PK}&#xa;+ serial_number: String {unique}&#xa;- serial_key: String&#xa;+ asset_tag: String&#xa;+ device_type: String&#xa;+ brand: String&#xa;+ model_name: String&#xa;+ colour: String&#xa;+ ownership: Ownership&#xa;+ status: DeviceStatus&#xa;+ is_archived: Boolean&#xa;+ owner_id: Integer {FK}&#xa;+ department_id: Integer {FK}" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=10;spacingRight=6;spacingTop=6;spacingBottom=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontFamily=Segoe UI;fontSize=11;fontColor=#1E293B;" vertex="1" parent="cls_device">
+          <mxGeometry y="32" width="270" height="216" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_device_sep" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=#333333;" vertex="1" parent="cls_device">
+          <mxGeometry y="248" width="270" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_device_ops" value="+ active_flags(): List&lt;DeviceFlag&gt;&#xa;+ valid_permits(): List&lt;TemporaryPermit&gt;&#xa;+ blocking_reasons(): List&lt;String&gt;&#xa;+ exit_restrictions(): List&lt;String&gt;&#xa;+ is_blocked(): Boolean" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=10;spacingRight=6;spacingTop=2;spacingBottom=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontFamily=Segoe UI;fontSize=11;fontColor=#0F172A;" vertex="1" parent="cls_device">
+          <mxGeometry y="256" width="270" height="96" as="geometry" />
         </mxCell>
 
-        <!-- EquipmentType -->
-        <mxCell id="cls_equip" value="&amp;laquo;catalog&amp;raquo;&lt;br/&gt;&lt;b&gt;EquipmentType&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;+ code: String {PK}&lt;br/&gt;+ label: String&lt;br/&gt;+ description: String&lt;br/&gt;+ offered_to_students: Boolean&lt;br/&gt;+ is_active: Boolean&lt;br/&gt;+ sort_order: Integer" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fontFamily=Segoe UI;fontSize=11;fillColor=#F3E8FF;strokeColor=#7E22CE;strokeWidth=1.5;fontColor=#0F172A;" vertex="1" parent="1">
-          <mxGeometry x="40" y="470" width="210" height="160" as="geometry" />
+        <!-- DeviceFlag (Bottom Center) -->
+        <mxCell id="cls_flag" value="&lt;b&gt;DeviceFlag&lt;/b&gt;" style="swimlane;fontStyle=1;align=center;verticalAlign=middle;childLayout=stackLayout;horizontal=1;startSize=32;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;fillColor=#D5E8D4;strokeColor=#333333;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=12;fontColor=#1E293B;" vertex="1" parent="1">
+          <mxGeometry x="740" y="860" width="230" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_flag_attr" value="+ id: Integer {PK}&#xa;+ reason: FlagReason&#xa;+ details: String&#xa;+ is_active: Boolean&#xa;+ created_at: DateTime&#xa;+ device_id: UUID {FK}" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=10;spacingRight=6;spacingTop=6;spacingBottom=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontFamily=Segoe UI;fontSize=11;fontColor=#1E293B;" vertex="1" parent="cls_flag">
+          <mxGeometry y="32" width="230" height="116" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_flag_sep" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=#333333;" vertex="1" parent="cls_flag">
+          <mxGeometry y="148" width="230" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_flag_ops" value="+ resolve(user: User): void" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=10;spacingRight=6;spacingTop=2;spacingBottom=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontFamily=Segoe UI;fontSize=11;fontColor=#0F172A;" vertex="1" parent="cls_flag">
+          <mxGeometry y="156" width="230" height="24" as="geometry" />
         </mxCell>
 
-        <!-- RegistrationAttempt -->
-        <mxCell id="cls_attempt" value="&lt;b&gt;RegistrationAttempt&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;+ id: Integer&lt;br/&gt;+ submitted_reg_number: String&lt;br/&gt;+ submitted_serial: String&lt;br/&gt;+ outcome: AttemptOutcome&lt;br/&gt;+ failure_reason: String&lt;br/&gt;+ ip_address: IPAddress&lt;br/&gt;+ created_at: DateTime" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fontFamily=Segoe UI;fontSize=11;fillColor=#FEE2E2;strokeColor=#B91C1C;strokeWidth=1.5;fontColor=#0F172A;" vertex="1" parent="1">
-          <mxGeometry x="340" y="460" width="240" height="170" as="geometry" />
+        <!-- OwnershipTransfer (Middle-Center Below Device) -->
+        <mxCell id="cls_transfer" value="&lt;b&gt;OwnershipTransfer&lt;/b&gt;" style="swimlane;fontStyle=1;align=center;verticalAlign=middle;childLayout=stackLayout;horizontal=1;startSize=32;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;fillColor=#D5E8D4;strokeColor=#333333;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=12;fontColor=#1E293B;" vertex="1" parent="1">
+          <mxGeometry x="690" y="610" width="230" height="164" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_transfer_attr" value="+ id: Integer {PK}&#xa;+ reason: String&#xa;+ transferred_at: DateTime&#xa;+ device_id: UUID {FK}&#xa;+ from_student_id: Integer {FK}&#xa;+ to_student_id: Integer {FK}" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=10;spacingRight=6;spacingTop=6;spacingBottom=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontFamily=Segoe UI;fontSize=11;fontColor=#1E293B;" vertex="1" parent="cls_transfer">
+          <mxGeometry y="32" width="230" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_transfer_sep" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=#333333;" vertex="1" parent="cls_transfer">
+          <mxGeometry y="132" width="230" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_transfer_ops" value="+ record_transfer(): void" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=10;spacingRight=6;spacingTop=2;spacingBottom=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontFamily=Segoe UI;fontSize=11;fontColor=#0F172A;" vertex="1" parent="cls_transfer">
+          <mxGeometry y="140" width="230" height="24" as="geometry" />
         </mxCell>
 
-        <!-- DeviceFlag -->
-        <mxCell id="cls_flag" value="&lt;b&gt;DeviceFlag&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;+ id: Integer&lt;br/&gt;+ reason: FlagReason&lt;br/&gt;+ details: String&lt;br/&gt;+ is_active: Boolean&lt;br/&gt;+ created_at: DateTime" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fontFamily=Segoe UI;fontSize=11;fillColor=#FEE2E2;strokeColor=#B91C1C;strokeWidth=1.5;fontColor=#0F172A;" vertex="1" parent="1">
-          <mxGeometry x="690" y="550" width="230" height="140" as="geometry" />
+        <!-- ==================== COLUMN 4: SCAN_EVENT, TEMPORARY_PERMIT, NOTIFICATION ==================== -->
+
+        <!-- ScanEvent (Top Right-Center Hub) -->
+        <mxCell id="cls_scan" value="&amp;laquo;append-only&amp;raquo; &lt;b&gt;ScanEvent&lt;/b&gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=middle;childLayout=stackLayout;horizontal=1;startSize=32;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;fillColor=#D5E8D4;strokeColor=#333333;strokeWidth=2;fontFamily=Segoe UI;fontSize=12;fontColor=#1E293B;" vertex="1" parent="1">
+          <mxGeometry x="1150" y="130" width="260" height="304" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_scan_attr" value="+ id: Integer {PK}&#xa;+ direction: Direction&#xa;+ verdict: Verdict&#xa;+ method: LookupMethod&#xa;+ claimed_serial: String&#xa;+ device_label: String&#xa;+ student_name: String&#xa;+ override_reason: String&#xa;+ client_reference: UUID {unique}&#xa;+ created_at: DateTime&#xa;+ device_id: UUID {FK}&#xa;+ gate_id: Integer {FK}&#xa;+ guard_id: Integer {FK}" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=10;spacingRight=6;spacingTop=6;spacingBottom=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontFamily=Segoe UI;fontSize=11;fontColor=#1E293B;" vertex="1" parent="cls_scan">
+          <mxGeometry y="32" width="260" height="236" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_scan_sep" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=#333333;" vertex="1" parent="cls_scan">
+          <mxGeometry y="268" width="260" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_scan_ops" value="+ snapshot_identity(): void" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=10;spacingRight=6;spacingTop=2;spacingBottom=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontFamily=Segoe UI;fontSize=11;fontColor=#0F172A;" vertex="1" parent="cls_scan">
+          <mxGeometry y="276" width="260" height="28" as="geometry" />
         </mxCell>
 
-        <!-- TemporaryPermit -->
-        <mxCell id="cls_permit" value="&lt;b&gt;TemporaryPermit&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;+ id: Integer&lt;br/&gt;+ bearer_name: String&lt;br/&gt;+ bearer_id_number: String&lt;br/&gt;+ relationship: String&lt;br/&gt;+ reason: String&lt;br/&gt;+ valid_from: DateTime&lt;br/&gt;+ valid_to: DateTime&lt;br/&gt;+ is_revoked: Boolean&lt;hr size=&quot;1&quot;/&gt;+ is_valid_now(): Boolean" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fontFamily=Segoe UI;fontSize=11;fillColor=#DCFCE7;strokeColor=#15803D;strokeWidth=1.5;fontColor=#0F172A;" vertex="1" parent="1">
-          <mxGeometry x="1000" y="460" width="230" height="195" as="geometry" />
+        <!-- TemporaryPermit (Middle Right-Center) -->
+        <mxCell id="cls_permit" value="&lt;b&gt;TemporaryPermit&lt;/b&gt;" style="swimlane;fontStyle=1;align=center;verticalAlign=middle;childLayout=stackLayout;horizontal=1;startSize=32;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;fillColor=#D5E8D4;strokeColor=#333333;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=12;fontColor=#1E293B;" vertex="1" parent="1">
+          <mxGeometry x="1090" y="610" width="240" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_permit_attr" value="+ id: Integer {PK}&#xa;+ bearer_name: String&#xa;+ bearer_id_number: String&#xa;+ valid_from: DateTime&#xa;+ valid_to: DateTime&#xa;+ is_revoked: Boolean&#xa;+ device_id: UUID {FK}" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=10;spacingRight=6;spacingTop=6;spacingBottom=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontFamily=Segoe UI;fontSize=11;fontColor=#1E293B;" vertex="1" parent="cls_permit">
+          <mxGeometry y="32" width="240" height="116" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_permit_sep" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=#333333;" vertex="1" parent="cls_permit">
+          <mxGeometry y="148" width="240" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_permit_ops" value="+ is_valid_now(): Boolean" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=10;spacingRight=6;spacingTop=2;spacingBottom=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontFamily=Segoe UI;fontSize=11;fontColor=#0F172A;" vertex="1" parent="cls_permit">
+          <mxGeometry y="156" width="240" height="24" as="geometry" />
         </mxCell>
 
-        <!-- User -->
-        <mxCell id="cls_user" value="&amp;laquo;staff&amp;raquo;&lt;br/&gt;&lt;b&gt;User&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;+ id: Integer&lt;br/&gt;+ username: String {unique}&lt;br/&gt;+ role: Role&lt;br/&gt;+ staff_number: String&lt;br/&gt;+ phone: String&lt;br/&gt;+ is_active: Boolean" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fontFamily=Segoe UI;fontSize=11;fillColor=#DCFCE7;strokeColor=#15803D;strokeWidth=1.5;fontColor=#0F172A;" vertex="1" parent="1">
-          <mxGeometry x="1470" y="420" width="230" height="160" as="geometry" />
+        <!-- Notification (Bottom Right-Center) -->
+        <mxCell id="cls_notif" value="&amp;laquo;outbox&amp;raquo; &lt;b&gt;Notification&lt;/b&gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=middle;childLayout=stackLayout;horizontal=1;startSize=32;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;fillColor=#D5E8D4;strokeColor=#333333;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=12;fontColor=#1E293B;" vertex="1" parent="1">
+          <mxGeometry x="1150" y="860" width="240" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_notif_attr" value="+ id: Integer {PK}&#xa;+ kind: String&#xa;+ channel: String&#xa;+ recipient: String&#xa;+ status: String&#xa;+ attempts: Integer" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=10;spacingRight=6;spacingTop=6;spacingBottom=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontFamily=Segoe UI;fontSize=11;fontColor=#1E293B;" vertex="1" parent="cls_notif">
+          <mxGeometry y="32" width="240" height="116" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_notif_sep" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=#333333;" vertex="1" parent="cls_notif">
+          <mxGeometry y="148" width="240" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_notif_ops" value="+ dispatch(): Boolean" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=10;spacingRight=6;spacingTop=2;spacingBottom=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontFamily=Segoe UI;fontSize=11;fontColor=#0F172A;" vertex="1" parent="cls_notif">
+          <mxGeometry y="156" width="240" height="24" as="geometry" />
         </mxCell>
 
-        <!-- ==================== ROW 3: TRANSFERS, OUTBOX, AUDIT & ENUMS ==================== -->
+        <!-- ==================== COLUMN 5 (FAR RIGHT): GATE, USER, READ_AUDIT_LOG ==================== -->
 
-        <!-- OwnershipTransfer -->
-        <mxCell id="cls_transfer" value="&lt;b&gt;OwnershipTransfer&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;+ id: Integer&lt;br/&gt;+ reason: String&lt;br/&gt;+ transferred_at: DateTime" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fontFamily=Segoe UI;fontSize=11;fillColor=#DBEAFE;strokeColor=#1D4ED8;strokeWidth=1.5;fontColor=#0F172A;" vertex="1" parent="1">
-          <mxGeometry x="690" y="760" width="230" height="105" as="geometry" />
+        <!-- Gate (Top Right) -->
+        <mxCell id="cls_gate" value="&lt;b&gt;Gate&lt;/b&gt;" style="swimlane;fontStyle=1;align=center;verticalAlign=middle;childLayout=stackLayout;horizontal=1;startSize=32;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;fillColor=#D5E8D4;strokeColor=#333333;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=12;fontColor=#1E293B;" vertex="1" parent="1">
+          <mxGeometry x="1600" y="90" width="250" height="216" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_gate_attr" value="+ id: Integer {PK}&#xa;+ code: String {unique}&#xa;+ name: String&#xa;+ location: String&#xa;+ allows_entry: Boolean&#xa;+ allows_exit: Boolean&#xa;+ opens_at: Time&#xa;+ closes_at: Time&#xa;+ is_active: Boolean" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=10;spacingRight=6;spacingTop=6;spacingBottom=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontFamily=Segoe UI;fontSize=11;fontColor=#1E293B;" vertex="1" parent="cls_gate">
+          <mxGeometry y="32" width="250" height="132" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_gate_sep" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=#333333;" vertex="1" parent="cls_gate">
+          <mxGeometry y="164" width="250" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_gate_ops" value="+ allows(direction: Direction): Boolean&#xa;+ is_open_at(moment: DateTime): Boolean" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=10;spacingRight=6;spacingTop=2;spacingBottom=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontFamily=Segoe UI;fontSize=11;fontColor=#0F172A;" vertex="1" parent="cls_gate">
+          <mxGeometry y="172" width="250" height="44" as="geometry" />
         </mxCell>
 
-        <!-- Notification -->
-        <mxCell id="cls_notif" value="&amp;laquo;outbox&amp;raquo;&lt;br/&gt;&lt;b&gt;Notification&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;+ id: Integer&lt;br/&gt;+ kind: String&lt;br/&gt;+ channel: String&lt;br/&gt;+ recipient: String&lt;br/&gt;+ subject: String&lt;br/&gt;+ status: String&lt;br/&gt;+ attempts: Integer&lt;br/&gt;+ next_attempt_at: DateTime" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fontFamily=Segoe UI;fontSize=11;fillColor=#E0F2FE;strokeColor=#0369A1;strokeWidth=1.5;fontColor=#0F172A;" vertex="1" parent="1">
-          <mxGeometry x="1090" y="730" width="240" height="180" as="geometry" />
+        <!-- User (Middle Right) -->
+        <mxCell id="cls_user" value="&amp;laquo;staff&amp;raquo; &lt;b&gt;User&lt;/b&gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=middle;childLayout=stackLayout;horizontal=1;startSize=32;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;fillColor=#D5E8D4;strokeColor=#333333;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=12;fontColor=#1E293B;" vertex="1" parent="1">
+          <mxGeometry x="1600" y="490" width="250" height="176" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_user_attr" value="+ id: Integer {PK}&#xa;+ username: String {unique}&#xa;+ role: Role&#xa;+ staff_number: String&#xa;+ phone: String&#xa;+ is_active: Boolean" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=10;spacingRight=6;spacingTop=6;spacingBottom=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontFamily=Segoe UI;fontSize=11;fontColor=#1E293B;" vertex="1" parent="cls_user">
+          <mxGeometry y="32" width="250" height="112" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_user_sep" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=#333333;" vertex="1" parent="cls_user">
+          <mxGeometry y="144" width="250" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_user_ops" value="+ has_portal_access(role: Role): Boolean" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=10;spacingRight=6;spacingTop=2;spacingBottom=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontFamily=Segoe UI;fontSize=11;fontColor=#0F172A;" vertex="1" parent="cls_user">
+          <mxGeometry y="152" width="250" height="24" as="geometry" />
         </mxCell>
 
-        <!-- ReadAuditLog -->
-        <mxCell id="cls_audit" value="&amp;laquo;audit&amp;raquo;&lt;br/&gt;&lt;b&gt;ReadAuditLog&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;+ id: Integer&lt;br/&gt;+ endpoint: String&lt;br/&gt;+ target_model: String&lt;br/&gt;+ target_id: String&lt;br/&gt;+ ip_address: IPAddress&lt;br/&gt;+ created_at: DateTime" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fontFamily=Segoe UI;fontSize=11;fillColor=#FFEDD5;strokeColor=#C2410C;strokeWidth=1.5;fontColor=#0F172A;" vertex="1" parent="1">
-          <mxGeometry x="1470" y="670" width="230" height="160" as="geometry" />
+        <!-- ReadAuditLog (Bottom Right) -->
+        <mxCell id="cls_audit" value="&amp;laquo;audit&amp;raquo; &lt;b&gt;ReadAuditLog&lt;/b&gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=middle;childLayout=stackLayout;horizontal=1;startSize=32;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;fillColor=#D5E8D4;strokeColor=#333333;strokeWidth=1.5;fontFamily=Segoe UI;fontSize=12;fontColor=#1E293B;" vertex="1" parent="1">
+          <mxGeometry x="1600" y="860" width="250" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_audit_attr" value="+ id: Integer {PK}&#xa;+ endpoint: String&#xa;+ target_model: String&#xa;+ target_id: String&#xa;+ ip_address: IPAddress&#xa;+ created_at: DateTime&#xa;+ user_id: Integer {FK}" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=10;spacingRight=6;spacingTop=6;spacingBottom=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontFamily=Segoe UI;fontSize=11;fontColor=#1E293B;" vertex="1" parent="cls_audit">
+          <mxGeometry y="32" width="250" height="116" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_audit_sep" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=#333333;" vertex="1" parent="cls_audit">
+          <mxGeometry y="148" width="250" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_audit_ops" value="+ record_access(): void" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=10;spacingRight=6;spacingTop=2;spacingBottom=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontFamily=Segoe UI;fontSize=11;fontColor=#0F172A;" vertex="1" parent="cls_audit">
+          <mxGeometry y="156" width="250" height="24" as="geometry" />
         </mxCell>
 
-        <!-- Enumerations (Standard UML «enumeration» Classifiers) -->
-        <mxCell id="enums" value="&lt;b&gt;&amp;laquo;enumeration&amp;raquo; StudentStatus&lt;/b&gt;&lt;br/&gt;ACTIVE | SUSPENDED | GRADUATED | WITHDRAWN&lt;hr size=&quot;1&quot;/&gt;&lt;b&gt;&amp;laquo;enumeration&amp;raquo; DeviceStatus&lt;/b&gt;&lt;br/&gt;PENDING | ACTIVE | LOST | STOLEN | RETIRED&lt;hr size=&quot;1&quot;/&gt;&lt;b&gt;&amp;laquo;enumeration&amp;raquo; Ownership&lt;/b&gt;&lt;br/&gt;STUDENT | UNIVERSITY&lt;hr size=&quot;1&quot;/&gt;&lt;b&gt;&amp;laquo;enumeration&amp;raquo; Verdict&lt;/b&gt;&lt;br/&gt;ALLOWED | DENIED | OVERRIDE | UNREGISTERED&lt;hr size=&quot;1&quot;/&gt;&lt;b&gt;&amp;laquo;enumeration&amp;raquo; Role&lt;/b&gt;&lt;br/&gt;ADMIN | REGISTRAR | GUARD" style="rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=top;spacing=6;fontFamily=Segoe UI;fontSize=10;fillColor=#F8FAFC;strokeColor=#475569;strokeWidth=1.5;fontColor=#0F172A;" vertex="1" parent="1">
-          <mxGeometry x="40" y="680" width="250" height="230" as="geometry" />
-        </mxCell>
+        <!-- ==================== ORTHOGONAL UML 2.5 RELATIONSHIPS (ZERO CROSSINGS) ==================== -->
 
-        <!-- ==================== UML 2.5 RELATIONSHIPS (ALL VISIBLE, NO OVERLAPS) ==================== -->
-
-        <!-- 1. Department ◇──▶ Student (Aggregation: 1 has 0..*) -->
-        <mxCell id="rel_dept_stu" value="1   has   0..*" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7E22CE;strokeWidth=1.8;fontFamily=Segoe UI;fontSize=10;fontStyle=1;startArrow=diamondThin;startFill=0;startSize=12;endArrow=open;endFill=0;endSize=10;labelBackgroundColor=#FFFFFF;exitX=1;exitY=0.5;entryX=0;entryY=0.21;" edge="1" parent="1" source="cls_dept" target="cls_student">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-
-        <!-- 2. Department ◇──▶ Device (Aggregation: 0..1 owns 0..*) -->
-        <mxCell id="rel_dept_dev" value="0..1   owns (institutional)   0..*" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7E22CE;strokeWidth=1.8;fontFamily=Segoe UI;fontSize=10;fontStyle=1;startArrow=diamondThin;startFill=0;startSize=12;endArrow=open;endFill=0;endSize=10;labelBackgroundColor=#FFFFFF;exitX=0.5;exitY=0;entryX=0.25;entryY=0;" edge="1" parent="1" source="cls_dept" target="cls_device">
+        <!-- 1. Department ◇──▶ Student (1 has 0..*) -->
+        <mxCell id="rel_dept_stu" value="1   has   0..*" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#475569;strokeWidth=1.6;fontFamily=Segoe UI;fontSize=10;fontStyle=1;startArrow=diamondThin;startFill=0;startSize=12;endArrow=open;endFill=0;endSize=10;labelBackgroundColor=#FFFFFF;exitX=1;exitY=0.7;entryX=0;entryY=0.25;" edge="1" parent="1" source="cls_dept" target="cls_student">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
-              <mxPoint x="145" y="58" />
-              <mxPoint x="758" y="58" />
+              <mxPoint x="340" y="164" />
+              <mxPoint x="340" y="514" />
             </Array>
           </mxGeometry>
         </mxCell>
 
-        <!-- 3. Student ───▶ Device (Directed Association: 0..1 owns 0..*) -->
-        <mxCell id="rel_stu_dev" value="0..1   owns   0..*" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#1D4ED8;strokeWidth=1.8;fontFamily=Segoe UI;fontSize=10;fontStyle=1;startArrow=none;endArrow=open;endFill=0;endSize=10;labelBackgroundColor=#FFFFFF;exitX=1;exitY=0.35;entryX=0;entryY=0.27;" edge="1" parent="1" source="cls_student" target="cls_device">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-
-        <!-- 4. Student ───▶ RegistrationAttempt (Directed Association: 0..1 submits 0..*) -->
-        <mxCell id="rel_stu_att" value="0..1   submits   0..*" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#B91C1C;strokeWidth=1.8;fontFamily=Segoe UI;fontSize=10;fontStyle=1;startArrow=none;endArrow=open;endFill=0;endSize=10;labelBackgroundColor=#FFFFFF;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="cls_student" target="cls_attempt">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-
-        <!-- 5. Device ◆──▶ DeviceFlag (Composition: 1 carries 0..*) -->
-        <mxCell id="rel_dev_flag" value="1   carries   0..*" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#B91C1C;strokeWidth=1.8;fontFamily=Segoe UI;fontSize=10;fontStyle=1;startArrow=diamondThin;startFill=1;startSize=12;endArrow=open;endFill=0;endSize=10;labelBackgroundColor=#FFFFFF;exitX=0.45;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="cls_device" target="cls_flag">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-
-        <!-- 6. Device ◆──▶ TemporaryPermit (Composition: 1 authorises 0..*) -->
-        <mxCell id="rel_dev_perm" value="1   authorises   0..*" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#15803D;strokeWidth=1.8;fontFamily=Segoe UI;fontSize=10;fontStyle=1;startArrow=diamondThin;startFill=1;startSize=12;endArrow=open;endFill=0;endSize=10;labelBackgroundColor=#FFFFFF;exitX=1;exitY=0.78;entryX=0.25;entryY=0;" edge="1" parent="1" source="cls_device" target="cls_permit">
+        <!-- 2. Department ◇──▶ Device (0..1 owns 0..*) -->
+        <mxCell id="rel_dept_dev" value="0..1   owns   0..*" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#475569;strokeWidth=1.6;fontFamily=Segoe UI;fontSize=10;fontStyle=1;startArrow=diamondThin;startFill=0;startSize=12;endArrow=open;endFill=0;endSize=10;labelBackgroundColor=#FFFFFF;exitX=1;exitY=0.35;entryX=0;entryY=0.2;" edge="1" parent="1" source="cls_dept" target="cls_device">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
-              <mxPoint x="1058" y="386" />
+              <mxPoint x="520" y="112" />
+              <mxPoint x="520" y="200" />
             </Array>
           </mxGeometry>
         </mxCell>
 
-        <!-- 7. Device ◆──▶ OwnershipTransfer (Composition: 1 logs 0..*) routed around left of DeviceFlag -->
-        <mxCell id="rel_dev_trans" value="1   logs history   0..*" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#1D4ED8;strokeWidth=1.8;fontFamily=Segoe UI;fontSize=10;fontStyle=1;startArrow=diamondThin;startFill=1;startSize=12;endArrow=open;endFill=0;endSize=10;labelBackgroundColor=#FFFFFF;exitX=0.12;exitY=1;entryX=0;entryY=0.5;" edge="1" parent="1" source="cls_device" target="cls_transfer">
+        <!-- 3. EquipmentType <.. Device («classified by code») -->
+        <mxCell id="rel_dev_equip" value="&amp;laquo;classified by code&amp;raquo;" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;dashed=1;dashPattern=6 4;strokeColor=#475569;strokeWidth=1.6;fontFamily=Segoe UI;fontSize=10;fontStyle=2;startArrow=none;endArrow=open;endFill=0;endSize=10;labelBackgroundColor=#FFFFFF;exitX=0;exitY=0.45;entryX=1;entryY=0.5;" edge="1" parent="1" source="cls_device" target="cls_equip">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
-              <mxPoint x="722" y="505" />
-              <mxPoint x="650" y="505" />
-              <mxPoint x="650" y="812" />
+              <mxPoint x="460" y="288" />
+              <mxPoint x="460" y="422" />
             </Array>
           </mxGeometry>
         </mxCell>
 
-        <!-- 8. Student ───▶ OwnershipTransfer (Directed Association: 1 from/to 0..*) -->
-        <mxCell id="rel_stu_trans" value="1   from / to   0..*" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#1D4ED8;strokeWidth=1.6;fontFamily=Segoe UI;fontSize=10;fontStyle=1;startArrow=none;endArrow=open;endFill=0;endSize=10;labelBackgroundColor=#FFFFFF;exitX=0.85;exitY=1;entryX=0;entryY=0.25;" edge="1" parent="1" source="cls_student" target="cls_transfer">
+        <!-- 4. Rule <.. Device («evaluates policy») -->
+        <mxCell id="rel_dev_rule" value="&amp;laquo;evaluates policy&amp;raquo;" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;dashed=1;dashPattern=6 4;strokeColor=#475569;strokeWidth=1.6;fontFamily=Segoe UI;fontSize=10;fontStyle=2;startArrow=none;endArrow=open;endFill=0;endSize=10;labelBackgroundColor=#FFFFFF;exitX=0;exitY=0.65;entryX=0.5;entryY=0;" edge="1" parent="1" source="cls_device" target="cls_rule">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
-              <mxPoint x="544" y="415" />
-              <mxPoint x="615" y="415" />
-              <mxPoint x="615" y="786" />
+              <mxPoint x="365" y="359" />
+              <mxPoint x="365" y="560" />
+              <mxPoint x="175" y="560" />
             </Array>
           </mxGeometry>
         </mxCell>
 
-        <!-- 9. Device ───▶ ScanEvent (Directed Association: 0..1 checked in 0..*) -->
-        <mxCell id="rel_dev_scan" value="0..1   checked in   0..*" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#B45309;strokeWidth=1.8;fontFamily=Segoe UI;fontSize=10;fontStyle=1;startArrow=none;endArrow=open;endFill=0;endSize=10;labelBackgroundColor=#FFFFFF;exitX=1;exitY=0.32;entryX=0;entryY=0.43;" edge="1" parent="1" source="cls_device" target="cls_scan">
+        <!-- 5. Student ───▶ Device (0..1 owns 0..*) -->
+        <mxCell id="rel_stu_dev" value="0..1   owns   0..*" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#475569;strokeWidth=1.6;fontFamily=Segoe UI;fontSize=10;fontStyle=1;startArrow=none;endArrow=open;endFill=0;endSize=10;labelBackgroundColor=#FFFFFF;exitX=1;exitY=0.25;entryX=0;entryY=0.82;" edge="1" parent="1" source="cls_student" target="cls_device">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="680" y="514" />
+              <mxPoint x="680" y="418" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 6. Student ───▶ RegistrationAttempt (0..1 attempted by 0..*) -->
+        <mxCell id="rel_stu_att" value="0..1   attempted by   0..*" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#475569;strokeWidth=1.6;fontFamily=Segoe UI;fontSize=10;fontStyle=1;startArrow=none;endArrow=open;endFill=0;endSize=10;labelBackgroundColor=#FFFFFF;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="cls_student" target="cls_attempt">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
 
-        <!-- 10. Student ───▶ ScanEvent (Directed Association: 0..1 bearer in 0..*) -->
-        <mxCell id="rel_stu_scan" value="0..1   bearer in   0..*" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#B45309;strokeWidth=1.8;fontFamily=Segoe UI;fontSize=10;fontStyle=1;startArrow=none;endArrow=open;endFill=0;endSize=10;labelBackgroundColor=#FFFFFF;exitX=0.5;exitY=0;entryX=0.35;entryY=0;" edge="1" parent="1" source="cls_student" target="cls_scan">
+        <!-- 7. Student ───▶ OwnershipTransfer (1 from / to 0..*) -->
+        <mxCell id="rel_stu_trans" value="1   from / to   0..*" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#475569;strokeWidth=1.6;fontFamily=Segoe UI;fontSize=10;fontStyle=1;startArrow=none;endArrow=open;endFill=0;endSize=10;labelBackgroundColor=#FFFFFF;exitX=1;exitY=0.75;entryX=0;entryY=0.5;" edge="1" parent="1" source="cls_student" target="cls_transfer">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
-              <mxPoint x="460" y="38" />
-              <mxPoint x="1178" y="38" />
+              <mxPoint x="660" y="642" />
+              <mxPoint x="660" y="692" />
             </Array>
           </mxGeometry>
         </mxCell>
 
-        <!-- 11. Gate ───▶ ScanEvent (Directed Association: 1 records 0..*) -->
-        <mxCell id="rel_gate_scan" value="1   records   0..*" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7E22CE;strokeWidth=1.8;fontFamily=Segoe UI;fontSize=10;fontStyle=1;startArrow=none;endArrow=open;endFill=0;endSize=10;labelBackgroundColor=#FFFFFF;exitX=0;exitY=0.48;entryX=1;entryY=0.43;" edge="1" parent="1" source="cls_gate" target="cls_scan">
+        <!-- 8. Device ◆──▶ OwnershipTransfer (1 logs history 0..*) -->
+        <mxCell id="rel_dev_trans" value="1   logs history   0..*" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#475569;strokeWidth=1.6;fontFamily=Segoe UI;fontSize=10;fontStyle=1;startArrow=diamondThin;startFill=1;startSize=12;endArrow=open;endFill=0;endSize=10;labelBackgroundColor=#FFFFFF;exitX=0.25;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="cls_device" target="cls_transfer">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
 
-        <!-- 12. User ───▶ ScanEvent (Directed Association: 1 decides 0..*) -->
-        <mxCell id="rel_user_scan" value="1   decides   0..*" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#15803D;strokeWidth=1.8;fontFamily=Segoe UI;fontSize=10;fontStyle=1;startArrow=none;endArrow=open;endFill=0;endSize=10;labelBackgroundColor=#FFFFFF;exitX=0;exitY=0.35;entryX=0.82;entryY=1;" edge="1" parent="1" source="cls_user" target="cls_scan">
-          <mxGeometry relative="1" as="geometry">
-            <Array as="points">
-              <mxPoint x="1295" y="476" />
-            </Array>
-          </mxGeometry>
-        </mxCell>
-
-        <!-- 13. TemporaryPermit ───▶ ScanEvent (Directed Association: 0..1 linked 0..*) -->
-        <mxCell id="rel_perm_scan" value="0..1   linked to   0..*" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#15803D;strokeWidth=1.8;fontFamily=Segoe UI;fontSize=10;fontStyle=1;startArrow=none;endArrow=open;endFill=0;endSize=10;labelBackgroundColor=#FFFFFF;exitX=0.72;exitY=0;entryX=0.3;entryY=1;" edge="1" parent="1" source="cls_permit" target="cls_scan">
+        <!-- 9. Device ◆──▶ DeviceFlag (1 carries 0..*) -->
+        <mxCell id="rel_dev_flag" value="1   carries   0..*" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#475569;strokeWidth=1.6;fontFamily=Segoe UI;fontSize=10;fontStyle=1;startArrow=diamondThin;startFill=1;startSize=12;endArrow=open;endFill=0;endSize=10;labelBackgroundColor=#FFFFFF;exitX=0.72;exitY=1;entryX=0.85;entryY=0;" edge="1" parent="1" source="cls_device" target="cls_flag">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
 
-        <!-- 14. User ───▶ ReadAuditLog (Directed Association: 1 triggers 0..*) -->
-        <mxCell id="rel_user_audit" value="1   triggers   0..*" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#C2410C;strokeWidth=1.8;fontFamily=Segoe UI;fontSize=10;fontStyle=1;startArrow=none;endArrow=open;endFill=0;endSize=10;labelBackgroundColor=#FFFFFF;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="cls_user" target="cls_audit">
+        <!-- 10. Device ◆──▶ TemporaryPermit (1 authorised by 0..*) -->
+        <mxCell id="rel_dev_perm" value="1   authorised by   0..*" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#475569;strokeWidth=1.6;fontFamily=Segoe UI;fontSize=10;fontStyle=1;startArrow=diamondThin;startFill=1;startSize=12;endArrow=open;endFill=0;endSize=10;labelBackgroundColor=#FFFFFF;exitX=0.9;exitY=1;entryX=0.25;entryY=0;" edge="1" parent="1" source="cls_device" target="cls_permit">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="983" y="545" />
+              <mxPoint x="1150" y="545" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 11. Device ───▶ ScanEvent (0..1 verified in 0..*) -->
+        <mxCell id="rel_dev_scan" value="0..1   verified in   0..*" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#475569;strokeWidth=1.6;fontFamily=Segoe UI;fontSize=10;fontStyle=1;startArrow=none;endArrow=open;endFill=0;endSize=10;labelBackgroundColor=#FFFFFF;exitX=1;exitY=0.45;entryX=0;entryY=0.5;" edge="1" parent="1" source="cls_device" target="cls_scan">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
 
-        <!-- 15. Device - - -▷ Rule (UML Dependency: «evaluates») -->
-        <mxCell id="rel_dev_rule" value="&amp;laquo;evaluates&amp;raquo;" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;dashed=1;dashPattern=6 4;strokeColor=#B45309;strokeWidth=1.8;fontFamily=Segoe UI;fontSize=10;fontStyle=2;startArrow=none;endArrow=open;endFill=0;endSize=10;labelBackgroundColor=#FFFFFF;exitX=0;exitY=0.82;entryX=1;entryY=0.5;" edge="1" parent="1" source="cls_device" target="cls_rule">
-          <mxGeometry relative="1" as="geometry">
-            <Array as="points">
-              <mxPoint x="640" y="402" />
-              <mxPoint x="640" y="395" />
-              <mxPoint x="295" y="395" />
-              <mxPoint x="295" y="345" />
-            </Array>
-          </mxGeometry>
-        </mxCell>
-
-        <!-- 16. Device - - -▷ EquipmentType (UML Dependency: «typed by») -->
-        <mxCell id="rel_dev_equip" value="&amp;laquo;typed by&amp;raquo;" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;dashed=1;dashPattern=6 4;strokeColor=#7E22CE;strokeWidth=1.8;fontFamily=Segoe UI;fontSize=10;fontStyle=2;startArrow=none;endArrow=open;endFill=0;endSize=10;labelBackgroundColor=#FFFFFF;exitX=0;exitY=0.92;entryX=1;entryY=0.5;" edge="1" parent="1" source="cls_device" target="cls_equip">
-          <mxGeometry relative="1" as="geometry">
-            <Array as="points">
-              <mxPoint x="665" y="440" />
-              <mxPoint x="295" y="440" />
-              <mxPoint x="295" y="550" />
-            </Array>
-          </mxGeometry>
-        </mxCell>
-
-        <!-- 17. ScanEvent - - -▷ Notification (UML Dependency: «enqueues alert») -->
-        <mxCell id="rel_scan_notif" value="&amp;laquo;enqueues alert&amp;raquo;" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;dashed=1;dashPattern=6 4;strokeColor=#0369A1;strokeWidth=1.8;fontFamily=Segoe UI;fontSize=10;fontStyle=2;startArrow=none;endArrow=open;endFill=0;endSize=10;labelBackgroundColor=#FFFFFF;exitX=0.72;exitY=1;entryX=0.75;entryY=0;" edge="1" parent="1" source="cls_scan" target="cls_notif">
+        <!-- 12. TemporaryPermit ───▶ ScanEvent (0..1 linked to 0..*) -->
+        <mxCell id="rel_perm_scan" value="0..1   linked to   0..*" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#475569;strokeWidth=1.6;fontFamily=Segoe UI;fontSize=10;fontStyle=1;startArrow=none;endArrow=open;endFill=0;endSize=10;labelBackgroundColor=#FFFFFF;exitX=0.65;exitY=0;entryX=0.35;entryY=1;" edge="1" parent="1" source="cls_permit" target="cls_scan">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
 
-        <!-- 18. DeviceFlag - - -▷ Notification (UML Dependency: «enqueues alert») -->
-        <mxCell id="rel_flag_notif" value="&amp;laquo;enqueues alert&amp;raquo;" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;dashed=1;dashPattern=6 4;strokeColor=#0369A1;strokeWidth=1.8;fontFamily=Segoe UI;fontSize=10;fontStyle=2;startArrow=none;endArrow=open;endFill=0;endSize=10;labelBackgroundColor=#FFFFFF;exitX=1;exitY=0.75;entryX=0;entryY=0.35;" edge="1" parent="1" source="cls_flag" target="cls_notif">
+        <!-- 13. Gate ───▶ ScanEvent (1 records 0..*) -->
+        <mxCell id="rel_gate_scan" value="1   records   0..*" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#475569;strokeWidth=1.6;fontFamily=Segoe UI;fontSize=10;fontStyle=1;startArrow=none;endArrow=open;endFill=0;endSize=10;labelBackgroundColor=#FFFFFF;exitX=0;exitY=0.5;entryX=1;entryY=0.35;" edge="1" parent="1" source="cls_gate" target="cls_scan">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
-              <mxPoint x="965" y="655" />
-              <mxPoint x="965" y="793" />
+              <mxPoint x="1500" y="198" />
+              <mxPoint x="1500" y="236" />
             </Array>
           </mxGeometry>
+        </mxCell>
+
+        <!-- 14. User ───▶ ScanEvent (1 guard decides 0..*) -->
+        <mxCell id="rel_user_scan" value="1   guard decides   0..*" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#475569;strokeWidth=1.6;fontFamily=Segoe UI;fontSize=10;fontStyle=1;startArrow=none;endArrow=open;endFill=0;endSize=10;labelBackgroundColor=#FFFFFF;exitX=0;exitY=0.5;entryX=1;entryY=0.65;" edge="1" parent="1" source="cls_user" target="cls_scan">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1500" y="578" />
+              <mxPoint x="1500" y="328" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 15. User ───▶ ReadAuditLog (1 triggers 0..*) -->
+        <mxCell id="rel_user_audit" value="1   triggers   0..*" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#475569;strokeWidth=1.6;fontFamily=Segoe UI;fontSize=10;fontStyle=1;startArrow=none;endArrow=open;endFill=0;endSize=10;labelBackgroundColor=#FFFFFF;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="cls_user" target="cls_audit">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- 16. ScanEvent - - -▷ Notification («enqueues alert») -->
+        <mxCell id="rel_scan_notif" value="&amp;laquo;enqueues alert&amp;raquo;" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;dashed=1;dashPattern=6 4;strokeColor=#475569;strokeWidth=1.6;fontFamily=Segoe UI;fontSize=10;fontStyle=2;startArrow=none;endArrow=open;endFill=0;endSize=10;labelBackgroundColor=#FFFFFF;exitX=0.8;exitY=1;entryX=0.75;entryY=0;" edge="1" parent="1" source="cls_scan" target="cls_notif">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- 17. DeviceFlag - - -▷ Notification («enqueues alert») -->
+        <mxCell id="rel_flag_notif" value="&amp;laquo;enqueues alert&amp;raquo;" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;dashed=1;dashPattern=6 4;strokeColor=#475569;strokeWidth=1.6;fontFamily=Segoe UI;fontSize=10;fontStyle=2;startArrow=none;endArrow=open;endFill=0;endSize=10;labelBackgroundColor=#FFFFFF;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="cls_flag" target="cls_notif">
+          <mxGeometry relative="1" as="geometry" />
         </mxCell>
 
       </root>
