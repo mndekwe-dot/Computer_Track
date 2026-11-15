@@ -35,3 +35,6 @@ Thumbs.db
 # Output of `npm run shots`
 frontend/screenshots/
 AI_CONTEXT.md
+
+# Local database backups taken before a migration
+db.sqlite3.bak-*
