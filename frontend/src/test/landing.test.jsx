@@ -8,7 +8,6 @@ import { MemoryRouter } from 'react-router-dom'
 import { describe, expect, it } from 'vitest'
 
 import Landing from '../pages/Landing'
-import { PORTAL_LIST } from '../portals'
 
 const renderLanding = () =>
   render(
@@ -44,20 +43,26 @@ describe('Landing', () => {
     const register = screen.getByRole('link', { name: /register my computer/i })
     expect(register.getAttribute('href')).toBe('/register')
     // And the staff route, which must be a real in-page link rather than a
-    // control that has to be discovered. There are two, one in the top bar
-    // and one beside the student action; both must land on the same section.
-    const staffLinks = screen.getAllByRole('link', { name: /staff sign in/i })
-    expect(staffLinks.length).toBeGreaterThan(0)
-    staffLinks.forEach((link) => expect(link.getAttribute('href')).toBe('#staff-sign-in'))
+    // control that has to be discovered. The ones at the top of the page jump
+    // to the staff section; the section itself holds the link to the form.
+    const jumpLinks = screen
+      .getAllByRole('link', { name: /staff sign in/i })
+      .filter((link) => link.getAttribute('href') === '#staff-sign-in')
+    expect(jumpLinks.length).toBeGreaterThan(0)
   })
 
-  it('links every portal to its own login', () => {
+  it('sends staff to one sign-in page and names no portal', () => {
     renderLanding()
     const staff = document.getElementById('staff-sign-in')
-    PORTAL_LIST.forEach((portal) => {
-      const link = within(staff).getByRole('link', { name: new RegExp(portal.name, 'i') })
-      expect(link.getAttribute('href')).toBe(`${portal.base}/login`)
-    })
+    const link = within(staff).getByRole('link', { name: /staff sign in/i })
+    expect(link.getAttribute('href')).toBe('/login')
+    // Which portal somebody lands in is decided by their credentials, so the
+    // public page must not hand out portal addresses. The office's name is
+    // fair game: a student is told where to take the computer.
+    const portalLinks = [...document.querySelectorAll('a[href]')].filter((link) =>
+      /^\/(guard|registry|admin)(\/|$)/.test(link.getAttribute('href')),
+    )
+    expect(portalLinks).toEqual([])
   })
 
   it('names each step rather than relying on the number alone', () => {

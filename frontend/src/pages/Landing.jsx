@@ -1,15 +1,8 @@
-import { ScanLine } from 'lucide-react'
+import { LogIn, ScanLine } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Brand } from '../components/Brand'
 import { PageMeta } from '../components/PageMeta'
 import { useSiteSettings } from '../hooks/useSiteSettings'
-import { PORTAL_LIST } from '../portals'
-
-const PORTAL_BLURB = {
-  guard: 'Check computers at a gate, and see the movement log.',
-  registry: 'Approve registrations, and manage students and equipment.',
-  admin: 'Oversight of every gate, staff accounts and the read audit log.',
-}
 
 // Built from the university's own names rather than fixed text: "the
 // registration office" is called something different at every institution,
@@ -198,30 +191,19 @@ export default function Landing() {
             <div>
               <h2 id="staff-heading">Staff sign in</h2>
               <p className="band-lede">
-                Each portal is a separate door with its own login. Accounts are issued by{' '}
-                {office}.
+                One sign-in page for every member of staff. Your account opens the portal you
+                work in, so there is no door to choose. Accounts are issued by {office}.
               </p>
             </div>
             <div>
-              <ul className="landing-portals">
-                {PORTAL_LIST.map((portal) => (
-                  <li key={portal.key}>
-                    <Link
-                      to={`${portal.base}/login`}
-                      className="landing-portal"
-                      style={{ '--portal-accent': portal.accent }}
-                    >
-                      <strong>{portal.name}</strong>
-                      <span>{PORTAL_BLURB[portal.key]}</span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+              <Link to="/login" className="btn btn-primary btn-lg">
+                <LogIn size={17} aria-hidden="true" />
+                Staff sign in
+              </Link>
               <p className="landing-hint">
                 <ScanLine size={15} aria-hidden="true" />
                 <span>
-                  Working a gate? Bookmark <code>/guard/login</code> on the terminal to skip this
-                  page.
+                  Working a gate? Bookmark <code>/login</code> on the terminal to skip this page.
                 </span>
               </p>
             </div>
@@ -261,11 +243,9 @@ export default function Landing() {
             <nav className="footer-col" aria-labelledby="footer-staff">
               <h2 id="footer-staff">For staff</h2>
               <ul>
-                {PORTAL_LIST.map((portal) => (
-                  <li key={portal.key}>
-                    <Link to={`${portal.base}/login`}>{portal.name}</Link>
-                  </li>
-                ))}
+                <li>
+                  <Link to="/login">Staff sign in</Link>
+                </li>
               </ul>
             </nav>
 

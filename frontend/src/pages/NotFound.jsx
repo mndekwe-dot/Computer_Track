@@ -84,11 +84,9 @@ export default function NotFound() {
               <li>
                 <Link to="/register">Register a computer, or check one you have registered</Link>
               </li>
-              {Object.values(PORTALS).map((entry) => (
-                <li key={entry.key}>
-                  <Link to={`${entry.base}/login`}>Sign in to {entry.name}</Link>
-                </li>
-              ))}
+              <li>
+                <Link to="/login">Sign in as a member of staff</Link>
+              </li>
             </ul>
           </nav>
         )}

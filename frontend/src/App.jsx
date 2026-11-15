@@ -10,7 +10,7 @@ import { PORTALS, homePortalFor } from './portals'
 
 import { SkeletonCard, SkeletonStats } from './components/ui'
 import Landing from './pages/Landing'
-import PortalLogin from './pages/PortalLogin'
+import StaffLogin from './pages/StaffLogin'
 import PublicRegister from './pages/PublicRegister'
 import Approvals from './pages/Approvals'
 import AuditLog from './pages/AuditLog'
@@ -71,7 +71,10 @@ function Root() {
 function portalRoutes(portal, children) {
   return (
     <>
-      <Route path={`${portal.base}/login`} element={<PortalLogin portal={portal} />} />
+      {/* The old per-portal login addresses stay alive as redirects. A guard
+          with `/guard/login` bookmarked on a gate terminal should not meet a
+          404 because the doors were merged. */}
+      <Route path={`${portal.base}/login`} element={<Navigate to="/login" replace />} />
       <Route
         path={portal.base}
         element={
@@ -94,6 +97,10 @@ export default function App() {
       <IdleWarning />
       <Routes>
         <Route path="/" element={<Root />} />
+
+        {/* One sign-in page for all staff. It names no portal: the account
+            decides which one opens. */}
+        <Route path="/login" element={<StaffLogin />} />
 
         {/* Students. No login, no portal - a plain public page. */}
         <Route path="/register" element={<PublicRegister />} />
