@@ -379,13 +379,13 @@ h4 {
 /* Tinted rather than filled. A solid block of accent for every active item
    was the loudest thing on screen and competed with the status banners,
    which are the one place colour has to mean something. */
-/* The active page is marked by a bar on the leading edge, like a tab in a
-   ring binder, rather than a tinted lozenge. */
+/* The active page is a white tab lifted off the grey sidebar, outlined all
+   the way round. */
 .nav a.active {
   background: var(--surface);
   color: var(--sidebar-text-strong);
   font-weight: 650;
-  box-shadow: inset 3px 0 0 var(--brand), 0 0 0 1px var(--border);
+  box-shadow: 0 0 0 1px var(--border-strong);
 }
 
 .nav a.active .nav-icon {
@@ -2823,12 +2823,14 @@ tbody tr:last-child td {
   border-top: 1px solid var(--border);
 }
 
-/* An edited row is marked with a rule down the side as well as a background
-   tint, so the change is visible without relying on colour alone. */
+/* An edited row is outlined with a dashed line as well as tinted, so the
+   change is visible without relying on colour alone. */
 .rule-row[data-dirty='true'] {
-  box-shadow: inset 3px 0 0 var(--brand);
-  padding-inline-start: 12px;
-  margin-inline-start: -12px;
+  outline: 1px dashed var(--brand);
+  outline-offset: -1px;
+  border-radius: var(--radius-sm);
+  padding-inline: 12px;
+  margin-inline: -12px;
   background: color-mix(in srgb, var(--brand) 4%, transparent);
 }
 
@@ -2866,8 +2868,8 @@ tbody tr:last-child td {
 
 /* A row that needs somebody's attention. The pill beside it already says so
    in words; this is what makes it findable while scanning. */
-tr[data-attention='true'] td:first-child {
-  box-shadow: inset 3px 0 0 var(--hold);
+tr[data-attention='true'] td {
+  background: color-mix(in srgb, var(--hold-soft) 45%, transparent);
 }
 
 @media (max-width: 720px) {
