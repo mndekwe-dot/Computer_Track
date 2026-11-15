@@ -40,7 +40,7 @@ export default function NotFound() {
       />
 
       <main className="notfound-card" id="main">
-        <Brand title={systemName} subtitle="Campus computer register" size="lg" stacked as="p" />
+        <Brand title={systemName} subtitle="Campus computer register" size="md" as="p" />
 
         <p className="notfound-code" aria-hidden="true">
           404
