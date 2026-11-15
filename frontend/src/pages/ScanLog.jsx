@@ -101,7 +101,7 @@ export default function ScanLog() {
 
   return (
     <>
-      <PageHeader title="Gate Log" subtitle="Every decision recorded at every gate">
+      <PageHeader title="Gate log" subtitle="Every decision recorded at every gate">
         <button type="button" className="btn btn-outline btn-sm" onClick={download}>
           <Download size={15} aria-hidden="true" />
           Export CSV
@@ -197,7 +197,7 @@ export default function ScanLog() {
                 <tbody>
                   {data?.results.map((scan) => (
                     <tr key={scan.id}>
-                      <td>{formatDateTime(scan.happened_at)}</td>
+                      <td className="nowrap">{formatDateTime(scan.happened_at)}</td>
                       <td className="hide-md">{scan.gate_name || ' - '}</td>
                       <td>
                         <span className="direction-cell">
@@ -209,7 +209,7 @@ export default function ScanLog() {
                           {scan.direction === 'IN' ? 'In' : 'Out'}
                         </span>
                       </td>
-                      <td className="mono">{scan.device_label || scan.claimed_serial || ' - '}</td>
+                      <td>{scan.device_label || scan.claimed_serial || ' - '}</td>
                       <td className="hide-sm">
                         {scan.student_name || ' - '}
                         {scan.bearer_name && (

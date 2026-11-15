@@ -340,7 +340,7 @@ export default function Dashboard() {
                     <tbody>
                       {data.recent_problems.map((scan) => (
                         <tr key={scan.id}>
-                          <td>{formatDateTime(scan.happened_at)}</td>
+                          <td className="nowrap">{formatDateTime(scan.happened_at)}</td>
                           <td className="hide-sm">{scan.gate_name || " - "}</td>
                           <td className="mono">
                             {scan.device_label || scan.claimed_serial || " - "}

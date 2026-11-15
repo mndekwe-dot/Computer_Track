@@ -66,7 +66,7 @@ export default function ImportStudents() {
 
   return (
     <>
-      <PageHeader title="Import Students" subtitle="Load the register from a CSV export">
+      <PageHeader title="Import students" subtitle="Load the register from a CSV export">
         <button type="button" className="btn btn-outline btn-sm" onClick={downloadTemplate}>
           <FileUp size={15} aria-hidden="true" />
           Download template

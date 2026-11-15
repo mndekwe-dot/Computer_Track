@@ -54,7 +54,7 @@ export default function AuditLog() {
   return (
     <>
       <PageHeader
-        title="Read Audit Log"
+        title="Read audit log"
         subtitle="Who looked up whom, and when"
       />
 
@@ -181,7 +181,7 @@ export default function AuditLog() {
               <tbody>
                 {data?.results.map((entry) => (
                   <tr key={entry.id}>
-                    <td>{formatDateTime(entry.created_at)}</td>
+                    <td className="nowrap">{formatDateTime(entry.created_at)}</td>
                     <td>
                       <strong>{entry.full_name || entry.username}</strong>
                       <div className="muted">{entry.role_display || ' - '}</div>

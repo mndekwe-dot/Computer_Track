@@ -42,7 +42,7 @@ export default function Approvals() {
   return (
     <>
       <PageHeader
-        title="Pending Approvals"
+        title="Pending approvals"
         subtitle="Computers students submitted through the public registration form"
       />
 
@@ -78,7 +78,7 @@ export default function Approvals() {
               <tbody>
                 {data?.results.map((device) => (
                   <tr key={device.id}>
-                    <td>{formatDateTime(device.registered_at)}</td>
+                    <td className="nowrap">{formatDateTime(device.registered_at)}</td>
                     <td>
                       <strong>{device.label}</strong>
                       <div className="mono muted">{device.serial_number}</div>

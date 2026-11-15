@@ -247,7 +247,7 @@ export default function GateConsole() {
   return (
     <>
       <PageHeader
-        title="Gate Console"
+        title="Gate console"
         subtitle="Ask for the registration number, then match the computer in front of you."
       >
         <span className="connection-badge" data-online={online}>

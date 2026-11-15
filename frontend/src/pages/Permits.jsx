@@ -121,7 +121,7 @@ export default function Permits() {
                       </td>
                       <td className="hide-md">{permit.owner_name}</td>
                       <td className="hide-sm">{formatDateTime(permit.valid_from)}</td>
-                      <td>{formatDateTime(permit.valid_to)}</td>
+                      <td className="nowrap">{formatDateTime(permit.valid_to)}</td>
                       <td>
                         {permit.is_revoked ? (
                           <StatusPill status="DENIED">REVOKED</StatusPill>

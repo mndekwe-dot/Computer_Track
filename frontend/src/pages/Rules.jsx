@@ -229,7 +229,7 @@ function RuleRow({ rule, value, error, dirty, onChange, onReset }) {
         {rule.kind === 'TEXT' && (
           <textarea
             id={id}
-            rows={rule.maximum && rule.maximum > 150 ? 3 : 2}
+            rows={rule.maximum && rule.maximum > 150 ? 3 : 1}
             value={value}
             maxLength={rule.maximum ?? undefined}
             aria-describedby={describedBy || undefined}
