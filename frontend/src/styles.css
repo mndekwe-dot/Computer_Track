@@ -231,13 +231,25 @@ h4 {
   width: var(--sidebar-w);
   flex-shrink: 0;
   background: var(--sidebar-bg);
-  border-top: 4px solid var(--brand);
   border-inline-end: 1px solid var(--sidebar-border);
   color: var(--sidebar-text);
   display: flex;
   flex-direction: column;
   padding: 18px 12px;
   gap: 18px;
+  /* Pinned to the viewport, not to the document. Without this the sidebar is
+     a flex item as tall as the whole page, so scrolling a long table scrolls
+     the navigation off the top and leaves a blank column: no way back to
+     another screen, and no sign of which portal you are in. `.nav` already
+     has `flex: 1; overflow-y: auto`, so once the box is bounded the links
+     scroll inside it and the account block stays at the bottom. */
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+  height: 100vh;
+  /* Mobile browser chrome makes 100vh taller than what you can see, which
+     would hide the sign-out button behind the address bar. */
+  height: 100dvh;
 }
 
 .brand {
