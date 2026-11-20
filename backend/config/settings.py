@@ -1,4 +1,4 @@
-"""Django settings for the Computer Track gate registration system.
+"""Django settings for the etracker gate registration system.
 
 Every value here comes from the environment through `python-decouple`, with a
 default that is safe to run but never right for production. Nothing that
@@ -99,7 +99,7 @@ if USING_POSTGRES:
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
-            "NAME": config("DB_NAME", default="computer_track"),
+            "NAME": config("DB_NAME", default="etracker"),
             "USER": config("DB_USER", default="postgres"),
             "PASSWORD": config("DB_PASSWORD", default=""),
             "HOST": config("DB_HOST", default="127.0.0.1"),
@@ -356,7 +356,7 @@ EMAIL_HOST_USER = config("EMAIL_HOST_USER", default="")
 EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", default="")
 EMAIL_USE_TLS = config("EMAIL_USE_TLS", default=False, cast=bool)
 EMAIL_TIMEOUT = config("EMAIL_TIMEOUT", default=15, cast=int)
-DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="Computer Track <no-reply@example.edu>")
+DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="etracker <no-reply@example.edu>")
 
 # Resend. The API key is the only secret; the sending domain has to be verified
 # in the Resend dashboard before anything will go out.
@@ -438,11 +438,11 @@ QR_PAYLOAD_PREFIX = config("QR_PAYLOAD_PREFIX", default="CTRACK")
 
 # Shown as the account name in an authenticator app. The university's display
 # name everywhere else comes from the editable branding rules, not from here.
-OTP_TOTP_ISSUER = config("OTP_TOTP_ISSUER", default="Computer Track")
+OTP_TOTP_ISSUER = config("OTP_TOTP_ISSUER", default="etracker")
 
 # Runs the suite against a dummy cache, so one test cannot serve another
 # test's stale rules or dashboard. See config/testrunner.py.
-TEST_RUNNER = "config.testrunner.ComputerTrackTestRunner"
+TEST_RUNNER = "config.testrunner.EtrackerTestRunner"
 
 LOG_LEVEL = config("DJANGO_LOG_LEVEL", default="INFO")
 LOGGING = {

@@ -1,6 +1,6 @@
 {
-  "name": "Computer Track - Campus Computer Register",
-  "short_name": "Computer Track",
+  "name": "etracker - Campus Computer Register",
+  "short_name": "etracker",
   "description": "Register a computer with the university and carry it through any campus gate.",
   "start_url": "/",
   "scope": "/",

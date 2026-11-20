@@ -8,7 +8,7 @@ import { useLocation } from 'react-router-dom'
  * screen shares one title. That is worse than it sounds: the browser tab, the
  * history entry, the bookmark name and the first line a screen reader
  * announces after a route change all come from `document.title`. A guard with
- * six tabs open had six tabs called "Computer Track".
+ * six tabs open had six tabs called "etracker".
  *
  * It also decides what search engines may index, which for this application
  * is a short list. The landing page and the student form are public and
@@ -47,7 +47,7 @@ export function PageMeta({
   const shouldIndex = index && !noindex
 
   useEffect(() => {
-    const siteName = document.documentElement.dataset.siteName || 'Computer Track'
+    const siteName = document.documentElement.dataset.siteName || 'etracker'
     const fullTitle = title ? `${title} · ${siteName}` : siteName
     document.title = fullTitle
 

@@ -16,7 +16,7 @@ import { publicApi } from '../api/endpoints'
  */
 
 const FALLBACK = {
-  'branding.system_name': 'Computer Track',
+  'branding.system_name': 'etracker',
   'branding.university_name': 'the university',
   'branding.office_name': 'the registration office',
   'branding.support_email': '',

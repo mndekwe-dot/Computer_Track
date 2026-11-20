@@ -1,5 +1,5 @@
 {
-  "name": "computer_track",
+  "name": "etracker",
   "version": "1.0.0",
   "description": "A system for university security guards to verify, at any gate, that the computer a student is carrying actually belongs to them.",
   "main": "index.js",

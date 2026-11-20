@@ -29,7 +29,7 @@ export default function NotFound() {
   }
 
   const portal = isAuthenticated ? homePortalFor(user) : null
-  const systemName = settings['branding.system_name'] || 'Computer Track'
+  const systemName = settings['branding.system_name'] || 'etracker'
 
   return (
     <div className="notfound-page">
