@@ -1,0 +1,4 @@
+# Read by Vercel when it builds the Python function in api/index.py.
+# Local development and Docker install from backend/ directly.
+-r backend/requirements.txt
+psycopg[binary]>=3.2

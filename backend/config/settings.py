@@ -11,8 +11,10 @@ pass, the wording a guard sees. Those live in the database and are edited in
 the Registration Office portal. See `campus/rules.py`.
 """
 
+import os
 from datetime import timedelta
 from pathlib import Path
+from urllib.parse import parse_qsl, unquote, urlparse
 
 from decouple import Config, Csv, RepositoryEmpty, RepositoryEnv
 
@@ -29,8 +31,21 @@ SECRET_KEY = config("DJANGO_SECRET_KEY", default="dev-only-insecure-key-change-m
 DEBUG = config("DJANGO_DEBUG", default=True, cast=bool)
 ALLOWED_HOSTS = config("DJANGO_ALLOWED_HOSTS", default="localhost,127.0.0.1,0.0.0.0", cast=Csv())
 
+# Vercel sets VERCEL=1 in every function. The site and the API share one
+# *.vercel.app address there, so that host is always allowed.
+ON_VERCEL = bool(os.environ.get("VERCEL"))
+if ON_VERCEL and ".vercel.app" not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS = [*ALLOWED_HOSTS, ".vercel.app"]
+
+# A hosted Postgres (Neon, through the Vercel marketplace) hands over a single
+# DATABASE_URL instead of separate DB_* values.
+DATABASE_URL = config("DATABASE_URL", default="")
+
 # Decided up here because it changes INSTALLED_APPS as well as DATABASES.
-USING_POSTGRES = config("DB_ENGINE", default="").lower() in {"postgres", "postgresql"}
+USING_POSTGRES = bool(DATABASE_URL) or config("DB_ENGINE", default="").lower() in {
+    "postgres",
+    "postgresql",
+}
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -95,7 +110,25 @@ TEMPLATES = [
 WSGI_APPLICATION = "config.wsgi.application"
 ASGI_APPLICATION = "config.asgi.application"
 
-if USING_POSTGRES:
+if DATABASE_URL:
+    _db = urlparse(DATABASE_URL)
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": _db.path.lstrip("/"),
+            "USER": unquote(_db.username or ""),
+            "PASSWORD": unquote(_db.password or ""),
+            "HOST": _db.hostname or "",
+            "PORT": str(_db.port or 5432),
+            # Query parameters such as sslmode=require pass straight through.
+            "OPTIONS": dict(parse_qsl(_db.query)),
+            # A serverless function may be frozen between requests, so a held
+            # connection is more likely to be dead than reusable.
+            "CONN_MAX_AGE": config("DB_CONN_MAX_AGE", default=0, cast=int),
+            "CONN_HEALTH_CHECKS": True,
+        }
+    }
+elif USING_POSTGRES:
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
@@ -146,7 +179,12 @@ STORAGES = {
 }
 
 MEDIA_URL = config("DJANGO_MEDIA_URL", default="media/")
-MEDIA_ROOT = Path(config("DJANGO_MEDIA_ROOT", default=str(BASE_DIR / "media")))
+# Vercel's filesystem is read-only apart from /tmp, and /tmp is not shared
+# between function instances, so uploaded photos there are temporary. A
+# permanent deployment should use object storage; see the README.
+MEDIA_ROOT = Path(
+    config("DJANGO_MEDIA_ROOT", default="/tmp/media" if ON_VERCEL else str(BASE_DIR / "media"))
+)
 
 # Uploaded photos are handed out as signed, expiring links rather than served
 # off disk. See config/media.py. This is how long one of those links stays
@@ -410,7 +448,10 @@ NOTIFY_RETRY_BACKOFF_SECONDS = config("NOTIFY_RETRY_BACKOFF_SECONDS", default=60
 #   inline - send during the request (development and tests)
 #   thread - background thread after commit (single-process deployments)
 #   worker - `manage.py process_notifications` drains the outbox (cron)
-NOTIFY_DISPATCH = config("NOTIFY_DISPATCH", default="inline" if DEBUG else "celery")
+# No worker runs on Vercel, so messages are sent within the request there.
+NOTIFY_DISPATCH = config(
+    "NOTIFY_DISPATCH", default="inline" if (DEBUG or ON_VERCEL) else "celery"
+)
 
 # Read audit log. How long lookups are kept is a policy decision, not a
 # technical one - 365 days is a defensible default (a full academic year of
