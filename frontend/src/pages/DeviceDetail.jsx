@@ -169,6 +169,31 @@ export default function DeviceDetail() {
                 {formatDateTime(device.registered_at)}
                 {device.registered_by_name ? ` by ${device.registered_by_name}` : ''}
               </Row>
+              {device.approval_evidence && (
+                <Row label="Checked at approval">
+                  <ul className="evidence-list">
+                    {[
+                      ['identity_checked', 'Student ID matched'],
+                      ['device_unlocked', 'Unlocked in person'],
+                      ['serial_matches', 'Serial matched the system'],
+                      ['proof_of_purchase_seen', 'Proof of purchase seen'],
+                    ].map(([key, label]) => (
+                      <li key={key}>
+                        {device.approval_evidence[key] ? 'Yes' : 'No'}: {label}
+                      </li>
+                    ))}
+                  </ul>
+                  {device.approval_evidence.notes && (
+                    <div className="muted">{device.approval_evidence.notes}</div>
+                  )}
+                  <div className="muted">
+                    Recorded {formatDateTime(device.approval_evidence.recorded_at)}
+                    {device.approval_evidence.recorded_by_name
+                      ? ` by ${device.approval_evidence.recorded_by_name}`
+                      : ''}
+                  </div>
+                </Row>
+              )}
               <Row label="Last movement">
                 {device.last_movement
                   ? `${device.last_movement.direction === 'IN' ? 'Entered' : 'Left'} via ${

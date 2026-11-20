@@ -40,7 +40,14 @@ def with_last_movement(queryset):
 def base(queryset=None):
     """Everything a device list renders, in one round trip per relation."""
     queryset = Device.objects.all() if queryset is None else queryset
-    return queryset.select_related("owner", "owner__department", "department", "registered_by")
+    return queryset.select_related(
+        "owner",
+        "owner__department",
+        "department",
+        "registered_by",
+        "approval_evidence",
+        "approval_evidence__recorded_by",
+    )
 
 
 def with_holds(queryset):

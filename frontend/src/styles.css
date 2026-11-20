@@ -763,6 +763,32 @@ textarea {
   flex-shrink: 0;
 }
 
+/* Approval evidence: one check per line, and long labels may wrap. */
+.evidence-checks {
+  display: grid;
+  gap: 10px;
+  margin: 0 0 14px;
+  padding: 0;
+  border: 0;
+}
+
+.evidence-checks .field-hint {
+  margin: -4px 0 2px;
+}
+
+.evidence-checks .check-inline {
+  font-size: 14px;
+  white-space: normal;
+}
+
+.evidence-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 2px;
+}
+
 /* ---------- Cards, pills, notes ---------- */
 
 .card {
