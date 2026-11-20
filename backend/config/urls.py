@@ -14,7 +14,7 @@ def health(_request):
     Postgres is slow takes the whole service out of the pool at exactly the
     moment it is struggling, which turns a slow minute into an outage.
     """
-    return JsonResponse({"status": "ok", "service": "computer-track-api"})
+    return JsonResponse({"status": "ok", "service": "etracker-api"})
 
 
 def ready(_request):

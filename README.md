@@ -1,4 +1,4 @@
-# Computer Track - Campus Gate Computer Register
+# etracker - Campus Gate Computer Register
 
 A system for university security guards to verify, at any gate, that the computer a student is
 carrying actually belongs to them.
@@ -378,7 +378,7 @@ python manage.py process_notifications --retry-failed
 ```env
 EMAIL_PROVIDER=resend
 RESEND_API_KEY=re_...
-DEFAULT_FROM_EMAIL=Computer Track <no-reply@your-university.edu>
+DEFAULT_FROM_EMAIL=etracker <no-reply@your-university.edu>
 ```
 
 The sending domain has to be verified in the Resend dashboard first, or every message is
@@ -897,7 +897,7 @@ trusts `X-Forwarded-Proto`; without it the SSL redirect becomes an infinite loop
 Run the notification worker from cron:
 
 ```
-* * * * * cd /srv/computer_track/backend && .venv/bin/python manage.py process_notifications
+* * * * * cd /srv/etracker/backend && .venv/bin/python manage.py process_notifications
 ```
 
 SQLite is fine for the demo but allows a single writer at a time, which several gates recording at
@@ -916,7 +916,7 @@ approved it, set `MEDIA_ACCEL_REDIRECT=True` and add:
 ```nginx
 location /protected-media/ {
     internal;                       # only reachable via X-Accel-Redirect
-    alias /srv/computer_track/backend/media/;
+    alias /srv/etracker/backend/media/;
 }
 ```
 

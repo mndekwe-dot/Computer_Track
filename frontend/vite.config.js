@@ -22,7 +22,7 @@ function seoFiles() {
   ]
 
   return {
-    name: 'computer-track-seo-files',
+    name: 'etracker-seo-files',
     apply: 'build',
     generateBundle() {
       const site = (process.env.VITE_SITE_URL || '').replace(/\/$/, '')

@@ -21,7 +21,7 @@ from django.test.runner import DiscoverRunner
 from django.test.utils import override_settings
 
 
-class ComputerTrackTestRunner(DiscoverRunner):
+class EtrackerTestRunner(DiscoverRunner):
     def setup_test_environment(self, **kwargs):
         super().setup_test_environment(**kwargs)
         from django.conf import settings

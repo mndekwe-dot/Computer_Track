@@ -1,6 +1,6 @@
 # Architecture
 
-How Computer Track is put together, and why. This is the document to read
+How etracker is put together, and why. This is the document to read
 before changing something structural; the README covers running it, and
 [CHANGELOG.md](CHANGELOG.md) covers what changed when.
 

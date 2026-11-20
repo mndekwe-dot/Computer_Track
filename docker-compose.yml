@@ -21,20 +21,20 @@
 #   beat    The clock. Without it nothing sweeps the outbox for messages
 #           queued while the broker was down, and the audit alert never runs.
 
-name: computer-track
+name: etracker
 
 services:
   db:
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${DB_NAME:-computer_track}
-      POSTGRES_USER: ${DB_USER:-computer_track}
+      POSTGRES_DB: ${DB_NAME:-etracker}
+      POSTGRES_USER: ${DB_USER:-etracker}
       POSTGRES_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in .env}
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U ${DB_USER:-computer_track}']
+      test: ['CMD-SHELL', 'pg_isready -U ${DB_USER:-etracker}']
       interval: 10s
       timeout: 5s
       retries: 5

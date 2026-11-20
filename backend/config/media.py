@@ -29,7 +29,7 @@ from django.urls import reverse
 from django.views import View
 from rest_framework import serializers
 
-SALT = "computer-track.media"
+SALT = "etracker.media"
 
 # Only these are ever served, and only with the type stated here. Anything
 # else is refused rather than guessed at. An uploads directory that will
