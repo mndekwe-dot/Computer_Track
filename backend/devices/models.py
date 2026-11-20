@@ -226,6 +226,59 @@ class Device(models.Model):
         return bool(self.blocking_reasons())
 
 
+class ApprovalEvidence(models.Model):
+    """What the registration officer checked before approving a registration.
+
+    No system can prove who legally owns a laptop. What it can do is record,
+    at the one moment the computer and its claimed owner are in the same room
+    as an officer, exactly what was checked. When the real owner later
+    reports it stolen, this is what shows whether the approval was careful.
+
+    Written once, at approval, and never edited: evidence that can be changed
+    afterwards is not evidence.
+    """
+
+    device = models.OneToOneField(
+        Device, on_delete=models.CASCADE, related_name="approval_evidence"
+    )
+    identity_checked = models.BooleanField(
+        default=False, help_text="Student ID card matched the owner on the record."
+    )
+    device_unlocked = models.BooleanField(
+        default=False, help_text="Owner unlocked the computer in front of the officer."
+    )
+    serial_matches = models.BooleanField(
+        default=False,
+        help_text="Serial read from the running system matches the one submitted.",
+    )
+    proof_of_purchase_seen = models.BooleanField(
+        default=False, help_text="A receipt, invoice or loan agreement was shown."
+    )
+    notes = models.TextField(blank=True)
+    recorded_by = models.ForeignKey(
+        "accounts.User",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="approval_evidence_recorded",
+    )
+    recorded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Evidence for {self.device}"
+
+    @property
+    def checks_passed(self):
+        return sum(
+            (
+                self.identity_checked,
+                self.device_unlocked,
+                self.serial_matches,
+                self.proof_of_purchase_seen,
+            )
+        )
+
+
 class FlagReason(models.TextChoices):
     STOLEN = "STOLEN", "Reported stolen"
     LOST = "LOST", "Reported lost"
