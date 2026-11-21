@@ -80,7 +80,8 @@ export const devices = {
   transfer: (id, payload) => api.post(`/api/devices/${id}/transfer/`, payload),
   reportStolen: (id, details) => api.post(`/api/devices/${id}/report_stolen/`, { details }),
   pending: (params) => api.get('/api/devices/pending/', params),
-  approve: (id, assetTag) => api.post(`/api/devices/${id}/approve/`, { asset_tag: assetTag }),
+  approve: (id, assetTag, evidence) =>
+    api.post(`/api/devices/${id}/approve/`, { asset_tag: assetTag, evidence }),
   reject: (id, reason) => api.post(`/api/devices/${id}/reject/`, { reason }),
   qrBlob: (id) => api.blob(`/api/devices/${id}/qr/`),
   summary: () => api.get('/api/devices/summary/'),

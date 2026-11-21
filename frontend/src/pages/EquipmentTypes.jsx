@@ -94,10 +94,11 @@ export default function EquipmentTypes() {
                     <td>{row.device_count}</td>
                     <td>
                       <StatusPill status={row.is_active ? 'ACTIVE' : 'RETIRED'}>
-                        {row.is_active ? 'IN USE' : 'RETIRED'}
+                        {row.is_active ? 'In use' : 'Retired'}
                       </StatusPill>
                     </td>
-                    <td className="row-actions">
+                    <td>
+                      <div className="row-actions">
                       <button
                         type="button"
                         className="btn btn-ghost btn-sm"
@@ -117,6 +118,7 @@ export default function EquipmentTypes() {
                           Retire
                         </button>
                       )}
+                      </div>
                     </td>
                   </tr>
                 ))}

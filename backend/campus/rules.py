@@ -159,7 +159,7 @@ _SPECS = [
     RuleSpec(
         "branding.system_name",
         Kind.TEXT,
-        "Computer Track",
+        "etracker",
         "System name",
         "Shown in the browser tab, on the landing page and above every sign-in form.",
         group="branding",

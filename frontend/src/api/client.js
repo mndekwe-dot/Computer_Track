@@ -1,3 +1,6 @@
+// The API's address. Set VITE_API_BASE_URL to "/" when the site and the API
+// share one domain (the Vercel deployment); BASE_URL is then empty and every
+// request goes to a relative /api/... path on the same origin.
 const BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000').replace(/\/$/, '')
 
 const ACCESS_KEY = 'ct.access'
@@ -102,7 +105,9 @@ async function refreshAccessToken() {
 }
 
 function buildUrl(path, params) {
-  const url = new URL(`${BASE_URL}${path}`)
+  // The second argument only matters when BASE_URL is empty: it resolves the
+  // relative path against the page's own origin instead of throwing.
+  const url = new URL(`${BASE_URL}${path}`, window.location.origin)
   Object.entries(params || {}).forEach(([key, value]) => {
     if (value !== undefined && value !== null && value !== '') {
       url.searchParams.set(key, value)

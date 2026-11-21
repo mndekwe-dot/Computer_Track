@@ -29,7 +29,7 @@ export default function NotFound() {
   }
 
   const portal = isAuthenticated ? homePortalFor(user) : null
-  const systemName = settings['branding.system_name'] || 'Computer Track'
+  const systemName = settings['branding.system_name'] || 'etracker'
 
   return (
     <div className="notfound-page">
@@ -40,7 +40,7 @@ export default function NotFound() {
       />
 
       <main className="notfound-card" id="main">
-        <Brand title={systemName} subtitle="Campus computer register" size="lg" stacked as="p" />
+        <Brand title={systemName} subtitle="Campus computer register" size="md" as="p" />
 
         <p className="notfound-code" aria-hidden="true">
           404
@@ -84,11 +84,9 @@ export default function NotFound() {
               <li>
                 <Link to="/register">Register a computer, or check one you have registered</Link>
               </li>
-              {Object.values(PORTALS).map((entry) => (
-                <li key={entry.key}>
-                  <Link to={`${entry.base}/login`}>Sign in to {entry.name}</Link>
-                </li>
-              ))}
+              <li>
+                <Link to="/login">Sign in as a member of staff</Link>
+              </li>
             </ul>
           </nav>
         )}

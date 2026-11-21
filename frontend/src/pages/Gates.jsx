@@ -71,7 +71,7 @@ export default function Gates() {
                       <td>{gate.scans_today}</td>
                       <td>
                         <StatusPill status={gate.is_active ? 'ACTIVE' : 'RETIRED'}>
-                          {gate.is_active ? 'OPEN' : 'CLOSED'}
+                          {gate.is_active ? 'Open' : 'Closed'}
                         </StatusPill>
                       </td>
                       <td>

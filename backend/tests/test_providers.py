@@ -38,7 +38,7 @@ class FakeResponse:
 @override_settings(
     EMAIL_BACKEND="notifications.providers.resend.ResendEmailBackend",
     RESEND_API_KEY="re_test_key",
-    DEFAULT_FROM_EMAIL="Computer Track <no-reply@example.edu>",
+    DEFAULT_FROM_EMAIL="etracker <no-reply@example.edu>",
 )
 class ResendTests(TestCase):
     def test_a_message_is_posted_in_the_shape_resend_expects(self):
@@ -59,7 +59,7 @@ class ResendTests(TestCase):
         self.assertEqual(payload["to"], ["aline@example.edu"])
         self.assertEqual(payload["subject"], "Your computer left campus")
         self.assertIn("Main Gate", payload["text"])
-        self.assertEqual(payload["from"], "Computer Track <no-reply@example.edu>")
+        self.assertEqual(payload["from"], "etracker <no-reply@example.edu>")
 
     def test_an_html_alternative_is_carried_but_text_is_always_sent(self):
         """A gate notification has to be readable in whatever opens it."""

@@ -7,6 +7,7 @@ from students.models import Student
 from students.serializers import StudentBriefSerializer
 
 from .models import (
+    ApprovalEvidence,
     AttemptOutcome,
     Device,
     DeviceFlag,
@@ -112,6 +113,27 @@ class OwnershipTransferSerializer(serializers.ModelSerializer):
             "created_at",
         )
         read_only_fields = ("transferred_by", "created_at", "from_student")
+
+
+class ApprovalEvidenceSerializer(serializers.ModelSerializer):
+    """FR 2.4: what was checked at approval. Read-only once written."""
+
+    recorded_by_name = serializers.CharField(
+        source="recorded_by.get_full_name", read_only=True, default=None
+    )
+
+    class Meta:
+        model = ApprovalEvidence
+        fields = (
+            "identity_checked",
+            "device_unlocked",
+            "serial_matches",
+            "proof_of_purchase_seen",
+            "notes",
+            "recorded_by_name",
+            "recorded_at",
+        )
+        read_only_fields = fields
 
 
 class DeviceSerializer(serializers.ModelSerializer):
@@ -253,6 +275,7 @@ class DeviceGateSerializer(DeviceSerializer):
     owner_photo = SignedImageField(
         source="owner.photo", read_only=True, allow_null=True, default=None
     )
+    approval_evidence = serializers.SerializerMethodField()
 
     class Meta(DeviceSerializer.Meta):
         fields = DeviceSerializer.Meta.fields + (
@@ -261,7 +284,17 @@ class DeviceGateSerializer(DeviceSerializer):
             "active_flags",
             "last_movement",
             "owner_photo",
+            "approval_evidence",
         )
+
+    def get_approval_evidence(self, obj):
+        # Devices registered directly by staff, or approved before evidence
+        # was recorded, have none.
+        try:
+            evidence = obj.approval_evidence
+        except ApprovalEvidence.DoesNotExist:
+            return None
+        return ApprovalEvidenceSerializer(evidence).data
 
     def get_valid_permits(self, obj):
         return TemporaryPermitSerializer(obj.valid_permits(), many=True).data

@@ -1,4 +1,4 @@
-# Computer Track - Campus Gate Computer Register
+# etracker - Campus Gate Computer Register
 
 A system for university security guards to verify, at any gate, that the computer a student is
 carrying actually belongs to them.
@@ -16,10 +16,53 @@ Almost nothing here is fixed in code. The equipment types, the gate rules, the w
 reads and the messages students receive are all edited by the registration office - see
 [Rules and wording](#rules-and-wording).
 
+## Project links
+
+| | |
+|---|---|
+| **Live app** | LIVE_APP_URL |
+| **Demo video** | DEMO_VIDEO_URL |
+| **SRS and proposal** | [Project proposal and SRS (Google Doc)](https://docs.google.com/document/d/1RoiJfIf-zGDeVO3oBFSsr6Xa4U0G-lx18q0HA9okkSQ/edit) |
+| **System design (UML)** | [Appendix B: UML diagrams](research/APPENDIX_B_SRS.md) and the editable diagrams in [`research/diagrams`](research/diagrams) |
+
+Sign in to the live app with the [demo accounts](#demo-accounts).
+
+## The problem
+
+Students carry their laptops through campus gates every day, but a guard has no quick way to
+tell whether the computer belongs to the person carrying it, or whether it has been reported
+lost or stolen. Checks are done from memory or paper, or not at all. Laptops are among the most
+stolen items on university campuses, theft is the most commonly recorded crime in Rwanda, and for
+a student a stolen laptop can mean a lost semester of coursework. Existing gate systems control
+who walks in; none of them check what is carried out.
+
+etracker is the register that closes that gap: students register their computers once, the
+registration office approves them in person, and any guard at any gate can confirm ownership in
+seconds, even with no network.
+
+## How the SRS requirements map to the app
+
+| SRS requirement | Where to see it |
+|---|---|
+| **FR 1** Student device registration (form, pending record, QR code) | `/register` (no account), then the QR sticker on a computer's detail page |
+| **FR 2** Approval and management (approve, reject, approval evidence, transfer, holds) | Registration Office: *Pending approvals*, *Computers* (detail page: transfer owner, report stolen) |
+| **FR 3** Gate verification (search by reg number, serial, asset tag or QR; owner photo; status) | Security Gate: *Gate console* |
+| **FR 4** Lost and stolen devices (report, block at every gate, record who changed it) | *Holds and theft*; the public *Report lost or stolen* tab on `/register` |
+| **FR 5** Gate decisions (gate, direction, rules, verdict, override with a written reason) | *Gate console* and *Gate log* |
+| **FR 6** Temporary passes (issue, link to a device, validity, expiry) | *Permits* |
+| **FR 7** Offline operation (cached app, queued decisions, sync without duplicates) | *Gate console* with the network turned off; see [Working offline](#working-offline) |
+| **FR 8** Notifications (outbox, email, SMS, delivery status) | *Messages*; see [Notifications](#notifications) |
+| **FR 9** Administration and audit (users, policies, audit log, suspicious access, reports) | Administration: *Staff accounts*, *Rules and wording*, *Read audit log*, *Dashboard*, CSV exports |
+
+The three actors in the system design each have their own portal behind one sign-in page:
+security guards, registration officers and administrators. Students use the public page and need
+no account.
+
 ---
 
 ## Contents
 
+- [Project links](#project-links) · [The problem](#the-problem) · [Requirements map](#how-the-srs-requirements-map-to-the-app)
 - [Running it](#running-it) - [with Docker](#with-docker) or [from source](#from-source) · [Demo accounts](#demo-accounts)
 - [Who uses what](#who-uses-what) - three staff portals and one public student page
 - [What it does](#what-it-does)
@@ -29,13 +72,32 @@ reads and the messages students receive are all edited by the registration offic
 - [Working offline](#working-offline)
 - [Read audit log](#read-audit-log)
 - [API](#api) · [Project layout](#project-layout) · [Commands](#management-commands)
-- [Tests](#tests) · [Deployment](#deployment)
+- [Tests](#tests) · [Deployment](#deployment) - including [on Vercel](#on-vercel-the-live-demo)
 - [ARCHITECTURE.md](ARCHITECTURE.md) - how it is put together, and why
 - [CHANGELOG.md](CHANGELOG.md) - what changed when
 
 ---
 
 ## Running it
+
+### Before you start
+
+You need:
+
+- **Git**
+- **Python 3.12 or newer** (developed on 3.13)
+- **Node.js 20 or newer**, with npm
+- **Docker Desktop**, only if you use the Docker route
+
+Get the code:
+
+```bash
+git clone https://github.com/mndekwe-dot/Computer_Track.git
+cd Computer_Track
+```
+
+Then follow **one** of the two routes below. *From source* is the quickest on a laptop. Run the
+backend and the frontend in two separate terminals.
 
 ### With Docker
 
@@ -95,14 +157,17 @@ App on `http://localhost:5173`.
 
 ### Demo accounts
 
-Created by `seed_demo`, all with password `passw0rd!`. Each signs in at **its own portal**:
+Created by `seed_demo`, all with password `passw0rd!`. Everyone signs in at the same
+page, **`/login`**, and the account decides which portal opens:
 
-| Username | Role | Sign in at |
-|----------|------|-----------|
-| `guard1` | Security guard, Main Gate | `/guard/login` |
-| `guard2` | Security guard, West Gate | `/guard/login` |
-| `registrar` | Registration officer | `/registry/login` |
-| `admin` | Administrator (also a Django superuser) | `/admin/login` |
+| Username | Role | Lands on |
+|----------|------|----------|
+| `guard1` | Security guard, Main Gate | Gate Console |
+| `guard2` | Security guard, West Gate | Gate Console |
+| `registrar` | Registration officer | Pending Approvals |
+| `admin` | Administrator (also a Django superuser) | Dashboard |
+
+`guard3` exists too, on Hostel Gate, though `seed_demo` does not print it.
 
 **Try this, in order - it exercises the whole system:**
 
@@ -129,22 +194,27 @@ and the staff portals, sit in the first screenful; everything that teaches (how 
 guard can see, what happens if a computer is stolen) sits below them, where it costs a returning
 user nothing. Anyone already signed in is sent straight to their own portal instead.
 
-The portals stay genuinely separate behind it: the landing page only links to their logins.
+The landing page links to one staff sign-in page, and names no portal.
 
-### Three staff portals
+### Three staff portals, one front door
 
-Each user type has its **own front door** - a separate login URL, its own navigation and its own
-accent colour. A guard and a registrar never see the same application.
+A guard and a registrar never see the same application: separate addresses, separate
+navigation, separate accent colour. What they share is the way in.
 
-| Portal | URL | Who signs in | What is in it |
-|--------|-----|--------------|---------------|
-| **Security Gate** | `/guard/login` | Security guards | Gate Console, Gate Log |
-| **Registration Office** | `/registry/login` | Registration officers | Pending Approvals, Students, Import, Computers, Holds & Theft, Permits |
-| **Administration** | `/admin/login` | Administrators | Everything above, plus Dashboard, Gates, Staff Accounts, Read Audit Log |
+| Portal | Base | Who works there | What is in it |
+|--------|------|-----------------|---------------|
+| **Security Gate** | `/guard` | Security guards | Gate Console, Gate Log |
+| **Registration Office** | `/registry` | Registration officers | Pending Approvals, Students, Import, Computers, Holds & Theft, Permits |
+| **Administration** | `/admin` | Administrators | Everything above, plus Dashboard, Gates, Staff Accounts, Read Audit Log |
 
-Sign in at the wrong door and the system says so plainly and links you to yours, rather than
-just refusing. Administrators are admitted to every portal and get a **portal switcher** in the
-sidebar, so they can stand at a gate and see exactly what the guard sees.
+Everyone signs in at **`/login`**. The page names no portal and lists no roles, because an
+unauthenticated visitor should not be able to read the shape of the organisation off a login
+screen, and nobody should have to know which door is theirs. Credentials decide: sign in and
+you arrive where you work. The old per-portal addresses still redirect there, so a bookmark on
+a gate terminal keeps working.
+
+Typing another portal's address while signed in simply returns you to your own. Administrators
+are admitted everywhere, so they can stand at a gate and see exactly what the guard sees.
 
 Guards deliberately **cannot** change ownership. That is the whole integrity of the system - if
 the person checking computers could also reassign them, the register would be worthless.
@@ -370,7 +440,7 @@ python manage.py process_notifications --retry-failed
 ```env
 EMAIL_PROVIDER=resend
 RESEND_API_KEY=re_...
-DEFAULT_FROM_EMAIL=Computer Track <no-reply@your-university.edu>
+DEFAULT_FROM_EMAIL=etracker <no-reply@your-university.edu>
 ```
 
 The sending domain has to be verified in the Resend dashboard first, or every message is
@@ -873,6 +943,57 @@ the reader can do, which matters most for the person who cannot open a console.
 
 ## Deployment
 
+### On Vercel (the live demo)
+
+The live app runs as **one** Vercel project: the React build and the Django API share one
+domain. [`vercel.json`](vercel.json) builds the frontend and sends every `/api/...` request to
+[`api/index.py`](api/index.py), a serverless function that loads the same Django project used
+everywhere else.
+
+1. **Import the repository.** In Vercel, choose *Add New → Project* and import
+   `Computer_Track`. Leave the root directory as the repository root; the build settings come
+   from `vercel.json`.
+2. **Add a database.** In the project, open *Storage → Create Database*, pick **Neon
+   (Postgres)** and connect it to the project. This adds a `DATABASE_URL` environment variable.
+3. **Set two environment variables** under *Settings → Environment Variables*:
+
+   | Name | Value |
+   |---|---|
+   | `DJANGO_SECRET_KEY` | a long random string, for example from `python -c "import secrets; print(secrets.token_urlsafe(50))"` |
+   | `DJANGO_DEBUG` | `False` |
+
+4. **Deploy**, or redeploy so the new variables take effect.
+5. **Create the tables and the demo data once**, from your own computer, pointed at the Vercel
+   database. Copy `DATABASE_URL` from *Settings → Environment Variables*, then:
+
+   ```bash
+   cd backend
+   pip install -r requirements.txt "psycopg[binary]"
+
+   # Windows PowerShell
+   $env:DATABASE_URL = "paste-the-value-here"
+   # macOS / Linux
+   # export DATABASE_URL="paste-the-value-here"
+
+   python manage.py migrate
+   python manage.py seed_demo
+   python manage.py rebuild_search_index
+   ```
+
+6. Open `https://<your-project>.vercel.app/login` and sign in with a
+   [demo account](#demo-accounts).
+
+What is different on Vercel:
+
+- **Uploaded photos are temporary.** A serverless function can only write to `/tmp`, which is
+  not shared between requests, so a photo uploaded on the live site may disappear. A permanent
+  deployment should store media in object storage.
+- **There is no background worker.** Notifications are sent inside the request instead of by
+  Celery.
+- **The Django admin is not exposed.** `/admin` is the React administration portal.
+
+### On your own server
+
 ```bash
 docker compose up -d          # PostgreSQL
 # backend/.env: DB_ENGINE=postgres, DJANGO_DEBUG=False, DJANGO_SSL_REDIRECT=True
@@ -889,7 +1010,7 @@ trusts `X-Forwarded-Proto`; without it the SSL redirect becomes an infinite loop
 Run the notification worker from cron:
 
 ```
-* * * * * cd /srv/computer_track/backend && .venv/bin/python manage.py process_notifications
+* * * * * cd /srv/etracker/backend && .venv/bin/python manage.py process_notifications
 ```
 
 SQLite is fine for the demo but allows a single writer at a time, which several gates recording at
@@ -908,7 +1029,7 @@ approved it, set `MEDIA_ACCEL_REDIRECT=True` and add:
 ```nginx
 location /protected-media/ {
     internal;                       # only reachable via X-Accel-Redirect
-    alias /srv/computer_track/backend/media/;
+    alias /srv/etracker/backend/media/;
 }
 ```
 
@@ -924,6 +1045,8 @@ size in a new tab" at the gate, which guards actually use.
 
 ## Not built yet
 
+- **Permanent photo storage on Vercel.** The live demo keeps uploads in `/tmp`; object
+  storage (S3, Cloudflare R2 or Vercel Blob) would make them last.
 - **Recovery codes for two-factor, and a password reset.** Account recovery is the weakest
   operational surface here.
 - **A backup and restore drill.** There is no `pg_dump` schedule in this repository and nothing

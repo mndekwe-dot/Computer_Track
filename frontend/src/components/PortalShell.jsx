@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
-import { Menu, LogOut, X } from 'lucide-react'
+import { Menu, LogOut, UserCog, X } from 'lucide-react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { PortalProvider } from '../auth/PortalContext'
-import { PORTAL_LIST, canEnter } from '../portals'
 import { Brand } from './Brand'
 import { ErrorBoundary } from './ErrorBoundary'
 
@@ -33,13 +32,8 @@ export function PortalShell({ portal }) {
 
   const signOut = () => {
     logout()
-    navigate(`${portal.base}/login`, { replace: true })
+    navigate('/login', { replace: true })
   }
-
-  // Admins can drop into another portal to see exactly what its users see.
-  const otherPortals = PORTAL_LIST.filter(
-    (candidate) => candidate.key !== portal.key && canEnter(user, candidate),
-  )
 
   return (
     <PortalProvider portal={portal}>
@@ -71,43 +65,59 @@ export function PortalShell({ portal }) {
         <aside className="sidebar" id="portal-nav" data-open={navOpen}>
           <Brand title={portal.name} subtitle={portal.tagline} />
 
+          {/* Links are grouped by the job they belong to. A group heading is
+              printed once, above its first link; ungrouped links sit at the
+              top. Each group is a list of its own so a screen reader announces
+              how many links it holds. */}
           <nav className="nav" aria-label={`${portal.name} sections`}>
-            {portal.nav.map((link) => {
-              const Icon = link.icon
-              return (
-                <NavLink key={link.to} to={link.to} end={link.end}>
-                  <Icon size={17} className="nav-icon" aria-hidden="true" />
-                  <span>{link.label}</span>
-                </NavLink>
-              )
-            })}
+            {groupNav(portal.nav).map(({ group, links }) => (
+              <div className="nav-section" key={group || 'top'}>
+                {group && (
+                  <div className="nav-group" id={`nav-${portal.key}-${group}`}>
+                    {group}
+                  </div>
+                )}
+                <ul aria-labelledby={group ? `nav-${portal.key}-${group}` : undefined}>
+                  {links.map((link) => {
+                    const Icon = link.icon
+                    // Pages reached from inside another (Import from the
+                    // Students page) keep their parent highlighted.
+                    const alsoActive = link.also?.some((path) =>
+                      location.pathname.startsWith(path),
+                    )
+                    return (
+                      <li key={link.to}>
+                        <NavLink
+                          to={link.to}
+                          end={link.end}
+                          className={({ isActive }) => (isActive || alsoActive ? 'active' : undefined)}
+                          aria-current={alsoActive ? 'page' : undefined}
+                        >
+                          <Icon size={17} className="nav-icon" aria-hidden="true" />
+                          <span>{link.label}</span>
+                        </NavLink>
+                      </li>
+                    )
+                  })}
+                </ul>
+              </div>
+            ))}
           </nav>
 
           <div className="sidebar-footer">
-            {otherPortals.length > 0 && (
-              <div className="portal-switch">
-                <div className="nav-group">Switch portal</div>
-                {otherPortals.map((other) => (
-                  <button
-                    key={other.key}
-                    type="button"
-                    className="portal-switch-btn"
-                    onClick={() => navigate(other.home)}
-                  >
-                    <span className="portal-dot" style={{ background: other.accent }} />
-                    {other.name}
-                  </button>
-                ))}
-              </div>
-            )}
-
-            <div className="sidebar-user">
-              <strong>{user?.full_name}</strong>
+            {/* Your own account lives with your name rather than in the list
+                of work: it is about you, not about the register. */}
+            <NavLink to={`${portal.base}/account`} className="sidebar-user">
+              <UserCog size={17} className="nav-icon" aria-hidden="true" />
               <span>
-                {user?.role_display}
-                {user?.default_gate_name ? ` · ${user.default_gate_name}` : ''}
+                <strong>{user?.full_name}</strong>
+                <span>
+                  {user?.role_display}
+                  {user?.default_gate_name ? `, ${user.default_gate_name}` : ''}
+                </span>
+                <span className="sidebar-user-link">My account</span>
               </span>
-            </div>
+            </NavLink>
             <button type="button" className="btn btn-ghost btn-sm btn-block" onClick={signOut}>
               <LogOut size={15} aria-hidden="true" />
               Sign out
@@ -123,6 +133,17 @@ export function PortalShell({ portal }) {
       </div>
     </PortalProvider>
   )
+}
+
+function groupNav(links) {
+  const sections = []
+  for (const link of links) {
+    const group = link.group || null
+    const last = sections[sections.length - 1]
+    if (last && last.group === group) last.links.push(link)
+    else sections.push({ group, links: [link] })
+  }
+  return sections
 }
 
 export function PageHeader({ title, subtitle, children }) {
