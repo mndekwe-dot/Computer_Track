@@ -1,6 +1,6 @@
 # Architecture
 
-How Computer Track is put together, and why. This is the document to read
+How etracker is put together, and why. This is the document to read
 before changing something structural; the README covers running it, and
 [CHANGELOG.md](CHANGELOG.md) covers what changed when.
 
@@ -194,12 +194,20 @@ than to write.
 
 ### Three portals, not one app with role checks
 
-`src/portals.js` declares three separate front doors — Security Gate,
-Registration Office, Administration — each with its own login URL, navigation
+`src/portals.js` declares three separate workspaces — Security Gate,
+Registration Office, Administration — each with its own address, navigation
 and accent colour. A guard and a registrar never see the same application.
+
+They share one way in. `/login` names no portal, and `homePortalFor` routes
+the person by role once the credentials are proved. Three labelled login
+pages told an unauthenticated visitor which roles exist and which addresses to
+try, and asked staff to know which door was theirs; the account already knows.
+The old per-portal login paths redirect to `/login` so bookmarks survive.
 
 Administrators may enter any portal, because being able to stand at a gate and
 reproduce exactly what a guard is seeing is how a support call gets resolved.
+There is no portal switcher in the sidebar: an administrator types the address,
+which keeps the chrome identical for every role.
 
 ### Offline
 

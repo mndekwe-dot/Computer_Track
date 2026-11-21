@@ -37,7 +37,7 @@ export default function Flags() {
   return (
     <>
       <PageHeader
-        title="Holds & Theft Reports"
+        title="Holds and theft reports"
         subtitle="An active hold blocks the computer at every gate on campus"
       />
 
@@ -82,7 +82,7 @@ export default function Flags() {
                 <tbody>
                   {data?.results.map((flag) => (
                     <tr key={flag.id}>
-                      <td>
+                      <td className="nowrap">
                         {formatDateTime(flag.created_at)}
                         {flag.raised_by_name && (
                           <div className="muted">by {flag.raised_by_name}</div>
@@ -101,9 +101,9 @@ export default function Flags() {
                       <td className="hide-md muted">{flag.details || ' - '}</td>
                       <td>
                         {flag.is_active ? (
-                          <StatusPill status="HOLD">ACTIVE</StatusPill>
+                          <StatusPill status="HOLD">Active</StatusPill>
                         ) : (
-                          <StatusPill status="ACTIVE">RESOLVED</StatusPill>
+                          <StatusPill status="ACTIVE">Resolved</StatusPill>
                         )}
                       </td>
                       <td>

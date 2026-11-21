@@ -122,7 +122,7 @@ export default function Attempts() {
               <tbody>
                 {data?.results?.map((attempt) => (
                   <tr key={attempt.id} data-attention={attempt.needs_review ? 'true' : 'false'}>
-                    <td>{formatDateTime(attempt.created_at)}</td>
+                    <td className="nowrap">{formatDateTime(attempt.created_at)}</td>
                     <td>
                       <strong className="mono">{attempt.reg_number || ' - '}</strong>
                       {attempt.student_name && <div className="muted">{attempt.student_name}</div>}

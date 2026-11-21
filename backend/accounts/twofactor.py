@@ -71,7 +71,7 @@ def begin_enrolment(user):
         key=os.urandom(20).hex(),
     )
 
-    issuer = getattr(settings, "UNIVERSITY_NAME", "Computer Track")
+    issuer = getattr(settings, "UNIVERSITY_NAME", "etracker")
     uri = device.config_url
     return {
         "otpauth_url": uri,

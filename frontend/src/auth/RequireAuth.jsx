@@ -1,11 +1,15 @@
-import { Navigate, useLocation, useNavigate } from 'react-router-dom'
-import { DoorOpen } from 'lucide-react'
+import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from './AuthContext'
 import { canEnter, homePortalFor } from '../portals'
 
 /**
- * Gate for a whole portal. An unauthenticated visitor is sent to *this*
- * portal's login page, not a shared one - the three front doors stay separate.
+ * Gate for a whole portal.
+ *
+ * An unauthenticated visitor goes to the single staff sign-in page. Somebody
+ * signed in who has typed an address belonging to another portal is sent to
+ * their own, silently: there is no decision for them to make, and a screen
+ * announcing which portal they are not allowed into would describe the
+ * organisation to anyone who guessed a URL.
  */
 export function RequirePortal({ portal, children }) {
   const { user, isAuthenticated, loading } = useAuth()
@@ -14,29 +18,10 @@ export function RequirePortal({ portal, children }) {
   if (loading) return <div className="page-loading">Checking your session…</div>
 
   if (!isAuthenticated) {
-    return <Navigate to={`${portal.base}/login`} state={{ from: location }} replace />
+    return <Navigate to="/login" state={{ from: location }} replace />
   }
 
-  if (!canEnter(user, portal)) return <WrongPortal user={user} portal={portal} />
+  if (!canEnter(user, portal)) return <Navigate to={homePortalFor(user).home} replace />
 
   return children
-}
-
-function WrongPortal({ user, portal }) {
-  const navigate = useNavigate()
-  const theirs = homePortalFor(user)
-
-  return (
-    <div className="empty-state" style={{ padding: '70px 24px' }}>
-      <DoorOpen size={34} aria-hidden="true" style={{ color: 'var(--text-muted)' }} />
-      <h2 style={{ marginTop: 12 }}>Wrong portal</h2>
-      <p style={{ maxWidth: 440, margin: '10px auto 20px' }}>
-        You are signed in as a {user.role_display}, which does not have access to the{' '}
-        {portal.name} portal. Your work is in {theirs.name}.
-      </p>
-      <button type="button" className="btn btn-primary" onClick={() => navigate(theirs.home)}>
-        Go to {theirs.name}
-      </button>
-    </div>
-  )
 }

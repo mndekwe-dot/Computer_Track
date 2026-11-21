@@ -63,7 +63,7 @@ export default function Settings() {
   return (
     <>
       <PageHeader
-        title="My Account"
+        title="My account"
         subtitle={`${user?.role_display} · ${portal.name} portal`}
       />
 
@@ -251,7 +251,7 @@ function TwoFactorPanel({ onToast }) {
       <div className="card-header">
         <h3>Two-factor authentication</h3>
         <StatusPill status={status.enabled ? 'ACTIVE' : 'PENDING'}>
-          {status.enabled ? 'ON' : 'OFF'}
+          {status.enabled ? 'On' : 'Off'}
         </StatusPill>
       </div>
 

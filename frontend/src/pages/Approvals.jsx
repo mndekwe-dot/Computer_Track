@@ -42,7 +42,7 @@ export default function Approvals() {
   return (
     <>
       <PageHeader
-        title="Pending Approvals"
+        title="Pending approvals"
         subtitle="Computers students submitted through the public registration form"
       />
 
@@ -78,7 +78,7 @@ export default function Approvals() {
               <tbody>
                 {data?.results.map((device) => (
                   <tr key={device.id}>
-                    <td>{formatDateTime(device.registered_at)}</td>
+                    <td className="nowrap">{formatDateTime(device.registered_at)}</td>
                     <td>
                       <strong>{device.label}</strong>
                       <div className="mono muted">{device.serial_number}</div>
@@ -142,8 +142,19 @@ export default function Approvals() {
   )
 }
 
+// FR 2.4: the checks a registration officer records at approval. Each one is
+// something they can only confirm with the computer and its owner in the room.
+const EVIDENCE_CHECKS = [
+  { key: 'identity_checked', label: 'Student ID card matches the owner on the record' },
+  { key: 'device_unlocked', label: 'Owner unlocked the computer in front of me' },
+  { key: 'serial_matches', label: 'Serial in the system settings matches the one submitted' },
+  { key: 'proof_of_purchase_seen', label: 'I saw a receipt, invoice or loan agreement' },
+]
+
 function ApproveDialog({ device, onClose, onDone }) {
   const [assetTag, setAssetTag] = useState('')
+  const [checks, setChecks] = useState({})
+  const [notes, setNotes] = useState('')
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
 
@@ -152,7 +163,7 @@ function ApproveDialog({ device, onClose, onDone }) {
     setBusy(true)
     setError('')
     try {
-      const outcome = await devices.approve(device.id, assetTag)
+      const outcome = await devices.approve(device.id, assetTag, { ...checks, notes })
       onDone(
         outcome.owner_notified
           ? `${device.serial_number} approved. The owner has been notified.`
@@ -183,6 +194,26 @@ function ApproveDialog({ device, onClose, onDone }) {
             placeholder="UNI-02401"
             autoFocus
           />
+        </Field>
+        <fieldset className="evidence-checks">
+          <legend className="field-label">What you checked</legend>
+          <p className="field-hint">
+            Saved with the approval and cannot be edited later. Leave a box unticked if you did
+            not check it.
+          </p>
+          {EVIDENCE_CHECKS.map((check) => (
+            <label key={check.key} className="check-inline">
+              <input
+                type="checkbox"
+                checked={Boolean(checks[check.key])}
+                onChange={(e) => setChecks({ ...checks, [check.key]: e.target.checked })}
+              />
+              {check.label}
+            </label>
+          ))}
+        </fieldset>
+        <Field label="Notes" hint="Anything else you saw, for example which document stood in for a receipt.">
+          <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} />
         </Field>
         <div className="form-actions">
           <button type="button" className="btn btn-ghost" onClick={onClose}>

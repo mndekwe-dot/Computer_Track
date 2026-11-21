@@ -9,9 +9,17 @@ import { defineConfig, devices } from '@playwright/test'
  * anywhere else every request is blocked and every test fails on empty pages
  * rather than on anything real.
  *
- *   cd backend && .venv/Scripts/python manage.py runserver 8000
+ *   cd backend && PUBLIC_FORM_RATE=200/hour .venv/Scripts/python manage.py runserver 8000
  *   cd frontend && npm run dev
  *   npx playwright test
+ *
+ * `PUBLIC_FORM_RATE` matters. The student form is throttled to 12/hour by
+ * default, because it is the only endpoint with no login in front of it. Two
+ * projects each submitting it, and a couple of reruns while you work on
+ * something, spend that budget in minutes: the report-missing test then fails
+ * on a missing confirmation heading, which reads like a broken form rather
+ * than a 429. Raise it for the suite only; the default is the number that
+ * matters on anything a student can reach.
  *
  * The frontend is started for you when it is not already running; the API is
  * not, because it needs a database and a Python environment this config has no

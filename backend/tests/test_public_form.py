@@ -9,7 +9,7 @@ from django.core.cache import cache
 from django.test import TestCase
 from rest_framework.throttling import SimpleRateThrottle
 
-from devices.models import Device, DeviceStatus
+from devices.models import ApprovalEvidence, Device, DeviceStatus
 
 from .factories import api_client, make_device, make_student, make_user, photo_bytes, set_rule
 
@@ -235,6 +235,39 @@ class ApprovalQueueTests(TestCase):
         self.device.refresh_from_db()
         self.assertEqual(self.device.status, DeviceStatus.ACTIVE)
         self.assertIsNone(self.device.asset_tag)
+
+    def test_approval_records_the_evidence_checked(self):
+        """FR 2.4: what the officer checked is stored with who checked it."""
+        response = self.client.post(
+            f"/api/devices/{self.device.id}/approve/",
+            {
+                "evidence": {
+                    "identity_checked": True,
+                    "device_unlocked": True,
+                    "serial_matches": True,
+                    "proof_of_purchase_seen": False,
+                    "notes": "Receipt left at home; loan form seen instead.",
+                }
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, 200, response.content)
+        evidence = ApprovalEvidence.objects.get(device=self.device)
+        self.assertTrue(evidence.identity_checked)
+        self.assertTrue(evidence.device_unlocked)
+        self.assertTrue(evidence.serial_matches)
+        self.assertFalse(evidence.proof_of_purchase_seen)
+        self.assertEqual(evidence.checks_passed, 3)
+        self.assertEqual(evidence.recorded_by, self.registrar)
+
+        detail = self.client.get(f"/api/devices/{self.device.id}/").json()
+        self.assertEqual(detail["approval_evidence"]["notes"], evidence.notes)
+        self.assertTrue(detail["approval_evidence"]["serial_matches"])
+
+    def test_approval_without_evidence_records_every_check_as_not_done(self):
+        self.client.post(f"/api/devices/{self.device.id}/approve/", {}, format="json")
+        evidence = ApprovalEvidence.objects.get(device=self.device)
+        self.assertEqual(evidence.checks_passed, 0)
 
     def test_a_duplicate_asset_tag_is_refused(self):
         make_device(self.student, "LN11112222", asset_tag="UNI-00042")

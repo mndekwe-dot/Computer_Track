@@ -21,6 +21,7 @@ from search.indexer import filter_devices
 
 from . import queries
 from .models import (
+    ApprovalEvidence,
     AttemptOutcome,
     Device,
     DeviceFlag,
@@ -196,13 +197,38 @@ class DeviceViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        device.status = DeviceStatus.ACTIVE
-        if asset_tag:
-            device.asset_tag = asset_tag
-        # Approval is the point at which a named officer takes responsibility
-        # for the record, so that is who it is attributed to.
-        device.registered_by = request.user
-        device.save(update_fields=["status", "asset_tag", "registered_by", "updated_at"])
+        # FR 2.4: what the officer checked with the computer and its owner in
+        # front of them. Any check left out is recorded as not done.
+        raw = request.data.get("evidence") or {}
+        if not isinstance(raw, dict):
+            return Response(
+                {"evidence": ["Send the approval checks as an object."]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        def checked(key):
+            value = raw.get(key, False)
+            return value is True or str(value).lower() in {"true", "1", "yes", "on"}
+
+        with transaction.atomic():
+            device.status = DeviceStatus.ACTIVE
+            if asset_tag:
+                device.asset_tag = asset_tag
+            # Approval is the point at which a named officer takes responsibility
+            # for the record, so that is who it is attributed to.
+            device.registered_by = request.user
+            device.save(update_fields=["status", "asset_tag", "registered_by", "updated_at"])
+            ApprovalEvidence.objects.update_or_create(
+                device=device,
+                defaults={
+                    "identity_checked": checked("identity_checked"),
+                    "device_unlocked": checked("device_unlocked"),
+                    "serial_matches": checked("serial_matches"),
+                    "proof_of_purchase_seen": checked("proof_of_purchase_seen"),
+                    "notes": str(raw.get("notes") or "").strip()[:1000],
+                    "recorded_by": request.user,
+                },
+            )
 
         # The student should not have to keep checking the page to find out.
         queued = notify_registration_approved(device)

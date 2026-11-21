@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Pencil, Plus } from 'lucide-react'
+import { Pencil, Plus, Upload } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { campus, students } from '../api/endpoints'
 import { useAuth } from '../auth/AuthContext'
@@ -59,10 +59,16 @@ export default function Students() {
     <>
       <PageHeader title="Students" subtitle="The people your computers belong to">
         {canManageRecords && (
-          <button type="button" className="btn btn-primary" onClick={() => setEditing({})}>
-            <Plus size={16} aria-hidden="true" />
-            Add student
-          </button>
+          <>
+            <Link to={`${portal.base}/import`} className="btn btn-outline">
+              <Upload size={16} aria-hidden="true" />
+              Import from CSV
+            </Link>
+            <button type="button" className="btn btn-primary" onClick={() => setEditing({})}>
+              <Plus size={16} aria-hidden="true" />
+              Add student
+            </button>
+          </>
         )}
       </PageHeader>
 

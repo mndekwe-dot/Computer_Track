@@ -44,7 +44,7 @@ export class ErrorBoundary extends Component {
               window.location.assign('/console')
             }}
           >
-            Back to the Gate Console
+            Back to the gate console
           </button>
         </div>
         <details style={{ marginTop: 26, textAlign: 'left', maxWidth: 560, margin: '26px auto 0' }}>

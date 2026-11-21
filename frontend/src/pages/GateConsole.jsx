@@ -5,12 +5,10 @@ import {
   Ban,
   Building2,
   Check,
-  CircleCheck,
   CloudOff,
   CircleHelp,
   GraduationCap,
   LaptopMinimal,
-  OctagonAlert,
   QrCode,
   RefreshCw,
   Search,
@@ -249,7 +247,7 @@ export default function GateConsole() {
   return (
     <>
       <PageHeader
-        title="Gate Console"
+        title="Gate console"
         subtitle="Ask for the registration number, then match the computer in front of you."
       >
         <span className="connection-badge" data-online={online}>
@@ -647,13 +645,14 @@ function DeviceDecisionCard({ device, direction, highlighted, onAllow, onDeny, o
       </div>
 
       <div className="verdict-banner" data-action={action}>
+        {/* The word is the signal, sized to be read from the far side of a
+            gate booth; the reason beside it says what to do about it. */}
         <span className="verdict-headline">
-          {hold ? (
-            <OctagonAlert size={18} aria-hidden="true" />
-          ) : (
-            <CircleCheck size={18} aria-hidden="true" />
-          )}
-          {hold ? 'HOLD - do not let this through' : 'CLEAR - details match the register'}
+          <span className="verdict-word">{hold ? 'HOLD' : 'CLEAR'}</span>
+          <span className="visually-hidden"> - </span>
+          <span className="verdict-reason">
+            {hold ? 'Do not let this through' : 'Details match the register'}
+          </span>
         </span>
         {hold && (
           <ul>
