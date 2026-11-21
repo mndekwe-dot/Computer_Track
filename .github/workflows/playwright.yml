@@ -1,27 +1,153 @@
-name: Playwright Tests
+# The three suites this project actually has.
+#
+# This replaces the generated Playwright starter workflow, which ran `npm ci`
+# at the root and then `npx playwright test`. That cannot work here:
+#
+#   * `frontend/` is a separate package with its own lockfile, and the
+#     Playwright config starts the dev server with `npm run dev --prefix
+#     frontend`. With only the root package installed that step dies with
+#     "sh: 1: vite: not found".
+#   * The suite drives a real application, so it needs the Django API up on
+#     :8000 with a migrated database and seed_demo data. The starter workflow
+#     had no Python in it at all, so global-setup could not even sign in.
+#   * Two throttles are deliberately tight: the student form is 12/hour and
+#     login is 20/min. Two Playwright projects and a rerun spend the form's
+#     budget in minutes, and the failure reads like a broken form rather than
+#     a 429, so the rate is raised for the run and only for the run.
+
+name: Tests
+
 on:
   push:
-    branches: [ main, master ]
+    branches: [main, master]
   pull_request:
-    branches: [ main, master ]
+    branches: [main, master]
+
 jobs:
-  test:
-    timeout-minutes: 60
+  backend:
+    name: Backend (Django)
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-node@v4
-      with:
-        node-version: lts/*
-    - name: Install dependencies
-      run: npm ci
-    - name: Install Playwright Browsers
-      run: npx playwright install --with-deps
-    - name: Run Playwright tests
-      run: npx playwright test
-    - uses: actions/upload-artifact@v4
-      if: ${{ !cancelled() }}
-      with:
-        name: playwright-report
-        path: playwright-report/
-        retention-days: 30
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r backend/requirements.txt
+
+      - name: Check for model changes with no migration
+        working-directory: backend
+        run: python manage.py makemigrations --check --dry-run
+
+      - name: Run tests
+        working-directory: backend
+        run: python manage.py test --verbosity 2
+
+  frontend:
+    name: Frontend (Vitest)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: frontend
+
+      - name: Run tests
+        run: npm test
+        working-directory: frontend
+
+      - name: Build
+        run: npm run build
+        working-directory: frontend
+
+  e2e:
+    name: End to end (Playwright)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            frontend/package-lock.json
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+
+      # Both packages. The root one holds Playwright; the frontend one holds
+      # Vite, which the config's webServer step shells out to.
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Install frontend dependencies
+        run: npm ci
+        working-directory: frontend
+
+      - name: Install backend dependencies
+        run: pip install -r backend/requirements.txt
+
+      - name: Prepare the database
+        working-directory: backend
+        run: |
+          python manage.py migrate --noinput
+          python manage.py seed_demo
+
+      - name: Start the API
+        working-directory: backend
+        env:
+          # See the note at the top of this file. The default of 12/hour is
+          # the number that matters on anything a student can reach; it is
+          # raised here and nowhere else.
+          PUBLIC_FORM_RATE: 500/hour
+          LOGIN_RATE: 200/min
+        # nohup, because the step's shell exits as soon as the wait loop
+        # finishes and the server has to outlive it. The log goes to a file so
+        # a failure further down has something to show.
+        run: |
+          nohup python manage.py runserver 8000 --noreload > "$RUNNER_TEMP/api.log" 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:8000/api/health/ >/dev/null; then
+              echo "API is up"; exit 0
+            fi
+            sleep 1
+          done
+          echo "API did not start within 30s"
+          cat "$RUNNER_TEMP/api.log"
+          exit 1
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Run Playwright tests
+        run: npx playwright test
+
+      - name: API log
+        if: failure()
+        run: cat "$RUNNER_TEMP/api.log"
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
