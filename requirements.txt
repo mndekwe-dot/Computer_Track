@@ -1,4 +1,24 @@
 # Read by Vercel when it builds the Python function in api/index.py.
-# Local development and Docker install from backend/ directly.
--r backend/requirements.txt
+# Local development and Docker install from backend/requirements.txt instead.
+#
+# This list is spelled out rather than written as `-r backend/requirements.txt`,
+# because Vercel's builder cannot follow an include and fails the whole deploy
+# with "could not parse requirements.txt". Keep it in step with the backend
+# file; `python manage.py check` on a fresh install is what catches drift.
+Django>=5.1,<6.0
+djangorestframework>=3.15
+djangorestframework-simplejwt>=5.3
+django-cors-headers>=4.4
+django-filter>=24.3
+python-decouple>=3.8
+Pillow>=10.4
+qrcode>=7.4
+django-otp>=1.5
+whitenoise>=6.7
+celery>=5.4
+redis>=5.0
+requests>=2.32
+
+# Postgres, which the hosted database speaks. Not in the backend list because
+# a local SQLite run does not need it.
 psycopg[binary]>=3.2
