@@ -20,7 +20,7 @@ reads and the messages students receive are all edited by the registration offic
 
 | | |
 |---|---|
-| **Live app** | LIVE_APP_URL |
+| **Live app** | **https://etracker-blush.vercel.app** |
 | **Demo video** | DEMO_VIDEO_URL |
 | **SRS and proposal** | [Project proposal and SRS (Google Doc)](https://docs.google.com/document/d/1RoiJfIf-zGDeVO3oBFSsr6Xa4U0G-lx18q0HA9okkSQ/edit) |
 | **System design (UML)** | [Appendix B: UML diagrams](research/APPENDIX_B_SRS.md) and the editable diagrams in [`research/diagrams`](research/diagrams) |
