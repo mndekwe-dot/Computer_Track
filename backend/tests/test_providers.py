@@ -9,7 +9,7 @@ that decides whether a student is told their laptop left campus.
 from unittest.mock import patch
 
 from django.core.mail import EmailMessage, send_mail
-from django.test import TestCase
+from django.test import SimpleTestCase, TestCase
 from django.test.utils import override_settings
 
 from notifications.backends import PermanentFailure, deliver
@@ -266,3 +266,29 @@ class ConsoleProviderTests(TestCase):
         )
         with self.assertRaises(PermanentFailure):
             deliver(row)
+
+
+class SenderIdTests(SimpleTestCase):
+    """A telephone number is not a sender id.
+
+    Africa's Talking reports this as InvalidSenderId per recipient inside an
+    HTTP 200, which reads like a problem with the number being written to
+    rather than the name being written from. Catching it at startup turns a
+    puzzling delivery failure into a log line that says what to change.
+    """
+
+    @override_settings(AFRICASTALKING_SENDER_ID="ETRACKER")
+    def test_alphanumeric_sender_id_is_kept(self):
+        self.assertEqual(AfricasTalkingSMSBackend().sender_id, "ETRACKER")
+
+    @override_settings(AFRICASTALKING_SENDER_ID="0788000000")
+    def test_telephone_number_is_rejected(self):
+        self.assertEqual(AfricasTalkingSMSBackend().sender_id, "")
+
+    @override_settings(AFRICASTALKING_SENDER_ID="+250788000000")
+    def test_international_number_is_rejected(self):
+        self.assertEqual(AfricasTalkingSMSBackend().sender_id, "")
+
+    @override_settings(AFRICASTALKING_SENDER_ID="  ETRACKER  ")
+    def test_surrounding_space_is_trimmed(self):
+        self.assertEqual(AfricasTalkingSMSBackend().sender_id, "ETRACKER")
