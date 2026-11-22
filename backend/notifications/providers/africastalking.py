@@ -115,11 +115,40 @@ def _post(url, data, api_key, timeout):
     )
 
 
+def _usable_sender_id(raw):
+    """The configured sender id, or nothing if it cannot be one.
+
+    A sender id is an alphanumeric name such as ETRACKER, or a registered
+    short code. A telephone number is neither, and Africa's Talking answers
+    a message sent with one as InvalidSenderId, per recipient, inside an
+    HTTP 200. That failure is easy to misread as a problem with the phone
+    number being written to rather than the name being written from, so it
+    is caught here instead, once, at startup.
+
+    Sending with no sender id at all is valid: the account's default is
+    used. That is the better outcome than every message failing.
+    """
+    value = (raw or "").strip()
+    if not value:
+        return ""
+    if value.lstrip("+").isdigit():
+        logger.warning(
+            "AFRICASTALKING_SENDER_ID %r looks like a telephone number. A sender id is "
+            "an alphanumeric name such as ETRACKER, or a registered short code. Ignoring "
+            "it and letting the account default apply.",
+            value,
+        )
+        return ""
+    return value
+
+
 class AfricasTalkingSMSBackend:
     def __init__(self):
         self.username = getattr(settings, "AFRICASTALKING_USERNAME", "sandbox")
         self.api_key = getattr(settings, "AFRICASTALKING_API_KEY", "")
-        self.sender_id = getattr(settings, "AFRICASTALKING_SENDER_ID", "")
+        self.sender_id = _usable_sender_id(
+            getattr(settings, "AFRICASTALKING_SENDER_ID", "")
+        )
         self.timeout = getattr(settings, "AFRICASTALKING_TIMEOUT", 15)
         # "sandbox" is the literal username Africa's Talking issues for the
         # test environment, and it only works against the sandbox host.
