@@ -47,3 +47,8 @@ db.sqlite3.bak-*
 # .env.example templates from anyone adding to them.
 .vercel
 .env.local
+.env*
+
+# Presenter notes for the demo video. Personal working material, not part
+# of the project.
+research/VIDEO_SCRIPT.md
