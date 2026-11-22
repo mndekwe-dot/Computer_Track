@@ -41,3 +41,9 @@ AI_CONTEXT.md
 
 # Local database backups taken before a migration
 db.sqlite3.bak-*
+# Added by the Vercel CLI: the link to the project, and the development
+# variables it pulls down. `.env` itself is already ignored above; the
+# CLI's `.env*` is not used because it would also hide the tracked
+# .env.example templates from anyone adding to them.
+.vercel
+.env.local
