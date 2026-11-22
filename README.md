@@ -961,6 +961,14 @@ everywhere else.
    |---|---|
    | `DJANGO_SECRET_KEY` | a long random string, for example from `python -c "import secrets; print(secrets.token_urlsafe(50))"` |
    | `DJANGO_DEBUG` | `False` |
+   | `EMAIL_PROVIDER` | `resend`, or leave it out to print mail to the function log |
+   | `RESEND_API_KEY` | your Resend key, if email is wanted |
+   | `DEFAULT_FROM_EMAIL` | `etracker <onboarding@resend.dev>` until a domain is verified |
+   | `SMS_PROVIDER` | `console` until an SMS account is connected |
+
+   Resend will not send from a domain you have not verified with it, so the test sender
+   above is the one that works immediately. It delivers only to the address that owns the
+   Resend account; any other recipient needs a verified domain.
 
 4. **Deploy**, or redeploy so the new variables take effect.
 5. **Create the tables and the demo data once**, from your own computer, pointed at the Vercel
@@ -982,6 +990,17 @@ everywhere else.
 
 6. Open `https://<your-project>.vercel.app/login` and sign in with a
    [demo account](#demo-accounts).
+
+Two things worth knowing before you repeat this:
+
+- **The root `requirements.txt` lists its packages directly.** It cannot say
+  `-r backend/requirements.txt`, because Vercel's Python builder does not follow an
+  include and fails the whole deploy with `could not parse requirements.txt`. Keep the
+  two files in step by hand.
+- **Migrations should run over Neon's direct connection, not the pooled one.** Neon
+  supplies both: `DATABASE_URL` is pooled and is what the application should use, while
+  `DATABASE_URL_UNPOOLED` is the direct connection. Schema changes through a connection
+  pooler are the kind of thing that works until they do not.
 
 What is different on Vercel:
 
