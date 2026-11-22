@@ -110,6 +110,19 @@ TEMPLATES = [
 WSGI_APPLICATION = "config.wsgi.application"
 ASGI_APPLICATION = "config.asgi.application"
 
+def _sqlite_path():
+    """Where the development database file lives.
+
+    Anything without a path separator or a recognisable database suffix is
+    treated as a leftover Postgres database name and ignored in favour of the
+    default, because the failure it causes otherwise is invisible: the
+    application starts, the tables are created, and every page is empty.
+    """
+    name = config("DB_NAME", default="").strip()
+    looks_like_a_path = "/" in name or "\\" in name or name.endswith((".sqlite3", ".db"))
+    return name if (name and looks_like_a_path) else str(BASE_DIR / "db.sqlite3")
+
+
 if DATABASE_URL:
     _db = urlparse(DATABASE_URL)
     DATABASES = {
@@ -147,7 +160,12 @@ else:
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
-            "NAME": config("DB_NAME", default=str(BASE_DIR / "db.sqlite3")),
+            # DB_NAME means two different things either side of this branch:
+            # a database name on Postgres, a file path here. An .env carrying
+            # the Postgres name with DB_ENGINE left blank used to create a
+            # stray `backend/<name>` file and quietly start from an empty
+            # register, so only a value that looks like a path is honoured.
+            "NAME": _sqlite_path(),
             "OPTIONS": {
                 # SQLite serialises writers. WAL lets the gate keep reading
                 # while a registrar saves, which is the shape of the load here.
