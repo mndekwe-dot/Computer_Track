@@ -9,6 +9,9 @@ env/
 # Django
 db.sqlite3
 db.sqlite3-journal
+# A DB_NAME meant for Postgres is read as a file path on SQLite, which
+# creates a database file named after the project. Never commit one.
+/backend/etracker
 /backend/media/
 /backend/staticfiles/
 .env
