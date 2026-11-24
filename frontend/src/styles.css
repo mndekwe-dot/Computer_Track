@@ -416,6 +416,37 @@ h4 {
 }
 
 
+/* Shown only when you are inside a portal that is not your own, which in
+   practice means an administrator looking at what a guard sees. */
+.portal-return {
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+  margin-bottom: 8px;
+  padding: 9px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px dashed var(--border-strong);
+  color: var(--sidebar-text-strong);
+  text-decoration: none;
+  font-size: 13px;
+}
+
+.portal-return:hover {
+  background: var(--sidebar-hover);
+}
+
+.portal-return > span {
+  display: grid;
+  gap: 1px;
+  font-weight: 600;
+}
+
+.portal-return > span > span {
+  color: var(--text-muted);
+  font-weight: 400;
+  font-size: 12px;
+}
+
 .sidebar-user {
   display: flex;
   gap: 11px;

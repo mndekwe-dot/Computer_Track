@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
-import { Menu, LogOut, UserCog, X } from 'lucide-react'
+import { CornerUpLeft, Menu, LogOut, UserCog, X } from 'lucide-react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { PortalProvider } from '../auth/PortalContext'
+import { homePortalFor } from '../portals'
 import { Brand } from './Brand'
 import { ErrorBoundary } from './ErrorBoundary'
 
@@ -12,6 +13,13 @@ export function PortalShell({ portal }) {
   const location = useLocation()
   const [navOpen, setNavOpen] = useState(false)
   const toggleRef = useRef(null)
+
+  // An administrator may open any portal, so they can stand at a gate and
+  // reproduce what a guard sees. Until now there was no marked way back:
+  // the sidebar showed the Security Gate's two links and the name of a
+  // portal that was not theirs, and the only exit was typing a URL.
+  const ownPortal = homePortalFor(user)
+  const visiting = ownPortal.key !== portal.key
 
   // On a phone the nav is a drawer; it must close on navigation, otherwise it
   // covers the page the guard just asked for.
@@ -105,6 +113,16 @@ export function PortalShell({ portal }) {
           </nav>
 
           <div className="sidebar-footer">
+            {visiting && (
+              <NavLink to={ownPortal.home} className="portal-return">
+                <CornerUpLeft size={15} aria-hidden="true" />
+                <span>
+                  Back to {ownPortal.name}
+                  <span>You are visiting {portal.name}</span>
+                </span>
+              </NavLink>
+            )}
+
             {/* Your own account lives with your name rather than in the list
                 of work: it is about you, not about the register. */}
             <NavLink to={`${portal.base}/account`} className="sidebar-user">
