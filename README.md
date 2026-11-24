@@ -23,6 +23,7 @@ reads and the messages students receive are all edited by the registration offic
 | **Live app** | **https://etracker-blush.vercel.app** |
 | **Demo video** | DEMO_VIDEO_URL |
 | **SRS and proposal** | [Project proposal and SRS (Google Doc)](https://docs.google.com/document/d/1RoiJfIf-zGDeVO3oBFSsr6Xa4U0G-lx18q0HA9okkSQ/edit) |
+| **Student survey** | [Laptops at the Campus Gate (Google Form)](https://docs.google.com/forms/d/e/1FAIpQLSfc3yEK3QLCTlYxaLVL_0saSqivhtxQW4z7Cp8FzdxwVwRbTg/viewform), 22 responses, [results below](#what-students-told-us) |
 | **System design (UML)** | [Appendix B: UML diagrams](research/APPENDIX_B_SRS.md) and the editable diagrams in [`research/diagrams`](research/diagrams) |
 
 Sign in to the live app with the [demo accounts](#demo-accounts).
@@ -35,6 +36,29 @@ lost or stolen. Checks are done from memory or paper, or not at all. Laptops are
 stolen items on university campuses, theft is the most commonly recorded crime in Rwanda, and for
 a student a stolen laptop can mean a lost semester of coursework. Existing gate systems control
 who walks in; none of them check what is carried out.
+
+### What students told us
+
+An anonymous survey, ["Laptops at the Campus Gate"](https://docs.google.com/forms/d/e/1FAIpQLSfc3yEK3QLCTlYxaLVL_0saSqivhtxQW4z7Cp8FzdxwVwRbTg/viewform),
+had 22 student responses. All 22 bring a
+laptop onto campus, and 18 carry it through a gate three or more days a week.
+
+| Finding | Students |
+| --- | --- |
+| Know another student whose laptop or device was lost or stolen on campus in the last 12 months | 19 of 22 |
+| Have been stopped or delayed because a guard could not confirm the laptop was theirs | 16 of 22 |
+| Have been made late for a class, exam or appointment by a gate check | 16 of 22 |
+| Think the current checks would not stop someone walking out with their laptop | 13 of 22 |
+| Say the usual check is a serial number written by hand in a book | 14 of 22 |
+| Agree the way laptops are checked at the gate needs to change | 20 of 22 |
+| Would register their laptop once if the gate recognised it afterwards | 18 of 22 |
+
+Ten respondents had lost a device on campus themselves; of the nine who said whether it came
+back, one got it back. Their worries about registering shaped the design: how long it takes
+(13 of 21) is why registration is one public form with no account; how the data is stored and
+who sees it (12 and 10 of 21) is why student details are staff-only by role and every lookup is
+written to the [read audit log](#read-audit-log); being wrongly stopped (8 of 21) is why the guard
+sees the owner's photo and an override needs a written reason.
 
 etracker is the register that closes that gap: students register their computers once, the
 registration office approves them in person, and any guard at any gate can confirm ownership in
@@ -64,6 +88,7 @@ no account.
 
 - [Project links](#project-links) · [The problem](#the-problem) · [Requirements map](#how-the-srs-requirements-map-to-the-app)
 - [Running it](#running-it) - [with Docker](#with-docker) or [from source](#from-source) · [Demo accounts](#demo-accounts)
+- **[A guided tour](#a-guided-tour-for-anyone-marking-or-reviewing-this)** - the shortest path through everything the system does, with real values to paste in
 - [Who uses what](#who-uses-what) - three staff portals and one public student page
 - [What it does](#what-it-does)
 - [Rules and wording](#rules-and-wording) - what a registrar can change without a developer
@@ -157,27 +182,118 @@ App on `http://localhost:5173`.
 
 ### Demo accounts
 
-Created by `seed_demo`, all with password `passw0rd!`. Everyone signs in at the same
-page, **`/login`**, and the account decides which portal opens:
+Everyone signs in at the same page, **`/login`**. There is no account to create and no
+portal to choose: the username decides which one opens.
 
-| Username | Role | Lands on |
-|----------|------|----------|
+**Password for every account below: `passw0rd!`**
+
+| Username | Who they are | Where signing in takes you |
+|----------|--------------|----------------------------|
+| `admin` | Administrator | Dashboard, and every screen in the system |
+| `registrar` | Registration officer | Pending Approvals |
 | `guard1` | Security guard, Main Gate | Gate Console |
 | `guard2` | Security guard, West Gate | Gate Console |
-| `registrar` | Registration officer | Pending Approvals |
-| `admin` | Administrator (also a Django superuser) | Dashboard |
+| `guard3` | Security guard, Hostel Gate | Gate Console |
 
-`guard3` exists too, on Hostel Gate, though `seed_demo` does not print it.
+Students need no account at all. The public pages are `/register` and `/register?tab=status`.
 
-**Try this, in order - it exercises the whole system:**
+These accounts and their data come from `seed_demo`, which creates 40 students, 38
+computers, 4 gates and 123 gate records. **It is invented data, not real people.**
 
-1. Open `/register` signed out. Register a computer using a reg number from the Students page
-   plus the email on that record. Note it comes back **pending**.
-2. Sign in as `guard1` and look up that reg number. The console says **HOLD - pending approval**,
-   and refuses to record a plain "allowed".
-3. Sign in as `registrar`, go to **Pending Approvals**, approve it with an asset tag.
-4. Back as `guard1`, look it up again - now **CLEAR**, and the exit records.
-5. As `admin`, open **Read Audit Log** and see every one of those lookups attributed.
+---
+
+## A guided tour, for anyone marking or reviewing this
+
+This is the shortest path through everything the system does. It takes about ten
+minutes, and every value below is real: these are the records on the live site right
+now, so you can copy and paste them.
+
+Start at the live app and sign in with the accounts above.
+
+### 1. Register a computer, as a student (no login)
+
+Open **`/register`**.
+
+1. Pick any student from the register. If you want one ready to use:
+   registration number **`218100002`**, email **`chantal.shema@student.university.edu`**.
+2. Fill in a serial number you invent, a make and a colour, and submit.
+3. It comes back **pending**. Nothing is approved online, because online nobody has
+   seen the computer.
+
+Then open **`/register?tab=status`**, enter the same registration number, and see the
+computer you just submitted waiting for approval.
+
+### 2. Approve it, as the registration office
+
+Sign in as **`registrar`**.
+
+1. **Pending Approvals** shows your submission.
+2. Click approve. The dialog asks **what you actually checked**: student ID matched,
+   computer unlocked in front of you, serial read from the running system, proof of
+   purchase seen.
+3. Approve it, then open the computer from **Computers** and scroll to **Approval
+   evidence**. It is written once and cannot be edited afterwards.
+
+This is the system's answer to a problem it cannot solve: no software can prove who
+legally owns a laptop. It can record how carefully the claim was checked.
+
+### 3. Check a computer at the gate, as a guard
+
+Sign in as **`guard1`**, which opens the **Gate Console**.
+
+Search each of these and watch the verdict change:
+
+| Search for | What you should see | Why |
+|---|---|---|
+| `AC950366620` | **CLEAR**, with the owner's photo | Approved, owner in good standing |
+| `LE720865338` | **HOLD** | Reported stolen: "taken from the library reading room on 3 August" |
+| `LE651400959` | **HOLD** | Still waiting for approval |
+| `218100002` | The student and their computers | Searching by registration number, not serial |
+
+You can also search by asset tag, or scan a QR sticker with the camera or a USB
+barcode scanner.
+
+**Try it with no network.** Open your browser's developer tools, go to the Network
+tab, set it to *Offline*, and record a decision. The console keeps working and queues
+the decision. Go back online and it syncs. A campus gate is exactly where the wifi is
+worst.
+
+### 4. See that everything was recorded, as an administrator
+
+Sign in as **`admin`**.
+
+- **Gate Log** lists every lookup made, with the guard, the gate, the direction and
+  the verdict. Including yours, just now.
+- **Read Audit Log** records which staff member looked at which student's record. The
+  register holds names, photographs and phone numbers, so someone quietly browsing it
+  is itself worth seeing.
+- **Dashboard** summarises scans, holds and gate activity.
+
+### 5. The rest, in any order
+
+| Screen | Sign in as | What it does |
+|---|---|---|
+| **Holds and theft** | `registrar` | Flag a computer as stolen or disputed, and watch the gate verdict change immediately |
+| **Permits** | `registrar` | Issue a gate pass so someone can carry a computer that is not theirs |
+| **Students** | `registrar` | The student register, with CSV import |
+| **Registration attempts** | `registrar` | Every public form submission, including the refused ones |
+| **Rules and wording** | `registrar` | Change policy without a developer: how many computers a student may register, the exact sentence a guard reads on a hold |
+| **Messages** | `registrar` | The wording of every email and SMS, editable, with a live preview |
+| **Equipment types** | `registrar` | Add projectors or lab equipment to the things a gate checks |
+| **Gates** | `registrar` | Add a gate, set which directions it serves |
+| **Staff accounts** | `admin` | Create staff, assign roles, require two-factor |
+| **My account** | anyone | Change password, set up two-factor |
+
+### Things worth knowing while you look
+
+- **Guards cannot change ownership.** If the person checking computers could also
+  reassign them, the register would be worthless. Sign in as `guard1` and you will
+  find no way to do it.
+- **Photos uploaded on the live site may disappear.** It runs as a serverless
+  function, which can only write to temporary storage. This is a hosting limit, not a
+  design one; a real deployment stores them in object storage.
+- **The demo data is fictional**, and the password above is public, so please do not
+  treat anything in it as a real student record.
 
 ---
 
@@ -1072,6 +1188,8 @@ size in a new tab" at the gate, which guards actually use.
   covering `media/`.
 - **Student lifecycle.** Nothing archives a graduate's computers or reclaims their asset tags.
 - **Two-factor for guards.** Currently administrator accounts only.
+- **A pilot at a real gate.** In the [survey](#what-students-told-us) 18 of 22 students said they
+  would register, but no student or guard has used etracker at a real gate yet.
 
 ## If you take this further
 
