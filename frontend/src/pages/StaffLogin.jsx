@@ -6,11 +6,7 @@ import { reasonText, takeSignedOutReason } from '../auth/session'
 import { Wordmark } from '../components/Brand'
 import { ErrorNote, Field } from '../components/ui'
 import { useSiteSettings } from '../hooks/useSiteSettings'
-import { PORTAL_LIST, canEnter, homePortalFor } from '../portals'
-
-// Listed without saying which portal each one opens. Finding that out is the
-// point of signing in.
-const DEMO_ACCOUNTS = ['admin', 'registrar', 'guard1', 'guard2']
+import { PORTAL_LIST, homePortalFor } from '../portals'
 
 /**
  * One front door for every member of staff.
@@ -147,11 +143,6 @@ export default function StaffLogin() {
             {busy ? 'Signing in…' : 'Sign in'}
           </button>
 
-          <div className="demo-hint">
-            <strong>Demo accounts</strong> (password <code>passw0rd!</code>)
-            <br />
-            {DEMO_ACCOUNTS.join(', ')}
-          </div>
         </form>
 
         <p className="login-aside">
@@ -173,7 +164,16 @@ export default function StaffLogin() {
 function destinationFor(profile, intended) {
   if (intended) {
     const owner = PORTAL_LIST.find((portal) => intended.startsWith(`${portal.base}/`))
-    if (owner && canEnter(profile, owner)) return intended
+    // Only back to where they were heading if that portal is their own. The
+    // check used to be `canEnter`, which admits an administrator everywhere,
+    // so an administrator who had been looking at a gate screen, or who was
+    // signed out of one, signed back in and landed in the Security Gate
+    // portal. That reads as the system getting their role wrong.
+    //
+    // An administrator can still open any portal by going there once signed
+    // in. This is only about where signing in puts you, and signing in should
+    // put you at your own desk.
+    if (owner && owner.key === homePortalFor(profile).key) return intended
   }
   return homePortalFor(profile).home
 }
