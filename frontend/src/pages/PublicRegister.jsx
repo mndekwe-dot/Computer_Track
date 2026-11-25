@@ -490,13 +490,23 @@ function StatusCheck() {
               <p>Use the other tab to register your computer.</p>
             </div>
           ) : (
+            <>
+            <p className="status-note">
+              Serial numbers are part-hidden here. A guard sees the whole one at the
+              gate; this page is reached with details a classmate could know.
+            </p>
             <ul className="status-list">
               {result.computers.map((computer) => (
                 <li key={computer.serial_number} className="status-item">
                   <div className="status-item-head">
                     <div>
                       <strong>{computer.label}</strong>
-                      <div className="mono muted">{computer.serial_number}</div>
+                      {/* The server sends only the last few characters. Say so,
+                          or it reads as a display fault on the one page where a
+                          student is checking their own record. */}
+                      <div className="mono muted" title="Only the last four characters are shown">
+                        {computer.serial_number}
+                      </div>
                     </div>
                     <StatusPill status={computer.status}>{computer.status_display}</StatusPill>
                   </div>
@@ -517,6 +527,7 @@ function StatusCheck() {
                 </li>
               ))}
             </ul>
+            </>
           )}
         </div>
       )}

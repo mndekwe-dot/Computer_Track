@@ -100,3 +100,40 @@ test.describe('staff sign-in', () => {
     await expect(page).toHaveURL(/\/login$/)
   })
 })
+
+test.describe('visiting a portal that is not yours', () => {
+  test('an administrator in the gate portal is offered a way back', async ({ page }) => {
+    await signIn(page, 'admin')
+    await page.goto('/guard/console')
+    // Going there deliberately still works: this is how a support call gets
+    // resolved, by seeing exactly what the guard sees.
+    await expect(page).toHaveURL(/\/guard\/console$/)
+
+    // Wait for the page before asking what is visible: on a phone the
+    // navigation is a drawer, and a click sent before React has rendered
+    // reads as "there is no drawer".
+    await expect(page.getByRole('heading', { name: /gate console/i })).toBeVisible()
+    const menu = page.locator('button.nav-toggle')
+    if (await menu.isVisible()) {
+      await menu.click()
+      await expect(page.locator('aside.sidebar')).toHaveAttribute('data-open', 'true')
+    }
+
+    const back = page.getByRole('link', { name: /back to administration/i })
+    await expect(back).toBeVisible()
+    await back.click()
+    await expect(page).toHaveURL(/\/admin\/dashboard$/)
+  })
+
+  test('a guard in their own portal is offered nothing of the sort', async ({ page }) => {
+    await signIn(page, 'guard1')
+    await page.goto('/guard/console')
+    await expect(page.getByRole('heading', { name: /gate console/i })).toBeVisible()
+    const menu = page.locator('button.nav-toggle')
+    if (await menu.isVisible()) {
+      await menu.click()
+      await expect(page.locator('aside.sidebar')).toHaveAttribute('data-open', 'true')
+    }
+    await expect(page.getByRole('link', { name: /back to/i })).toHaveCount(0)
+  })
+})

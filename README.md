@@ -30,6 +30,24 @@ Sign in to the live app with the [demo accounts](#demo-accounts), then follow
 [the guided tour](#a-guided-tour-for-anyone-marking-or-reviewing-this), which walks
 through every part of the system in about ten minutes using real records from the
 deployed site.
+### Signing in to the live app
+
+Open **https://etracker-blush.vercel.app/login** and use any of these. There is nothing
+to create, and no portal to choose: the username decides which one opens.
+
+| Username | Password | Opens |
+|---|---|---|
+| `admin` | `passw0rd!` | Administration: every screen in the system |
+| `registrar` | `passw0rd!` | Registration Office: approvals and the register |
+| `guard1` | `passw0rd!` | Security Gate: the gate console |
+
+Students need no account at all: **`/register`** to register a computer, and
+**`/register?tab=status`** to check one.
+
+Then follow [the guided tour](#a-guided-tour-for-anyone-marking-or-reviewing-this),
+which walks through everything the system does in about ten minutes, with real
+serial numbers from the live site to paste in. The full account list is under
+[demo accounts](#demo-accounts).
 
 ## The problem
 
@@ -129,25 +147,53 @@ backend and the frontend in two separate terminals.
 
 ### With Docker
 
-Everything - database, cache, API, worker, scheduler and frontend - in one command.
+The whole system - PostgreSQL, Redis, the API, the background worker, the scheduler and
+the site - in one command. Nothing to install but Docker itself, and nothing to edit.
+
+**1. Start Docker Desktop**, then, from the project folder:
 
 ```bash
 cp .env.docker.example .env
-# fill in DJANGO_SECRET_KEY and DB_PASSWORD; compose refuses to start without them
-docker compose up --build
-
-docker compose exec api python manage.py migrate
-docker compose exec api python manage.py seed_demo
+docker compose up --build -d
 ```
 
-App on `http://localhost:8080`, API on `http://localhost:8000`.
+The first build pulls images and compiles the frontend, so expect **three to five
+minutes**. Later starts take seconds. `-d` leaves it running in the background and gives
+you your terminal back.
 
-Five services, each there for a reason. `db` is PostgreSQL, because SQLite allows one writer at
-a time and several gates recording simultaneously will hit that. `redis` is the cache and the
-Celery broker; without it four gunicorn workers keep four separate copies of the rules. `api` is
-Django under gunicorn. `worker` drains the notification outbox, separately so a slow provider
-cannot occupy a request thread. `beat` is the clock - without it nothing sweeps up messages
-queued while the broker was down.
+**2. Create the tables and load the demo data**, once:
+
+```bash
+docker compose exec api python manage.py migrate
+docker compose exec api python manage.py seed_demo
+docker compose exec api python manage.py rebuild_search_index
+```
+
+**3. Open http://localhost:8080** and sign in with `admin` / `passw0rd!`, or any of the
+[demo accounts](#demo-accounts). The API is on http://localhost:8000.
+
+The copied `.env` already contains a throwaway secret key and database password, so
+there is nothing to fill in for a local run. Replace both before putting this anywhere
+reachable from outside your machine.
+
+**Useful afterwards:**
+
+```bash
+docker compose logs -f api     # follow the API log
+docker compose ps              # what is running
+docker compose down            # stop everything, keep the data
+docker compose down -v         # stop and delete the database and uploads
+```
+
+If port 8080 or 8000 is already taken, change `WEB_PORT` or `API_PORT` in `.env` and
+run `docker compose up -d` again.
+
+**Why five services.** `db` is PostgreSQL, because SQLite allows one writer at a time
+and several gates recording simultaneously will hit that. `redis` is the cache and the
+Celery broker; without it four gunicorn workers keep four separate copies of the rules.
+`api` is Django under gunicorn. `worker` drains the notification outbox, separately so a
+slow provider cannot occupy a request thread. `beat` is the clock, without which nothing
+sweeps up messages queued while the broker was down.
 
 ### From source
 

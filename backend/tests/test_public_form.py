@@ -3,6 +3,7 @@
 These tests exist mostly to prove what it *cannot* do.
 """
 
+import json
 from unittest.mock import patch
 
 from django.core.cache import cache
@@ -164,7 +165,12 @@ class PublicStatusTests(TestCase):
         make_device(other, "LN55554444")
         body = self.check().json()
         serials = [row["serial_number"] for row in body["computers"]]
-        self.assertEqual(serials, ["HP12345678"])
+        # Serials come back part-hidden, so the assertion is on the tail. The
+        # point of the test is unchanged: one computer, and it is this
+        # student's, not the other one's.
+        self.assertEqual(len(serials), 1)
+        self.assertTrue(serials[0].endswith("5678"), serials)
+        self.assertNotIn("4444", json.dumps(body))
 
     def test_wrong_verification_reveals_nothing(self):
         response = self.check(verification="guessing")
