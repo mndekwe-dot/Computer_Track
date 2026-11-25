@@ -4,9 +4,13 @@ This is the only unauthenticated write in the system that blocks something,
 so the tests here are mostly about what it refuses to do.
 """
 
+import json
+from unittest.mock import patch
+
 from django.core import mail
 from django.test import TestCase
 from rest_framework.test import APIClient
+from rest_framework.throttling import SimpleRateThrottle
 
 from devices.models import Device, DeviceFlag, DeviceStatus, FlagReason
 from students.models import Student
@@ -135,3 +139,54 @@ class PublicMissingReportTests(TestCase):
         device = response.data["devices"][0]
         self.assertTrue(device["is_blocked"])
         self.assertTrue(any("STOLEN" in reason for reason in device["blocking_reasons"]))
+
+
+class PublicStatusMaskingTests(TestCase):
+    """The status page must not hand out a serial number.
+
+    It is reached with a registration number and an email address or national
+    ID. All three are semi-public inside a university, which is a fair bar for
+    "has mine been approved yet" and far too low a bar for the one fact the
+    ownership story rests on.
+    """
+
+    def setUp(self):
+        self.student = make_student(reg_number="219100777", email="mask@student.university.edu")
+        self.device = make_device(
+            owner=self.student, serial_number="HP9876543210", asset_tag="UNI-09999"
+        )
+
+    def _status(self):
+        # The real ceiling is 12/hour per address and three calls in one test
+        # class would spend a quarter of it. Patching the rate table is the
+        # only thing that works: SimpleRateThrottle binds THROTTLE_RATES at
+        # import, so override_settings does not reach it.
+        with patch.dict(SimpleRateThrottle.THROTTLE_RATES, {"public-form": "100/hour"}):
+            return self._post()
+
+    def _post(self):
+        response = self.client.post(
+            "/api/public/my-computers/",
+            {"reg_number": self.student.reg_number, "verification": self.student.email},
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 200, response.content)
+        return response.json()
+
+    def test_the_serial_is_not_returned_in_full(self):
+        body = json.dumps(self._status())
+        self.assertNotIn("HP9876543210", body)
+        self.assertNotIn("UNI-09999", body)
+
+    def test_enough_of_the_serial_remains_to_tell_two_computers_apart(self):
+        shown = self._status()["computers"][0]["serial_number"]
+        self.assertTrue(shown.endswith("3210"), shown)
+        self.assertNotIn("HP98", shown)
+
+    def test_a_short_identifier_is_hidden_completely(self):
+        from students.public import mask_identifier
+
+        # Keeping the last four of a four-character tag would reveal all of it.
+        self.assertEqual(mask_identifier("AB12"), "••••")
+        self.assertEqual(mask_identifier(""), "")
+        self.assertEqual(mask_identifier(None), "")

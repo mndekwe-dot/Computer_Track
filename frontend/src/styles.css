@@ -2587,6 +2587,13 @@ tbody tr:last-child td {
   color: var(--text);
 }
 
+.status-note {
+  margin: 0 0 14px;
+  font-size: 13.5px;
+  color: var(--text-muted);
+  max-width: 62ch;
+}
+
 .status-list {
   list-style: none;
   margin: 0;

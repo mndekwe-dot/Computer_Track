@@ -446,6 +446,37 @@ class PublicStatusSerializer(serializers.Serializer):
     verification = serializers.CharField()
 
 
+def mask_identifier(value, keep=4):
+    """A serial or asset tag with everything but its last few characters hidden.
+
+    This page is reached with a registration number and either an email
+    address or a national ID number. Inside a university all three are
+    semi-public: they appear on class lists, in group chats and on the front
+    of an ID card. That is an acceptable bar for "show me whether my own
+    computer has been approved yet". It is not an acceptable bar for handing
+    out the serial number.
+
+    The serial is the one fact the whole ownership story rests on. A
+    registration is approved by an officer reading the serial off the running
+    machine and matching it to the one submitted, and a dispute between two
+    claimants turns on who can produce it. Publishing it to anyone who can
+    guess a classmate's email would let a second person submit a registration
+    quoting the real serial, which is precisely the attack the approval
+    evidence exists to defeat.
+
+    Enough of the tail is kept for a student with two computers to tell them
+    apart, which is the only thing this page needs the serial for.
+    """
+    text = (value or "").strip()
+    if not text:
+        return text
+    if len(text) <= keep:
+        # Too short to hide anything meaningfully: hide all of it rather than
+        # reveal a three-character tag in full.
+        return "•" * len(text)
+    return "•" * (len(text) - keep) + text[-keep:]
+
+
 class PublicStatusView(APIView):
     """POST /api/public/my-computers/ - "has mine been approved yet?"
 
@@ -475,10 +506,10 @@ class PublicStatusView(APIView):
                 "student": {"reg_number": student.reg_number, "full_name": student.full_name},
                 "computers": [
                     {
-                        "serial_number": device.serial_number,
+                        "serial_number": mask_identifier(device.serial_number),
                         "label": device.label,
                         "type": device.device_type_label,
-                        "asset_tag": device.asset_tag,
+                        "asset_tag": mask_identifier(device.asset_tag),
                         "status": device.status,
                         "status_display": device.get_status_display(),
                         "registered_at": device.registered_at,
