@@ -4,7 +4,6 @@ __pycache__/
 .venv/
 venv/
 env/
-.agents
 
 # Django
 db.sqlite3
@@ -37,7 +36,6 @@ Thumbs.db
 
 # Output of `npm run shots`
 frontend/screenshots/
-AI_CONTEXT.md
 
 # Local database backups taken before a migration
 db.sqlite3.bak-*
@@ -53,6 +51,3 @@ db.sqlite3.bak-*
 # of the project.
 research/VIDEO_SCRIPT.md
 research/PR_DESCRIPTIONS.md
-
-# Local editor state, machine-specific.
-.editor-state/

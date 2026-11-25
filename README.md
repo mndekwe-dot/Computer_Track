@@ -26,7 +26,24 @@ reads and the messages students receive are all edited by the registration offic
 | **Student survey** | [Laptops at the Campus Gate (Google Form)](https://docs.google.com/forms/d/e/1FAIpQLSfc3yEK3QLCTlYxaLVL_0saSqivhtxQW4z7Cp8FzdxwVwRbTg/viewform), 22 responses, [results below](#what-students-told-us) |
 | **System design (UML)** | [Appendix B: UML diagrams](research/APPENDIX_B_SRS.md) and the editable diagrams in [`research/diagrams`](research/diagrams) |
 
-Sign in to the live app with the [demo accounts](#demo-accounts).
+### Signing in to the live app
+
+Open **https://etracker-blush.vercel.app/login** and use any of these. There is nothing
+to create, and no portal to choose: the username decides which one opens.
+
+| Username | Password | Opens |
+|---|---|---|
+| `admin` | `passw0rd!` | Administration: every screen in the system |
+| `registrar` | `passw0rd!` | Registration Office: approvals and the register |
+| `guard1` | `passw0rd!` | Security Gate: the gate console |
+
+Students need no account at all: **`/register`** to register a computer, and
+**`/register?tab=status`** to check one.
+
+Then follow [the guided tour](#a-guided-tour-for-anyone-marking-or-reviewing-this),
+which walks through everything the system does in about ten minutes, with real
+serial numbers from the live site to paste in. The full account list is under
+[demo accounts](#demo-accounts).
 
 ## The problem
 
