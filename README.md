@@ -21,7 +21,7 @@ reads and the messages students receive are all edited by the registration offic
 | | |
 |---|---|
 | **Live app** | **https://etracker-blush.vercel.app** |
-| **Demo video** | _recorded 25 November 2026, link to follow_ |
+| **Demo video** | [Final prototype demo (YouTube)](https://www.youtube.com/watch?v=8jatDaRBFm8) |
 | **SRS and proposal** | [Project proposal and SRS (Google Doc)](https://docs.google.com/document/d/1RoiJfIf-zGDeVO3oBFSsr6Xa4U0G-lx18q0HA9okkSQ/edit) |
 | **Student survey** | [Laptops at the Campus Gate (Google Form)](https://docs.google.com/forms/d/e/1FAIpQLSfc3yEK3QLCTlYxaLVL_0saSqivhtxQW4z7Cp8FzdxwVwRbTg/viewform), 22 responses, [results below](#what-students-told-us) |
 | **System design (UML)** | [Appendix B: UML diagrams](research/APPENDIX_B_SRS.md) and the editable diagrams in [`research/diagrams`](research/diagrams) |
