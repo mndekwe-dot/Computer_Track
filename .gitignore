@@ -53,3 +53,8 @@ db.sqlite3.bak-*
 # of the project.
 research/VIDEO_SCRIPT.md
 research/PR_DESCRIPTIONS.md
+
+# Local editor and tooling state. Machine-specific, not part of the project.
+.claude/
+.kilo/
+skills-lock.json
